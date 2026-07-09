@@ -1,0 +1,211 @@
+import { useEffect, useState } from "react"
+import { createPortal } from "react-dom"
+import { AnimatePresence, motion } from "framer-motion"
+import { Minus, Plus, X } from "lucide-react"
+import { useWishlist } from "@/context/useWishlist"
+import { useToast } from "@/context/useToast"
+import { parsePriceValue, slugify } from "@/lib/catalogItem"
+import { ModalAccordionSection } from "@/components/packages/ModalAccordionSection"
+import type { CatalogItem } from "@/types"
+
+interface CatalogItemModalProps {
+  item: CatalogItem | null
+  /** Same namespace passed to the triggering CatalogItemCard, so the wishlist key matches. */
+  namespace: string
+  onClose: () => void
+}
+
+/**
+ * Item detail modal matching the live site's GoodShuffle-powered catalog
+ * popup: blue breadcrumb header, photo (or the real "No image available."
+ * placeholder — the catalog genuinely lacks photos for some items), quantity
+ * stepper, rate readout, wishlist CTA, and Description/Pricing accordions.
+ */
+export function CatalogItemModal({ item, namespace, onClose }: CatalogItemModalProps) {
+  const { toggleItem, isSaved } = useWishlist()
+  const { showToast } = useToast()
+  const [quantity, setQuantity] = useState(1)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const isOpen = item !== null
+
+  useEffect(() => {
+    if (!isOpen) return undefined
+    setQuantity(1)
+    setSelectedImageIndex(0)
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose()
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isOpen, onClose])
+
+  if (!item) return null
+
+  const slug = `${namespace}-${slugify(item.name)}`
+  const saved = isSaved(slug)
+  const images = [item.image, ...(item.additionalImages ?? [])].filter((src): src is string => Boolean(src))
+
+  const handleWishlistClick = () => {
+    toggleItem({ slug, name: item.name, imageSeed: slug, startingPrice: parsePriceValue(item.price) })
+    showToast(saved ? `Removed ${item.name} from your wishlist` : `Added ${item.name} to your wishlist`)
+  }
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen ? (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-label={item.name}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 12 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            onClick={(event) => event.stopPropagation()}
+            className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden bg-white"
+          >
+            <div className="flex shrink-0 items-center justify-between bg-blue px-5 py-3">
+              <span className="font-bold text-white">{item.category}</span>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close item details"
+                className="cursor-pointer text-white transition-opacity hover:opacity-70"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 overflow-y-auto p-5 sm:grid-cols-2 sm:p-6">
+              <div>
+                {images.length > 0 ? (
+                  <div className="flex h-64 w-full items-center justify-center">
+                    <img
+                      src={images[selectedImageIndex]}
+                      alt={item.name}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-56 w-full items-center justify-center bg-graytint">
+                    <span className="text-sm text-body/70">No image available.</span>
+                  </div>
+                )}
+
+                {images.length > 1 ? (
+                  <div className="mt-3 flex gap-2">
+                    {images.map((src, index) => (
+                      <button
+                        key={src}
+                        type="button"
+                        onClick={() => setSelectedImageIndex(index)}
+                        aria-label={`Show photo ${index + 1} of ${item.name}`}
+                        aria-current={index === selectedImageIndex}
+                        className={`h-14 w-14 shrink-0 cursor-pointer overflow-hidden border-2 transition-colors ${
+                          index === selectedImageIndex ? "border-pink" : "border-border hover:border-navy/40"
+                        }`}
+                      >
+                        <img src={src} alt="" className="h-full w-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              <div>
+                <h2 className="text-xl text-navy">{item.name}</h2>
+                <p className="mt-2 inline-block border border-blue px-2.5 py-1 font-bold text-blue">{item.price}</p>
+
+                <div className="mt-4 flex items-center justify-between gap-4">
+                  <span className="font-bold text-navy">Quantity</span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+                      aria-label="Decrease quantity"
+                      className="cursor-pointer text-navy transition-colors hover:text-pink"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <span className="w-10 border border-border px-2 py-1 text-center">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((current) => current + 1)}
+                      aria-label="Increase quantity"
+                      className="cursor-pointer text-navy transition-colors hover:text-pink"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between gap-4">
+                  <span className="font-bold text-navy">Rate</span>
+                  <span className="border border-border px-3 py-1.5 text-sm text-body">Flat-Fee &ndash; {item.price}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleWishlistClick}
+                  className="mt-4 w-full cursor-pointer bg-pink py-2.5 text-center font-bold uppercase tracking-wide text-white transition-colors hover:bg-pink-dark"
+                >
+                  {saved ? "Remove From Wishlist" : "Add To Wishlist"}
+                </button>
+
+                <ModalAccordionSection title="Description">
+                  <ul className="space-y-1.5">
+                    {item.description.map((line) => (
+                      <li key={line} className="flex gap-2 text-xs leading-relaxed text-body">
+                        <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-pink" aria-hidden="true" />
+                        <span>{line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </ModalAccordionSection>
+
+                {item.details && item.details.length > 0 ? (
+                  <ModalAccordionSection title="Details">
+                    {item.details.map((row) => (
+                      <div key={row.label} className="flex items-center justify-between text-sm text-body">
+                        <span>{row.label}</span>
+                        <span>{row.value}</span>
+                      </div>
+                    ))}
+                  </ModalAccordionSection>
+                ) : null}
+
+                {item.pricing.length > 0 ? (
+                  <ModalAccordionSection title="Pricing">
+                    {item.pricing.map((row) => (
+                      <div key={row.label} className="flex items-center justify-between text-sm text-body">
+                        <span>{row.label}</span>
+                        <span>{row.value}</span>
+                      </div>
+                    ))}
+                  </ModalAccordionSection>
+                ) : null}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>,
+    document.body,
+  )
+}

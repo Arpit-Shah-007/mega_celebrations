@@ -1,0 +1,48 @@
+[
+  {
+    "slug": "cross-back-chairs",
+    "name": "Cross Back Chairs",
+    "price": "$10.00",
+    "category": "Furniture > Seating & Chairs",
+    "image": "/media/a-la-carte/cross-back-chairs.jpg",
+    "description": [
+      "Classic wood dining chairs with a crossed-back design and a cushioned seat — a versatile pairing for farm tables or any outdoor dining setup."
+    ],
+    "pricing": [{ "label": "Flat fee", "value": "$10.00" }]
+  },
+  {
+    "slug": "farm-table",
+    "name": "Farm Table",
+    "price": "$125.00",
+    "category": "Furniture > Tables",
+    "image": "/media/a-la-carte/farm-table.jpg",
+    "description": [
+      "A rustic wooden farm table that anchors any outdoor dining setup, comfortably seating up to 8 guests."
+    ],
+    "pricing": [{ "label": "Flat fee", "value": "$125.00" }]
+  },
+  {
+    "slug": "picnic-tables-w-pillows-and-rug",
+    "name": "Picnic Tables w/ Pillows and Rug",
+    "price": "$235.00",
+    "category": "Furniture > Dining Tables",
+    "image": "/media/celebrations-picnic-adult-main.jpg",
+    "description": [
+      "Includes low-profile picnic tables, a floor rug, and pillow seating.",
+      "Each table comfortably seats up to 8 adults or 10 small children.",
+      "Please note: table decor and place settings are not included with this package."
+    ],
+    "pricing": [{ "label": "Flat fee", "value": "$235.00" }]
+  },
+  {
+    "slug": "wood-folding-chairs",
+    "name": "Wood Folding Chairs",
+    "price": "$5.00",
+    "category": "Furniture > Sectionals",
+    "image": "/media/a-la-carte/wood-folding-chairs.png",
+    "description": [
+      "Sturdy wood folding chairs with a padded seat cushion — an easy, comfortable seating option for any event."
+    ],
+    "pricing": [{ "label": "Flat fee", "value": "$5.00" }]
+  }
+]

@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Barcelony";
+  src: url("./assets/fonts/Barcelony.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  /* Palette matches the live mega-celebrations.com site (extracted via computed styles, not invented) */
+  --color-navy: #022843;
+  --color-navy-deep: #0b2d4d;
+  --color-blue: #0b5d9b;
+  --color-pink: #d485ad;
+  --color-pink-dark: #c06a95;
+  --color-body: #444444;
+  /* Distinct from --color-body: this is Enfold's "meta/link" gray (colorset-main_color-color),
+     used for nav links, footer links, and captions — not the same value as paragraph body text. */
+  --color-ui-gray: #333333;
+  --color-border: #cccccc;
+  --color-offwhite: #f4f4f4;
+  --color-graytint: #f0f0f0;
+
+  --font-sans: "Lato", "Helvetica Neue", Arial, sans-serif;
+  /* The client's real licensed font, provided directly (src/assets/fonts/Barcelony.ttf), same font the live site uses for cursive accents. */
+  --font-script: "Barcelony", "Alex Brush", cursive;
+
+  --shadow-soft: 0 8px 24px -8px rgba(2, 40, 67, 0.18);
+  --shadow-lift: 0 18px 44px -12px rgba(2, 40, 67, 0.28);
+
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  zoom: 1.1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+  Must be inside @layer base: unlayered CSS always beats every Tailwind
+  layer (base/components/utilities) regardless of specificity or source
+  order, per the CSS cascade layers spec. Without this wrapper, a plain
+  "h1,h2,h3,h4{color:navy}" rule silently wins over "text-white" utility
+  classes on headings (e.g. the hero's "a Mega Celebration" rendered navy
+  instead of white even with text-white applied).
+*/
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    color: var(--color-navy);
+  }
+}
+
+::selection {
+  background: var(--color-pink);
+  color: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

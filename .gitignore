@@ -1,0 +1,18 @@
+# Internal planning docs, client media exports, and session notes — not for the repo
+docs/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Node (in case anything runs at repo root)
+node_modules/
+
+# Env files — never commit secrets
+.env
+.env.local
+.env.*.local
+.dev.vars
