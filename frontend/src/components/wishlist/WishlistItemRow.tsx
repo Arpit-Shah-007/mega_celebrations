@@ -1,7 +1,6 @@
 import { motion } from "framer-motion"
 import { Trash2 } from "lucide-react"
 import { PlaceholderPhoto } from "@/components/ui/PlaceholderPhoto"
-import { getPackagePhoto } from "@/data/realPhotos"
 import type { WishlistItem } from "@/types"
 
 interface WishlistItemRowProps {
@@ -22,7 +21,6 @@ export function WishlistItemRow({ item, onRemove }: WishlistItemRowProps) {
       <PlaceholderPhoto
         seed={item.imageSeed}
         alt={`${item.name} preview`}
-        src={getPackagePhoto(item.slug)}
         className="h-16 w-16 shrink-0 sm:h-20 sm:w-20"
       />
       <div className="min-w-0 flex-1">

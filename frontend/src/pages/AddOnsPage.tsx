@@ -1,15 +1,24 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { PageHero } from "@/components/ui/PageHero"
 import { Container } from "@/components/ui/Container"
 import { PlaceholderPhoto } from "@/components/ui/PlaceholderPhoto"
-import { addOnCategories } from "@/data/addOns"
+import { PageLoadingState, PageErrorState } from "@/components/ui/PageLoadingState"
 import { getAddOnIcon } from "@/components/packages/tagIcons"
-import { getAddOnCardPhoto, realPhotos } from "@/data/realPhotos"
+import { fetchAddOnCategories } from "@/lib/api"
 import type { AddOnCategory } from "@/types"
 
+/** Same real "Canopy Lounge" shot used as that package's own secondary photo — a fixed design choice for this hub page's banner, not admin-editable catalog content. */
+const ADD_ONS_HERO_PHOTO = "/media/MAIN-Canopy-Lounge-Copy.jpg"
+
 export function AddOnsPage() {
+  const { data: categories, isPending, isError } = useQuery({ queryKey: ["addon-categories"], queryFn: fetchAddOnCategories })
+
+  if (isPending) return <PageLoadingState />
+  if (isError || !categories) return <PageErrorState />
+
   return (
     <>
       {/* Real site uses a full-bleed photo hero here (same "Canopy Lounge" shot used as the package's secondary photo), not the solid navy band used on most interior pages. Overlay verified against the live site: plain black at 50% opacity, not a blue/navy tint. */}
@@ -18,7 +27,7 @@ export function AddOnsPage() {
         title="Add-Ons"
         photoSeed="add-ons-hero"
         photoAlt="Lounge cushions and canopy draping from a Mega Celebrations setup"
-        photoSrc={realPhotos.packageHero["canopy-lounge"]}
+        photoSrc={ADD_ONS_HERO_PHOTO}
         photoHeightClassName="h-56 sm:h-64"
         photoOverlayClassName="bg-black/50"
       />
@@ -26,7 +35,7 @@ export function AddOnsPage() {
       <section className="py-16 sm:py-20">
         <Container>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {addOnCategories.map((category) => (
+            {categories.map((category) => (
               <AddOnCard key={category.slug} category={category} />
             ))}
           </div>
@@ -57,9 +66,9 @@ function AddOnCard({ category }: { category: AddOnCategory }) {
       <div className="relative h-80 w-full overflow-hidden sm:h-96">
         <PlaceholderPhoto
           seed={`addon-${category.slug}`}
-          alt={`${category.name} add-ons preview`}
+          alt={category.cardImage.alt}
           icon={Icon}
-          src={getAddOnCardPhoto(category.slug)}
+          src={category.cardImage.url || undefined}
           className="absolute inset-0 h-full w-full"
         />
 

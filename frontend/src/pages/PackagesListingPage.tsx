@@ -1,13 +1,16 @@
 import { useMemo, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "framer-motion"
 import type { LucideIcon } from "lucide-react"
 import { PageHero } from "@/components/ui/PageHero"
 import { Container } from "@/components/ui/Container"
 import { PackageCard } from "@/components/packages/PackageCard"
+import { PageLoadingState, PageErrorState } from "@/components/ui/PageLoadingState"
 import { getTagIcon } from "@/components/packages/tagIcons"
-import { packages, allTags } from "@/data/packages"
+import { fetchPackages } from "@/lib/api"
 import { realPhotos } from "@/data/realPhotos"
-import type { PackageTag } from "@/types"
+import { ALL_PACKAGE_TAGS } from "@/types"
+import type { Package, PackageTag } from "@/types"
 
 type TagFilter = PackageTag | "All Packages"
 
@@ -32,7 +35,7 @@ const LISTING_ORDER: readonly string[] = [
   "pamper-party",
 ]
 
-function getOrderedPackages() {
+function getOrderedPackages(packages: Package[]) {
   const orderIndex = new Map(LISTING_ORDER.map((slug, index) => [slug, index]))
   return [...packages].sort((a, b) => {
     const aIndex = orderIndex.get(a.slug) ?? LISTING_ORDER.length
@@ -43,13 +46,17 @@ function getOrderedPackages() {
 
 export function PackagesListingPage() {
   const [activeTag, setActiveTag] = useState<TagFilter>("All Packages")
+  const { data: packages, isPending, isError } = useQuery({ queryKey: ["packages"], queryFn: fetchPackages })
 
-  const orderedPackages = useMemo(() => getOrderedPackages(), [])
+  const orderedPackages = useMemo(() => getOrderedPackages(packages ?? []), [packages])
 
   const filteredPackages = useMemo(() => {
     if (activeTag === "All Packages") return orderedPackages
     return orderedPackages.filter((pkg) => pkg.tags.includes(activeTag))
   }, [activeTag, orderedPackages])
+
+  if (isPending) return <PageLoadingState />
+  if (isError) return <PageErrorState />
 
   return (
     <>
@@ -73,7 +80,7 @@ export function PackagesListingPage() {
           >
             <span className="text-sm font-bold text-navy">Filter by Package Type</span>
             <FilterPill label="All Packages" isActive={activeTag === "All Packages"} onClick={() => setActiveTag("All Packages")} />
-            {allTags.map((tag) => (
+            {ALL_PACKAGE_TAGS.map((tag) => (
               <FilterPill
                 key={tag}
                 label={tag}

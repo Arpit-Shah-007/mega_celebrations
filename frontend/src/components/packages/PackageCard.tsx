@@ -3,7 +3,6 @@ import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import { PlaceholderPhoto } from "@/components/ui/PlaceholderPhoto"
 import { getTagIcon } from "@/components/packages/tagIcons"
-import { getPackagePhoto } from "@/data/realPhotos"
 import type { Package } from "@/types"
 
 interface PackageCardProps {
@@ -20,7 +19,6 @@ interface PackageCardProps {
  */
 export function PackageCard({ pkg, className = "" }: PackageCardProps) {
   const [hovered, setHovered] = useState(false)
-  const heroImage = pkg.images[0]
   const Icon = getTagIcon(pkg.tags[0])
 
   return (
@@ -37,15 +35,13 @@ export function PackageCard({ pkg, className = "" }: PackageCardProps) {
       <Link to={`/packages/${pkg.slug}`} className="absolute inset-0 z-20" aria-label={`View details for ${pkg.name}`} />
 
       <div className="relative aspect-2/3 w-full overflow-hidden">
-        {heroImage ? (
-          <PlaceholderPhoto
-            seed={heroImage.seed}
-            alt={heroImage.alt}
-            icon={Icon}
-            src={getPackagePhoto(pkg.slug)}
-            className="absolute inset-0 h-full w-full"
-          />
-        ) : null}
+        <PlaceholderPhoto
+          seed={pkg.slug}
+          alt={pkg.cardImage.alt}
+          icon={Icon}
+          src={pkg.cardImage.url || undefined}
+          className="absolute inset-0 h-full w-full"
+        />
 
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 bg-white px-4 py-3 transition-opacity duration-200"

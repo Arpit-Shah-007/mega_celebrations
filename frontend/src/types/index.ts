@@ -1,14 +1,16 @@
 /** Matches the live site's exact filter pills: "Filter by Package Type: All Packages, Dining, Indoor, Lounge, Outdoor, Sleepover". */
 export type PackageTag = "Dining" | "Indoor" | "Lounge" | "Outdoor" | "Sleepover"
 
+export const ALL_PACKAGE_TAGS: PackageTag[] = ["Dining", "Indoor", "Lounge", "Outdoor", "Sleepover"]
+
 export interface PriceTier {
   label: string
   price: number
   note?: string
 }
 
-export interface PackageImage {
-  seed: string
+export interface ImageRef {
+  url: string
   alt: string
 }
 
@@ -28,7 +30,9 @@ export interface Package {
   tags: PackageTag[]
   description: string
   inclusions: string[]
-  images: PackageImage[]
+  heroImage: ImageRef
+  cardImage: ImageRef
+  gallery: ImageRef[]
   priceTiers: PriceTier[]
   startingPrice: number
   priceIsPlaceholder?: boolean
@@ -48,6 +52,8 @@ export interface AddOnCategory {
   name: string
   tagline: string
   description: string
+  heroImage: ImageRef
+  cardImage: ImageRef
   items: CatalogItem[]
 }
 

@@ -1,0 +1,32 @@
+{
+  "name": "backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply mega-celebrations --local",
+    "db:migrate:remote": "wrangler d1 migrations apply mega-celebrations --remote",
+    "seed:local": "wrangler d1 execute mega-celebrations --local --file=./scripts/seed.sql",
+    "seed:remote": "wrangler d1 execute mega-celebrations --remote --file=./scripts/seed.sql",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.2",
+    "hono": "4.12.28",
+    "jose": "6.2.3",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.18.3",
+    "@types/node": "^24.13.2",
+    "drizzle-kit": "0.31.10",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.10",
+    "wrangler": "4.109.0"
+  }
+}
