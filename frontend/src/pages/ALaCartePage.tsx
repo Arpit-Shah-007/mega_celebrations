@@ -1,13 +1,15 @@
 import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { PageHero } from "@/components/ui/PageHero"
 import { Container } from "@/components/ui/Container"
 import { SectionHeading } from "@/components/ui/SectionHeading"
 import { AccordionItem } from "@/components/ui/Accordion"
 import { CatalogItemCard } from "@/components/packages/CatalogItemCard"
 import { CatalogItemModal } from "@/components/packages/CatalogItemModal"
+import { PageLoadingState, PageErrorState } from "@/components/ui/PageLoadingState"
 import { TestimonialsSection } from "@/components/home/TestimonialsSection"
 import { realPhotos } from "@/data/realPhotos"
-import aLaCarteItemsData from "@/data/aLaCarteItems.json"
+import { fetchALaCarteItems } from "@/lib/api"
 import type { CatalogItem } from "@/types"
 
 const A_LA_CARTE_NAMESPACE = "a-la-carte"
@@ -20,12 +22,7 @@ const A_LA_CARTE_NAMESPACE = "a-la-carte"
  * items with real names/pricing, and a 4-question FAQ accordion (answers
  * pulled from the page's own schema.org markup, since the accordions render
  * collapsed by default).
- *
- * Item data (name, price, category breadcrumb, description, pricing) lives
- * in aLaCarteItems.json rather than inline so it can be swapped for a
- * database-backed admin portal later without touching this component.
  */
-const A_LA_CARTE_ITEMS = aLaCarteItemsData as CatalogItem[]
 
 const A_LA_CARTE_FAQS = [
   {
@@ -50,6 +47,14 @@ const A_LA_CARTE_FAQS = [
 
 export function ALaCartePage() {
   const [activeItem, setActiveItem] = useState<CatalogItem | null>(null)
+  const {
+    data: items,
+    isPending,
+    isError,
+  } = useQuery({ queryKey: ["catalog-items", "a_la_carte"], queryFn: fetchALaCarteItems })
+
+  if (isPending) return <PageLoadingState />
+  if (isError || !items) return <PageErrorState />
 
   return (
     <>
@@ -74,7 +79,7 @@ export function ALaCartePage() {
           />
 
           <div className="mx-auto mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {A_LA_CARTE_ITEMS.map((item, index) => (
+            {items.map((item, index) => (
               <CatalogItemCard
                 key={item.slug}
                 name={item.name}

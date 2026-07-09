@@ -18,7 +18,7 @@ export function WishlistButton({ pkg, className = "" }: WishlistButtonProps) {
     toggleItem({
       slug: pkg.slug,
       name: pkg.name,
-      imageSeed: pkg.images[0]?.seed ?? pkg.slug,
+      imageSeed: pkg.slug,
       startingPrice: pkg.startingPrice,
     })
     showToast(saved ? `Removed ${pkg.name} from your wishlist` : `Added ${pkg.name} to your wishlist`)

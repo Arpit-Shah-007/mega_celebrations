@@ -1,22 +1,33 @@
 import { useState } from "react"
 import { useParams } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 import { Container } from "@/components/ui/Container"
 import { PageHero } from "@/components/ui/PageHero"
 import { Button } from "@/components/ui/Button"
 import { SectionHeading } from "@/components/ui/SectionHeading"
 import { CatalogItemCard } from "@/components/packages/CatalogItemCard"
 import { CatalogItemModal } from "@/components/packages/CatalogItemModal"
-import { getAddOnBySlug } from "@/data/addOns"
+import { PageLoadingState } from "@/components/ui/PageLoadingState"
 import { getAddOnIcon } from "@/components/packages/tagIcons"
-import { getAddOnPhoto } from "@/data/realPhotos"
+import { fetchAddOnCategoryBySlug } from "@/lib/api"
 import type { CatalogItem } from "@/types"
 
 export function AddOnCategoryPage() {
   const { slug } = useParams<{ slug: string }>()
-  const category = slug ? getAddOnBySlug(slug) : undefined
   const [activeItem, setActiveItem] = useState<CatalogItem | null>(null)
+  const {
+    data: category,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["addon-category", slug],
+    queryFn: () => fetchAddOnCategoryBySlug(slug!),
+    enabled: Boolean(slug),
+  })
 
-  if (!category) {
+  if (isPending) return <PageLoadingState />
+
+  if (isError || !category) {
     return (
       <Container className="flex min-h-[50vh] flex-col items-center justify-center gap-4 py-24 text-center">
         <h1 className="text-3xl text-navy">Add-on category not found</h1>
@@ -39,9 +50,9 @@ export function AddOnCategoryPage() {
         title={category.name}
         photoHeightClassName="h-64 sm:h-72"
         photoSeed={`addon-${category.slug}`}
-        photoAlt={`${category.name} add-ons`}
+        photoAlt={category.heroImage.alt}
         photoIcon={Icon}
-        photoSrc={getAddOnPhoto(category.slug)}
+        photoSrc={category.heroImage.url || undefined}
         photoOverlayClassName="bg-black/50"
       />
 

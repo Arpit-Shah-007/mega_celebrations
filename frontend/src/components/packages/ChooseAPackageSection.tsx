@@ -14,7 +14,9 @@ const OPTIONS = [
     tagline: "Let us do the work for you, all our packages include set up and take down.",
     seed: "choose-full-service",
     icon: Layers,
-    src: realPhotos.packageCards["tent-sleepover"],
+    // Same real "Tent Sleepover" card photo used on the Full Service Packages
+    // listing card — a fixed design choice for this hub tile, not admin-editable.
+    src: "/media/MAIN-TS.jpeg",
   },
   {
     to: "/packages/a-la-carte",

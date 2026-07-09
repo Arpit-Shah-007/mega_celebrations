@@ -2,25 +2,42 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { ToastProvider } from "@/context/ToastContext"
 import { WishlistProvider } from "@/context/WishlistContext"
+import { createTestQueryClient } from "@/test/queryClient"
 import { ALaCartePage } from "./ALaCartePage"
-import aLaCarteItemsData from "@/data/aLaCarteItems.json"
+import { fetchALaCarteItems } from "@/lib/api"
 import type { CatalogItem } from "@/types"
 
 vi.setConfig({ testTimeout: 15000 })
+vi.mock("@/lib/api")
 
-const A_LA_CARTE_ITEMS = aLaCarteItemsData as CatalogItem[]
+const A_LA_CARTE_ITEMS: CatalogItem[] = [
+  {
+    slug: "cross-back-chairs",
+    name: "Cross Back Chairs",
+    price: "$10.00",
+    category: "Furniture > Seating & Chairs",
+    image: "/media/a-la-carte/cross-back-chairs.jpg",
+    description: ["Classic wood dining chairs with a crossed-back design."],
+    pricing: [{ label: "Flat fee", value: "$10.00" }],
+  },
+]
+
+vi.mocked(fetchALaCarteItems).mockResolvedValue(A_LA_CARTE_ITEMS)
 
 function renderALaCartePage() {
   return render(
-    <MemoryRouter>
-      <ToastProvider>
-        <WishlistProvider>
-          <ALaCartePage />
-        </WishlistProvider>
-      </ToastProvider>
-    </MemoryRouter>,
+    <QueryClientProvider client={createTestQueryClient()}>
+      <MemoryRouter>
+        <ToastProvider>
+          <WishlistProvider>
+            <ALaCartePage />
+          </WishlistProvider>
+        </ToastProvider>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
@@ -29,10 +46,10 @@ describe("ALaCartePage", () => {
     window.localStorage.clear()
   })
 
-  it("renders the page hero, every catalog item, and the FAQ accordion", () => {
+  it("renders the page hero, every catalog item, and the FAQ accordion", async () => {
     renderALaCartePage()
 
-    expect(screen.getByRole("heading", { name: /A La.*Carte/s, level: 1 })).toBeInTheDocument()
+    expect(await screen.findByRole("heading", { name: /A La.*Carte/s, level: 1 })).toBeInTheDocument()
     for (const item of A_LA_CARTE_ITEMS) {
       expect(screen.getByText(item.name)).toBeInTheDocument()
     }
@@ -44,7 +61,7 @@ describe("ALaCartePage", () => {
     renderALaCartePage()
     const firstItem = A_LA_CARTE_ITEMS[0]
 
-    await user.click(screen.getByRole("button", { name: `Add ${firstItem.name} to wishlist` }))
+    await user.click(await screen.findByRole("button", { name: `Add ${firstItem.name} to wishlist` }))
 
     expect(screen.getByRole("button", { name: `Remove ${firstItem.name} from wishlist` })).toBeInTheDocument()
   })
@@ -54,7 +71,7 @@ describe("ALaCartePage", () => {
     renderALaCartePage()
     const firstItem = A_LA_CARTE_ITEMS[0]
 
-    await user.click(screen.getByRole("button", { name: firstItem.name }))
+    await user.click(await screen.findByRole("button", { name: firstItem.name }))
 
     expect(screen.getByText(firstItem.description[0])).toBeInTheDocument()
   })

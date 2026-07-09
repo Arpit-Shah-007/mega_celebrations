@@ -8,13 +8,8 @@ import { QuoteForm } from "@/components/wishlist/QuoteForm"
 import { QuoteSuccessPanel } from "@/components/wishlist/QuoteSuccessPanel"
 import { useWishlist } from "@/context/useWishlist"
 import { useToast } from "@/context/useToast"
+import { submitQuoteInquiry } from "@/lib/api"
 import type { QuoteFormValues } from "@/types"
-
-function simulateQuoteSubmission(_values: QuoteFormValues): Promise<void> {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, 900)
-  })
-}
 
 export function WishlistPage() {
   const { items, removeItem, clear } = useWishlist()
@@ -22,7 +17,7 @@ export function WishlistPage() {
   const [submitted, setSubmitted] = useState(false)
 
   const handleSubmitQuote = async (values: QuoteFormValues) => {
-    await simulateQuoteSubmission(values)
+    await submitQuoteInquiry(values, items)
     setSubmitted(true)
     clear()
     showToast("Your quote request has been sent!")

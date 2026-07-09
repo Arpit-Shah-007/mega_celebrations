@@ -1,11 +1,13 @@
 import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "framer-motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Container } from "@/components/ui/Container"
 import { SectionHeading } from "@/components/ui/SectionHeading"
 import { Reveal } from "@/components/ui/Reveal"
 import { PackageCard } from "@/components/packages/PackageCard"
-import { packages } from "@/data/packages"
+import { PageLoadingState, PageErrorState } from "@/components/ui/PageLoadingState"
+import { fetchPackages } from "@/lib/api"
 
 const VISIBLE = 4
 
@@ -17,6 +19,11 @@ const VISIBLE = 4
 export function PackageCarousel() {
   const [start, setStart] = useState(0)
   const [direction, setDirection] = useState<1 | -1>(1)
+  const { data: packages, isPending, isError } = useQuery({ queryKey: ["packages"], queryFn: fetchPackages })
+
+  if (isPending) return <PageLoadingState />
+  if (isError || !packages) return <PageErrorState />
+
   const pageCount = Math.ceil(packages.length / VISIBLE)
   const maxStart = (pageCount - 1) * VISIBLE
 

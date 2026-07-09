@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mega-celebrations-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-09",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mega-celebrations",
+      // Placeholder — replace with the real ID printed by `wrangler d1 create mega-celebrations`.
+      "database_id": "REPLACE_WITH_REAL_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "mega-celebrations-media"
+    }
+  ],
+  "vars": {
+    // Not secrets — replace with the real values from Zero Trust > Access controls > Applications
+    // once the /admin Access application is created. Used to verify the Cf-Access-Jwt-Assertion header.
+    "ACCESS_TEAM_DOMAIN": "https://REPLACE_WITH_TEAM_NAME.cloudflareaccess.com",
+    "ACCESS_AUD": "REPLACE_WITH_POLICY_AUD_TAG",
+    "PUBLIC_MEDIA_BASE_URL": "https://media.mega-celebrations.com"
+  }
+}
