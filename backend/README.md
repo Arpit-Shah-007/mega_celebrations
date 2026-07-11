@@ -2,6 +2,8 @@
 
 Hono API on Cloudflare Workers, backed by D1 (SQLite) via Drizzle ORM, R2 for media. See `../docs/making-claude/BACKEND_SPEC.md` for the full design (scope, schema, API surface).
 
+Deployed via Cloudflare Workers Builds (Git integration) on push to `main`.
+
 ## Stack
 
 Hono + Drizzle ORM + Cloudflare D1 + Cloudflare R2 + Zod + Wrangler + Vitest (`@cloudflare/vitest-pool-workers`).
