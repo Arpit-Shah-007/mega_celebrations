@@ -1,7 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
+import { setupServer } from "msw/node"
+import { http, HttpResponse } from "msw"
 import { ToastProvider } from "@/context/ToastContext"
 import { WishlistProvider } from "@/context/WishlistContext"
 import { WishlistPage } from "./WishlistPage"
@@ -9,7 +11,16 @@ import type { WishlistItem } from "@/types"
 
 vi.setConfig({ testTimeout: 15000 })
 
+const API_BASE_URL = "http://localhost:8787"
 const STORAGE_KEY = "mega-celebrations:wishlist"
+
+const server = setupServer(
+  http.post(`${API_BASE_URL}/api/quote-inquiries`, () => HttpResponse.json({ success: true, data: { id: 1 } })),
+)
+
+beforeAll(() => server.listen())
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
 
 function renderWishlistPage() {
   return render(

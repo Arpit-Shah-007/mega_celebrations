@@ -24,7 +24,13 @@ const app = new Hono<{ Bindings: Env }>()
 app.use(
   "/api/*",
   cors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "https://mega-celebrations-test.ashah10-b13.workers.dev",
+    ],
   }),
 )
 

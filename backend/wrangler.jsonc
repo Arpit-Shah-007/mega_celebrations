@@ -8,8 +8,7 @@
     {
       "binding": "DB",
       "database_name": "mega-celebrations",
-      // Placeholder — replace with the real ID printed by `wrangler d1 create mega-celebrations`.
-      "database_id": "REPLACE_WITH_REAL_D1_DATABASE_ID",
+      "database_id": "64b66cc4-ba99-4bbb-8742-cfb1ddd947b1",
       "migrations_dir": "migrations"
     }
   ],
@@ -24,6 +23,6 @@
     // once the /admin Access application is created. Used to verify the Cf-Access-Jwt-Assertion header.
     "ACCESS_TEAM_DOMAIN": "https://REPLACE_WITH_TEAM_NAME.cloudflareaccess.com",
     "ACCESS_AUD": "REPLACE_WITH_POLICY_AUD_TAG",
-    "PUBLIC_MEDIA_BASE_URL": "https://media.mega-celebrations.com"
+    "PUBLIC_MEDIA_BASE_URL": "https://pub-ae783edbdd264f028c01064edee41770.r2.dev"
   }
 }
