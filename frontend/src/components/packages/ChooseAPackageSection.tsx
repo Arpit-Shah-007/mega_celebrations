@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container"
 import { PlaceholderPhoto } from "@/components/ui/PlaceholderPhoto"
 import { Layers, UtensilsCrossed } from "lucide-react"
 import { realPhotos } from "@/data/realPhotos"
+import { MEDIA_BASE_URL } from "@/lib/media"
 
 const OPTIONS = [
   {
@@ -16,7 +17,7 @@ const OPTIONS = [
     icon: Layers,
     // Same real "Tent Sleepover" card photo used on the Full Service Packages
     // listing card — a fixed design choice for this hub tile, not admin-editable.
-    src: "/media/MAIN-TS.jpeg",
+    src: `${MEDIA_BASE_URL}/media/MAIN-TS.jpeg`,
   },
   {
     to: "/packages/a-la-carte",

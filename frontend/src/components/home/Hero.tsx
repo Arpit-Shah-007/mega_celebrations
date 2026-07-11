@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import { MEDIA_BASE_URL } from "@/lib/media"
 
 /** Full-bleed video hero: centered script phrase over the main heading, with a readable paragraph below. */
 export function Hero() {
@@ -6,7 +7,7 @@ export function Hero() {
     <section className="relative flex h-108 items-center overflow-hidden sm:h-148">
       <video
         className="absolute inset-0 h-full w-full object-cover"
-        src="/media/hero-background-video.mp4"
+        src={`${MEDIA_BASE_URL}/media/hero-background-video.mp4`}
         autoPlay
         loop
         muted

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { realPhotos } from "./realPhotos"
 
 function expectMediaPath(path: string) {
-  expect(path.startsWith("/media/")).toBe(true)
+  expect(path.includes("/media/")).toBe(true)
 }
 
 describe("realPhotos", () => {

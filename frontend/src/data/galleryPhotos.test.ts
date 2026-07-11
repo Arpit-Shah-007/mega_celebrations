@@ -6,9 +6,9 @@ describe("galleryPhotos", () => {
     expect(galleryPhotos.length).toBeGreaterThan(0)
   })
 
-  it("has an absolute src path and non-empty alt text for every photo", () => {
+  it("has an absolute src URL and non-empty alt text for every photo", () => {
     galleryPhotos.forEach((photo) => {
-      expect(photo.src.startsWith("/")).toBe(true)
+      expect(photo.src.startsWith("http")).toBe(true)
       expect(photo.alt.trim().length).toBeGreaterThan(0)
     })
   })
