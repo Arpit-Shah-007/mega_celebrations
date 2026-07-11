@@ -4,12 +4,13 @@ import { Container } from "@/components/ui/Container"
 import { InstagramIcon, FacebookIcon } from "@/components/ui/SocialIcons"
 import { PlaceholderPhoto } from "@/components/ui/PlaceholderPhoto"
 import logo from "@/assets/brand/mega-celebrations-logo.png"
+import { MEDIA_BASE_URL } from "@/lib/media"
 
 const INSTAGRAM_PREVIEW_PHOTOS = [
-  { seed: "ig-preview-1", src: "/media/gallery/red-pink-balloon-columns-6th-birthday.jpg" },
-  { seed: "ig-preview-2", src: "/media/gallery/luxury-estate-outdoor-dinner-black-white-florals.jpg" },
-  { seed: "ig-preview-3", src: "/media/gallery/mermaid-sleepover-teepees-lavender-teal.jpg" },
-  { seed: "ig-preview-4", src: "/media/gallery/spa-party-pink-mirror-stations-relax-sign.jpg" },
+  { seed: "ig-preview-1", src: `${MEDIA_BASE_URL}/media/gallery/red-pink-balloon-columns-6th-birthday.jpg` },
+  { seed: "ig-preview-2", src: `${MEDIA_BASE_URL}/media/gallery/luxury-estate-outdoor-dinner-black-white-florals.jpg` },
+  { seed: "ig-preview-3", src: `${MEDIA_BASE_URL}/media/gallery/mermaid-sleepover-teepees-lavender-teal.jpg` },
+  { seed: "ig-preview-4", src: `${MEDIA_BASE_URL}/media/gallery/spa-party-pink-mirror-stations-relax-sign.jpg` },
 ]
 
 export function Footer() {
