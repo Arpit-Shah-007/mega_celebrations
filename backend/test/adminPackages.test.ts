@@ -90,3 +90,30 @@ it("deleting a package cascades to its images, tiers, and variants", async () =>
   const getResponse = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}`)
   expect(getResponse.status).toBe(404)
 })
+
+it("reordering gallery images persists the new sort order via a single batch", async () => {
+  const pkg = await createPackage("test-package-reorder-images")
+  const imageIds: number[] = []
+  for (const url of ["/media/one.jpg", "/media/two.jpg", "/media/three.jpg"]) {
+    const response = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}/images`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "gallery", url, alt: "Gallery photo" }),
+    })
+    const body = await readJson<{ data: { id: number } }>(response)
+    imageIds.push(body.data.id)
+  }
+
+  const reversedIds = [...imageIds].reverse()
+  const reorderResponse = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}/images/reorder`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderedIds: reversedIds }),
+  })
+  expect(reorderResponse.status).toBe(200)
+
+  const getResponse = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}`)
+  const getBody = await readJson<{ data: { images: { id: number; sortOrder: number }[] } }>(getResponse)
+  const gallery = getBody.data.images.filter((image) => reversedIds.includes(image.id)).sort((a, b) => a.sortOrder - b.sortOrder)
+  expect(gallery.map((image) => image.id)).toEqual(reversedIds)
+})

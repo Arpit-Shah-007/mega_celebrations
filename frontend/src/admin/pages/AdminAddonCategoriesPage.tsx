@@ -1,14 +1,21 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
+  createAddonCategory,
   createCatalogItem,
+  deleteAddonCategory,
   fetchAdminAddonCategories,
   fetchAdminCatalogItems,
+  reorderAddonCategories,
+  reorderCatalogItems,
   updateAddonCategory,
   type AdminAddonCategoryRow,
 } from "@/lib/adminApi"
 import { AdminButton, Card, Field, Input, TextArea } from "@/admin/components/AdminForm"
 import { ImageUploadField } from "@/admin/components/ImageUploadField"
 import { CatalogItemRow } from "@/admin/components/CatalogItemRow"
+
+/** Sentinel for a brand-new category's not-yet-uploaded hero/card photo — the DB column is NOT NULL, but ImageUploadField should still show its empty state rather than a broken <img>. */
+const PENDING_IMAGE = "pending-upload"
 
 export function AdminAddonCategoriesPage() {
   const queryClient = useQueryClient()
@@ -30,15 +37,56 @@ export function AdminAddonCategoriesPage() {
     return <p className="text-sm text-slate-500">Loading…</p>
   }
 
+  const sorted = [...categories].sort((a, b) => a.sortOrder - b.sortOrder)
+
+  const moveCategory = async (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= sorted.length) return
+    const reordered = [...sorted]
+    ;[reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]]
+    await reorderAddonCategories(reordered.map((category) => category.id))
+    invalidate()
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold">Add-On Categories</h1>
-      {categories.map((category) => (
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Add-On Categories</h1>
+        <AdminButton
+          variant="primary"
+          onClick={async () => {
+            await createAddonCategory({
+              slug: `new-category-${Date.now()}`,
+              name: "New Category",
+              tagline: "",
+              description: "",
+              heroImageUrl: PENDING_IMAGE,
+              heroImageAlt: "New category hero image",
+              cardImageUrl: PENDING_IMAGE,
+              cardImageAlt: "New category card image",
+              sortOrder: sorted.length,
+            })
+            invalidate()
+          }}
+        >
+          + New Category
+        </AdminButton>
+      </div>
+      {sorted.map((category, index) => (
         <CategoryCard
           key={category.id}
           category={category}
           items={items.filter((item) => item.addonCategoryId === category.id)}
           onChanged={invalidate}
+          onMove={(direction) => moveCategory(index, direction)}
+          onDelete={async () => {
+            if (window.confirm(`Delete "${category.name}"? This will also delete its ${items.filter((item) => item.addonCategoryId === category.id).length} item(s). This cannot be undone.`)) {
+              await deleteAddonCategory(category.id)
+              invalidate()
+            }
+          }}
+          canMoveUp={index > 0}
+          canMoveDown={index < sorted.length - 1}
         />
       ))}
     </div>
@@ -49,13 +97,47 @@ function CategoryCard({
   category,
   items,
   onChanged,
+  onMove,
+  onDelete,
+  canMoveUp,
+  canMoveDown,
 }: {
   category: AdminAddonCategoryRow
   items: import("@/lib/adminApi").AdminCatalogItemRow[]
   onChanged: () => void
+  onMove: (direction: -1 | 1) => void
+  onDelete: () => void
+  canMoveUp: boolean
+  canMoveDown: boolean
 }) {
+  const sortedItems = [...items].sort((a, b) => a.sortOrder - b.sortOrder)
+
+  const moveItem = async (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= sortedItems.length) return
+    const reordered = [...sortedItems]
+    ;[reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]]
+    await reorderCatalogItems(reordered.map((item) => item.id))
+    onChanged()
+  }
+
   return (
-    <Card title={category.name}>
+    <Card
+      title={category.name}
+      action={
+        <div className="flex items-center gap-2">
+          <AdminButton onClick={() => onMove(-1)} disabled={!canMoveUp}>
+            ↑
+          </AdminButton>
+          <AdminButton onClick={() => onMove(1)} disabled={!canMoveDown}>
+            ↓
+          </AdminButton>
+          <AdminButton variant="danger" onClick={onDelete}>
+            Delete Category
+          </AdminButton>
+        </div>
+      }
+    >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Name">
           <Input
@@ -99,7 +181,7 @@ function CategoryCard({
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <ImageUploadField
           label="Hero (category page banner)"
-          currentUrl={category.heroImageUrl}
+          currentUrl={category.heroImageUrl === PENDING_IMAGE ? "" : category.heroImageUrl}
           onUploaded={async (url) => {
             await updateAddonCategory(category.id, { heroImageUrl: url })
             onChanged()
@@ -107,7 +189,7 @@ function CategoryCard({
         />
         <ImageUploadField
           label="Card (Add-Ons hub thumbnail)"
-          currentUrl={category.cardImageUrl}
+          currentUrl={category.cardImageUrl === PENDING_IMAGE ? "" : category.cardImageUrl}
           onUploaded={async (url) => {
             await updateAddonCategory(category.id, { cardImageUrl: url })
             onChanged()
@@ -133,7 +215,7 @@ function CategoryCard({
                 description: [],
                 details: null,
                 pricing: [],
-                sortOrder: items.length,
+                sortOrder: sortedItems.length,
               })
               onChanged()
             }}
@@ -142,8 +224,15 @@ function CategoryCard({
           </AdminButton>
         </div>
         <div className="flex flex-col gap-3">
-          {items.map((item) => (
-            <CatalogItemRow key={item.id} item={item} onChanged={onChanged} />
+          {sortedItems.map((item, index) => (
+            <CatalogItemRow
+              key={item.id}
+              item={item}
+              onChanged={onChanged}
+              onMove={(direction) => moveItem(index, direction)}
+              canMoveUp={index > 0}
+              canMoveDown={index < sortedItems.length - 1}
+            />
           ))}
         </div>
       </div>

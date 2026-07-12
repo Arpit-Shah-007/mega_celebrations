@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { createCatalogItem, fetchAdminCatalogItems } from "@/lib/adminApi"
+import { createCatalogItem, fetchAdminCatalogItems, reorderCatalogItems } from "@/lib/adminApi"
 import { AdminButton } from "@/admin/components/AdminForm"
 import { CatalogItemRow } from "@/admin/components/CatalogItemRow"
 
@@ -11,6 +11,17 @@ export function AdminALaCartePage() {
   })
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin", "catalog-items", "a_la_carte"] })
+
+  const sorted = [...(items ?? [])].sort((a, b) => a.sortOrder - b.sortOrder)
+
+  const moveItem = async (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= sorted.length) return
+    const reordered = [...sorted]
+    ;[reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]]
+    await reorderCatalogItems(reordered.map((item) => item.id))
+    invalidate()
+  }
 
   return (
     <div>
@@ -32,7 +43,7 @@ export function AdminALaCartePage() {
               description: [],
               details: null,
               pricing: [],
-              sortOrder: items?.length ?? 0,
+              sortOrder: sorted.length,
             })
             invalidate()
           }}
@@ -45,8 +56,15 @@ export function AdminALaCartePage() {
         <p className="mt-6 text-sm text-slate-500">Loading…</p>
       ) : (
         <div className="mt-6 flex flex-col gap-3">
-          {items.map((item) => (
-            <CatalogItemRow key={item.id} item={item} onChanged={invalidate} />
+          {sorted.map((item, index) => (
+            <CatalogItemRow
+              key={item.id}
+              item={item}
+              onChanged={invalidate}
+              onMove={(direction) => moveItem(index, direction)}
+              canMoveUp={index > 0}
+              canMoveDown={index < sorted.length - 1}
+            />
           ))}
         </div>
       )}

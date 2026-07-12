@@ -32,10 +32,12 @@ async function loadFullPackage(db: Database, packageId: number) {
 }
 
 async function deletePackageCascade(db: Database, packageId: number) {
-  await db.delete(packageImages).where(eq(packageImages.packageId, packageId))
-  await db.delete(packagePriceTiers).where(eq(packagePriceTiers.packageId, packageId))
-  await db.delete(packageVariants).where(eq(packageVariants.packageId, packageId))
-  await db.delete(packages).where(eq(packages.id, packageId))
+  await db.batch([
+    db.delete(packageImages).where(eq(packageImages.packageId, packageId)),
+    db.delete(packagePriceTiers).where(eq(packagePriceTiers.packageId, packageId)),
+    db.delete(packageVariants).where(eq(packageVariants.packageId, packageId)),
+    db.delete(packages).where(eq(packages.id, packageId)),
+  ])
 }
 
 adminPackagesRoute.get("/", async (c) => {
@@ -142,9 +144,10 @@ adminPackagesRoute.patch("/:id/images/reorder", async (c) => {
   }
 
   const db = createDb(c.env.DB)
-  await Promise.all(
-    parsed.data.orderedIds.map((imageId, index) => db.update(packageImages).set({ sortOrder: index }).where(eq(packageImages.id, imageId))),
+  const updates = parsed.data.orderedIds.map((imageId, index) =>
+    db.update(packageImages).set({ sortOrder: index }).where(eq(packageImages.id, imageId)),
   )
+  await db.batch(updates as [(typeof updates)[number], ...(typeof updates)[number][]])
   return ok(c, { reordered: parsed.data.orderedIds.length })
 })
 
@@ -238,8 +241,9 @@ adminPackagesRoute.patch("/:id/variants/reorder", async (c) => {
   }
 
   const db = createDb(c.env.DB)
-  await Promise.all(
-    parsed.data.orderedIds.map((variantId, index) => db.update(packageVariants).set({ sortOrder: index }).where(eq(packageVariants.id, variantId))),
+  const updates = parsed.data.orderedIds.map((variantId, index) =>
+    db.update(packageVariants).set({ sortOrder: index }).where(eq(packageVariants.id, variantId)),
   )
+  await db.batch(updates as [(typeof updates)[number], ...(typeof updates)[number][]])
   return ok(c, { reordered: parsed.data.orderedIds.length })
 })
