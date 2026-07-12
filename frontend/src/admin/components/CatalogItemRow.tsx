@@ -2,10 +2,18 @@ import { deleteCatalogItem, updateCatalogItem, type AdminCatalogItemRow } from "
 import { AdminButton, Field, Input, TextArea } from "@/admin/components/AdminForm"
 import { ImageUploadField } from "@/admin/components/ImageUploadField"
 
-export function CatalogItemRow({ item, onChanged }: { item: AdminCatalogItemRow; onChanged: () => void }) {
+interface CatalogItemRowProps {
+  item: AdminCatalogItemRow
+  onChanged: () => void
+  onMove?: (direction: -1 | 1) => void
+  canMoveUp?: boolean
+  canMoveDown?: boolean
+}
+
+export function CatalogItemRow({ item, onChanged, onMove, canMoveUp = false, canMoveDown = false }: CatalogItemRowProps) {
   return (
     <div className="border border-slate-100 p-3">
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_1fr_auto_auto]">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_1fr_auto_auto_auto_auto]">
         <Field label="Name">
           <Input
             defaultValue={item.name}
@@ -53,6 +61,16 @@ export function CatalogItemRow({ item, onChanged }: { item: AdminCatalogItemRow;
           />
           Call for price
         </label>
+        {onMove ? (
+          <>
+            <AdminButton onClick={() => onMove(-1)} disabled={!canMoveUp}>
+              ↑
+            </AdminButton>
+            <AdminButton onClick={() => onMove(1)} disabled={!canMoveDown}>
+              ↓
+            </AdminButton>
+          </>
+        ) : null}
         <AdminButton
           variant="danger"
           onClick={async () => {

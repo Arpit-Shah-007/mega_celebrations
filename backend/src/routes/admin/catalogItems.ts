@@ -40,6 +40,23 @@ adminCatalogItemsRoute.post("/", async (c) => {
   return ok(c, inserted, 201)
 })
 
+// Registered before "/:id" — Hono matches these routes in registration order,
+// so "/reorder" must come first or a PATCH to /reorder gets swallowed by the
+// "/:id" handler (treating "reorder" as the id, which then 404s).
+adminCatalogItemsRoute.patch("/reorder", async (c) => {
+  const parsed = reorderInputSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) {
+    return fail(c, parsed.error.issues.map((issue) => issue.message).join(" "), 400)
+  }
+
+  const db = createDb(c.env.DB)
+  const updates = parsed.data.orderedIds.map((itemId, index) =>
+    db.update(catalogItems).set({ sortOrder: index }).where(eq(catalogItems.id, itemId)),
+  )
+  await db.batch(updates as [(typeof updates)[number], ...(typeof updates)[number][]])
+  return ok(c, { reordered: parsed.data.orderedIds.length })
+})
+
 adminCatalogItemsRoute.patch("/:id", async (c) => {
   const itemId = Number(c.req.param("id"))
   const parsed = catalogItemInputSchema.partial().safeParse(await c.req.json().catch(() => null))
@@ -56,17 +73,4 @@ adminCatalogItemsRoute.delete("/:id", async (c) => {
   const itemId = Number(c.req.param("id"))
   await createDb(c.env.DB).delete(catalogItems).where(eq(catalogItems.id, itemId))
   return ok(c, { id: itemId })
-})
-
-adminCatalogItemsRoute.patch("/reorder", async (c) => {
-  const parsed = reorderInputSchema.safeParse(await c.req.json().catch(() => null))
-  if (!parsed.success) {
-    return fail(c, parsed.error.issues.map((issue) => issue.message).join(" "), 400)
-  }
-
-  const db = createDb(c.env.DB)
-  await Promise.all(
-    parsed.data.orderedIds.map((itemId, index) => db.update(catalogItems).set({ sortOrder: index }).where(eq(catalogItems.id, itemId))),
-  )
-  return ok(c, { reordered: parsed.data.orderedIds.length })
 })

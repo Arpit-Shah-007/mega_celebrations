@@ -23,6 +23,23 @@ adminAddonCategoriesRoute.post("/", async (c) => {
   return ok(c, inserted, 201)
 })
 
+// Registered before "/:id" — Hono matches these routes in registration order,
+// so "/reorder" must come first or a PATCH to /reorder gets swallowed by the
+// "/:id" handler (treating "reorder" as the id, which then 404s).
+adminAddonCategoriesRoute.patch("/reorder", async (c) => {
+  const parsed = reorderInputSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) {
+    return fail(c, parsed.error.issues.map((issue) => issue.message).join(" "), 400)
+  }
+
+  const db = createDb(c.env.DB)
+  const updates = parsed.data.orderedIds.map((categoryId, index) =>
+    db.update(addonCategories).set({ sortOrder: index }).where(eq(addonCategories.id, categoryId)),
+  )
+  await db.batch(updates as [(typeof updates)[number], ...(typeof updates)[number][]])
+  return ok(c, { reordered: parsed.data.orderedIds.length })
+})
+
 adminAddonCategoriesRoute.patch("/:id", async (c) => {
   const categoryId = Number(c.req.param("id"))
   const parsed = addonCategoryInputSchema.partial().safeParse(await c.req.json().catch(() => null))
@@ -38,20 +55,9 @@ adminAddonCategoriesRoute.patch("/:id", async (c) => {
 adminAddonCategoriesRoute.delete("/:id", async (c) => {
   const categoryId = Number(c.req.param("id"))
   const db = createDb(c.env.DB)
-  await db.delete(catalogItems).where(eq(catalogItems.addonCategoryId, categoryId))
-  await db.delete(addonCategories).where(eq(addonCategories.id, categoryId))
+  await db.batch([
+    db.delete(catalogItems).where(eq(catalogItems.addonCategoryId, categoryId)),
+    db.delete(addonCategories).where(eq(addonCategories.id, categoryId)),
+  ])
   return ok(c, { id: categoryId })
-})
-
-adminAddonCategoriesRoute.patch("/reorder", async (c) => {
-  const parsed = reorderInputSchema.safeParse(await c.req.json().catch(() => null))
-  if (!parsed.success) {
-    return fail(c, parsed.error.issues.map((issue) => issue.message).join(" "), 400)
-  }
-
-  const db = createDb(c.env.DB)
-  await Promise.all(
-    parsed.data.orderedIds.map((categoryId, index) => db.update(addonCategories).set({ sortOrder: index }).where(eq(addonCategories.id, categoryId))),
-  )
-  return ok(c, { reordered: parsed.data.orderedIds.length })
 })
