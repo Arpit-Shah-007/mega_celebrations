@@ -3,7 +3,7 @@ import { footerNav, businessInfo } from "@/data/nav"
 import { Container } from "@/components/ui/Container"
 import { InstagramIcon, FacebookIcon } from "@/components/ui/SocialIcons"
 import { PlaceholderPhoto } from "@/components/ui/PlaceholderPhoto"
-import logo from "@/assets/brand/Mega_Celebrations_Logo.png"
+import logo from "@/assets/brand/mega-celebrations-logo.png"
 import { MEDIA_BASE_URL } from "@/lib/media"
 
 const INSTAGRAM_PREVIEW_PHOTOS = [
