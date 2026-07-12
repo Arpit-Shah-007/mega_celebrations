@@ -30,6 +30,7 @@ test-reports
 !.dev.vars.example
 .env*
 !.env.example
+!.env.production
 
 # Catalog media migrated to Cloudflare R2 (see docs/making-claude/STACK_SPEC.md) —
 # kept on disk locally as a backup, no longer needed in the deployed build.
