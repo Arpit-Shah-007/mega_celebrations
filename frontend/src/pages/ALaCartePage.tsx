@@ -99,7 +99,7 @@ export function ALaCartePage() {
       </section>
 
       <section
-        className="bg-white bg-top bg-no-repeat py-16 sm:py-20"
+        className="bg-white bg-top bg-repeat-y py-16 sm:py-20"
         style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)`, backgroundSize: "100% auto" }}
       >
         <Container>

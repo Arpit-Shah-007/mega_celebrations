@@ -34,7 +34,7 @@ const OPTIONS = [
 export function ChooseAPackageSection({ background = "bg-white" }: { background?: string }) {
   return (
     <section
-      className={`bg-top bg-no-repeat py-16 sm:py-20 ${background}`}
+      className={`bg-top bg-repeat-y py-16 sm:py-20 ${background}`}
       style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)`, backgroundSize: "100% auto" }}
     >
       <Container>
