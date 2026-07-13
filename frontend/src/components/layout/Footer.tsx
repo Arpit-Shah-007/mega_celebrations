@@ -83,7 +83,7 @@ export function Footer() {
 
         <div>
           <h3 className="text-[19px] font-extrabold uppercase tracking-wide text-navy">From Instagram</h3>
-          <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-1">
+          <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-2">
             {INSTAGRAM_PREVIEW_PHOTOS.map((photo) => (
               <a
                 key={photo.seed}
@@ -91,12 +91,17 @@ export function Footer() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="View Mega Celebrations on Instagram"
+                className="group relative block overflow-hidden rounded-lg"
               >
                 <PlaceholderPhoto
                   seed={photo.seed}
                   src={photo.src}
                   alt="Recent Mega Celebrations Instagram post"
-                  className="h-28 w-28 transition-opacity hover:opacity-80"
+                  className="h-32 w-32"
+                />
+                <span
+                  className="pointer-events-none absolute inset-0 bg-white opacity-0 transition-opacity duration-200 group-hover:opacity-70"
+                  aria-hidden="true"
                 />
               </a>
             ))}
