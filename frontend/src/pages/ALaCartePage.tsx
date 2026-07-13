@@ -7,6 +7,7 @@ import { AccordionItem } from "@/components/ui/Accordion"
 import { CatalogItemCard } from "@/components/packages/CatalogItemCard"
 import { CatalogItemModal } from "@/components/packages/CatalogItemModal"
 import { PageLoadingState, PageErrorState } from "@/components/ui/PageLoadingState"
+import { Reveal } from "@/components/ui/Reveal"
 import { TestimonialsSection } from "@/components/home/TestimonialsSection"
 import { realPhotos } from "@/data/realPhotos"
 import { fetchALaCarteItems } from "@/lib/api"
@@ -71,33 +72,35 @@ export function ALaCartePage() {
 
       <section className="py-16 sm:py-20">
         <Container className="text-center">
-          <SectionHeading
-            align="center"
-            title="About Our"
-            scriptSuffix="A La Carte"
-            titleSuffix="Package"
-            description="Not looking for a full service package? Create your own package by choosing your items individually. $400 delivery minimum, some items are available for pick up."
-          />
+          <Reveal direction="bottom-to-top">
+            <SectionHeading
+              align="center"
+              title="About Our"
+              scriptSuffix="A La Carte"
+              titleSuffix="Package"
+              description="Not looking for a full service package? Create your own package by choosing your items individually. $400 delivery minimum, some items are available for pick up."
+            />
 
-          <div className="mx-auto mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {items.map((item, index) => (
-              <CatalogItemCard
-                key={item.slug}
-                name={item.name}
-                price={item.price}
-                image={item.image}
-                namespace={A_LA_CARTE_NAMESPACE}
-                delay={Math.min(index * 0.05, 0.3)}
-                onOpenDetails={() => setActiveItem(item)}
-              />
-            ))}
-          </div>
+            <div className="mx-auto mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {items.map((item, index) => (
+                <CatalogItemCard
+                  key={item.slug}
+                  name={item.name}
+                  price={item.price}
+                  image={item.image}
+                  namespace={A_LA_CARTE_NAMESPACE}
+                  delay={Math.min(index * 0.05, 0.3)}
+                  onOpenDetails={() => setActiveItem(item)}
+                />
+              ))}
+            </div>
+          </Reveal>
         </Container>
       </section>
 
       <section
-        className="bg-white bg-cover bg-center bg-no-repeat py-16 sm:py-20"
-        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)` }}
+        className="bg-white bg-top bg-no-repeat py-16 sm:py-20"
+        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)`, backgroundSize: "100% auto" }}
       >
         <Container>
           <SectionHeading align="center" title="Frequently Asked" scriptSuffix="Questions" />

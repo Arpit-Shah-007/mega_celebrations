@@ -250,8 +250,8 @@ export function PackageDetailPage() {
       ) : null}
 
       <section
-        className="bg-white bg-cover bg-center bg-no-repeat py-14 sm:py-20"
-        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)` }}
+        className="bg-white bg-top bg-no-repeat py-14 sm:py-20"
+        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)`, backgroundSize: "100% auto" }}
       >
         <Container>
           <SectionHeading title="Frequently Asked" scriptSuffix="Questions" />

@@ -12,8 +12,8 @@ export function FaqsPage() {
       <PageHero variant="navy" title="FAQs" />
 
       <section
-        className="bg-white bg-cover bg-center bg-no-repeat pb-16 pt-8 sm:pb-20 sm:pt-10"
-        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)` }}
+        className="bg-white bg-top bg-no-repeat pb-16 pt-8 sm:pb-20 sm:pt-10"
+        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)`, backgroundSize: "100% auto" }}
       >
         <Container>
           <div className="mx-auto max-w-5xl space-y-14">

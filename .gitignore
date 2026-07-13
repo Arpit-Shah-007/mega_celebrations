@@ -1,8 +1,9 @@
 # Internal planning docs, client media exports, and session notes — not for the repo
+# (this also covers docs/r2_storage/, the local used-vs-unused R2 media export)
 docs/
 
-# Local export of R2 storage (used-vs-unused split) — not for the repo
-r2_storage/
+# Wrangler local cache/state
+.wrangler/
 
 # OS / editor cruft
 .DS_Store

@@ -15,9 +15,10 @@ const OPTIONS = [
     tagline: "Let us do the work for you, all our packages include set up and take down.",
     seed: "choose-full-service",
     icon: Layers,
-    // Same real "Tent Sleepover" card photo used on the Full Service Packages
-    // listing card — a fixed design choice for this hub tile, not admin-editable.
-    src: `${MEDIA_BASE_URL}/media/Tent_Sleepover_Card.jpeg`,
+    // Matches the real site's own Full Service Packages tile photo (a sleepover
+    // scene distinct from any single package's own card image) — a fixed design
+    // choice for this hub tile, not admin-editable.
+    src: `${MEDIA_BASE_URL}/media/Full_Service_Packages_Card.jpg`,
   },
   {
     to: "/packages/a-la-carte",
@@ -33,8 +34,8 @@ const OPTIONS = [
 export function ChooseAPackageSection({ background = "bg-white" }: { background?: string }) {
   return (
     <section
-      className={`bg-cover bg-center bg-no-repeat py-16 sm:py-20 ${background}`}
-      style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)` }}
+      className={`bg-top bg-no-repeat py-16 sm:py-20 ${background}`}
+      style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)`, backgroundSize: "100% auto" }}
     >
       <Container>
         <SectionHeading title="Start by" scriptSuffix="Choosing a Package" />
