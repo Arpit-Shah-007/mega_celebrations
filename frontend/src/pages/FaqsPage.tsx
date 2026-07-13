@@ -12,7 +12,7 @@ export function FaqsPage() {
       <PageHero variant="navy" title="FAQs" />
 
       <section
-        className="bg-white bg-top bg-no-repeat pb-16 pt-8 sm:pb-20 sm:pt-10"
+        className="bg-white bg-top bg-repeat-y pb-16 pt-8 sm:pb-20 sm:pt-10"
         style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)`, backgroundSize: "100% auto" }}
       >
         <Container>
