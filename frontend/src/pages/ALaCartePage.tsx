@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { motion } from "framer-motion"
 import { PageHero } from "@/components/ui/PageHero"
 import { Container } from "@/components/ui/Container"
 import { SectionHeading } from "@/components/ui/SectionHeading"
@@ -7,7 +8,6 @@ import { AccordionItem } from "@/components/ui/Accordion"
 import { CatalogItemCard } from "@/components/packages/CatalogItemCard"
 import { CatalogItemModal } from "@/components/packages/CatalogItemModal"
 import { PageLoadingState, PageErrorState } from "@/components/ui/PageLoadingState"
-import { Reveal } from "@/components/ui/Reveal"
 import { TestimonialsSection } from "@/components/home/TestimonialsSection"
 import { realPhotos } from "@/data/realPhotos"
 import { fetchALaCarteItems } from "@/lib/api"
@@ -72,7 +72,7 @@ export function ALaCartePage() {
 
       <section className="py-16 sm:py-20">
         <Container className="text-center">
-          <Reveal direction="bottom-to-top">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <SectionHeading
               align="center"
               title="About Our"
@@ -80,21 +80,21 @@ export function ALaCartePage() {
               titleSuffix="Package"
               description="Not looking for a full service package? Create your own package by choosing your items individually. $400 delivery minimum, some items are available for pick up."
             />
+          </motion.div>
 
-            <div className="mx-auto mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {items.map((item, index) => (
-                <CatalogItemCard
-                  key={item.slug}
-                  name={item.name}
-                  price={item.price}
-                  image={item.image}
-                  namespace={A_LA_CARTE_NAMESPACE}
-                  delay={Math.min(index * 0.05, 0.3)}
-                  onOpenDetails={() => setActiveItem(item)}
-                />
-              ))}
-            </div>
-          </Reveal>
+          <div className="mx-auto mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {items.map((item, index) => (
+              <CatalogItemCard
+                key={item.slug}
+                name={item.name}
+                price={item.price}
+                image={item.image}
+                namespace={A_LA_CARTE_NAMESPACE}
+                delay={Math.min(index * 0.05, 0.3)}
+                onOpenDetails={() => setActiveItem(item)}
+              />
+            ))}
+          </div>
         </Container>
       </section>
 

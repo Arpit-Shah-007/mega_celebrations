@@ -105,6 +105,36 @@ export function CatalogItemRow({ item, onChanged, onMove, canMoveUp = false, can
           />
         </Field>
       </div>
+
+      <div className="mt-2">
+        <span className="text-sm font-semibold text-slate-700">Additional photos (shown as switchable thumbnails on the item's detail popup)</span>
+        <div className="mt-1 flex flex-wrap items-end gap-3">
+          {(item.additionalImageUrls ?? []).map((url, index) => (
+            <div key={url} className="flex flex-col items-center gap-1">
+              <img src={url} alt="" className="h-16 w-16 object-cover" />
+              <AdminButton
+                variant="danger"
+                onClick={async () => {
+                  const next = (item.additionalImageUrls ?? []).filter((_, i) => i !== index)
+                  await updateCatalogItem(item.id, { additionalImageUrls: next.length > 0 ? next : null })
+                  onChanged()
+                }}
+              >
+                Remove
+              </AdminButton>
+            </div>
+          ))}
+          <ImageUploadField
+            label="Add photo"
+            currentUrl=""
+            onUploaded={async (url) => {
+              const next = [...(item.additionalImageUrls ?? []), url]
+              await updateCatalogItem(item.id, { additionalImageUrls: next })
+              onChanged()
+            }}
+          />
+        </div>
+      </div>
     </div>
   )
 }

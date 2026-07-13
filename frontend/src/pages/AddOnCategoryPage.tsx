@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
+import { motion } from "framer-motion"
 import { Container } from "@/components/ui/Container"
 import { PageHero } from "@/components/ui/PageHero"
 import { Button } from "@/components/ui/Button"
 import { SectionHeading } from "@/components/ui/SectionHeading"
-import { Reveal } from "@/components/ui/Reveal"
 import { CatalogItemCard } from "@/components/packages/CatalogItemCard"
 import { CatalogItemModal } from "@/components/packages/CatalogItemModal"
 import { PageLoadingState } from "@/components/ui/PageLoadingState"
@@ -59,23 +59,23 @@ export function AddOnCategoryPage() {
 
       <section className="py-16 sm:py-20">
         <Container className="text-center">
-          <Reveal direction="bottom-to-top">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <SectionHeading align="center" title="About Our" scriptSuffix={category.name} description={category.description} />
+          </motion.div>
 
-            <div className="mx-auto mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {category.items.map((item, index) => (
-                <CatalogItemCard
-                  key={item.slug}
-                  name={item.name}
-                  price={item.price}
-                  image={item.image}
-                  namespace={category.slug}
-                  delay={Math.min(index * 0.05, 0.3)}
-                  onOpenDetails={() => setActiveItem(item)}
-                />
-              ))}
-            </div>
-          </Reveal>
+          <div className="mx-auto mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {category.items.map((item, index) => (
+              <CatalogItemCard
+                key={item.slug}
+                name={item.name}
+                price={item.price}
+                image={item.image}
+                namespace={category.slug}
+                delay={Math.min(index * 0.05, 0.3)}
+                onOpenDetails={() => setActiveItem(item)}
+              />
+            ))}
+          </div>
         </Container>
       </section>
 

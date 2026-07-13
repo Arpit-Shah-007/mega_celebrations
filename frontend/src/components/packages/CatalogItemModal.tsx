@@ -108,7 +108,7 @@ export function CatalogItemModal({ item, namespace, onClose }: CatalogItemModalP
                   </div>
                 )}
 
-                {images.length > 1 ? (
+                {images.length > 0 ? (
                   <div className="mt-3 flex gap-2">
                     {images.map((src, index) => (
                       <button
