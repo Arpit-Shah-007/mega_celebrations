@@ -1,6 +1,9 @@
 # Internal planning docs, client media exports, and session notes — not for the repo
 docs/
 
+# Local export of R2 storage (used-vs-unused split) — not for the repo
+r2_storage/
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db
