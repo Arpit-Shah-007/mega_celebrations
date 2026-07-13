@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button"
 import { SectionHeading } from "@/components/ui/SectionHeading"
 import { realPhotos } from "@/data/realPhotos"
 import { revealVariants, revealViewport } from "@/lib/animation"
+import { MEDIA_BASE_URL } from "@/lib/media"
 
 const STEPS = [
   {
@@ -35,7 +36,7 @@ export function HowToBookSection({ showFaqsCta = true }: HowToBookSectionProps) 
   return (
     <section
       className="bg-navy bg-cover bg-center py-14 sm:py-20"
-      style={{ backgroundImage: "url(/media/how-to-book-background.png)" }}
+      style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Navy_Background_Pattern.png)` }}
     >
       <Container>
         <SectionHeading title="How to" scriptSuffix="Book" light />

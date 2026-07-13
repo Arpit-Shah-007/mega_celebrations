@@ -12,7 +12,7 @@ import { MEDIA_BASE_URL } from "@/lib/media"
 import type { AddOnCategory } from "@/types"
 
 /** Same real "Canopy Lounge" shot used as that package's own secondary photo — a fixed design choice for this hub page's banner, not admin-editable catalog content. */
-const ADD_ONS_HERO_PHOTO = `${MEDIA_BASE_URL}/media/MAIN-Canopy-Lounge-Copy.jpg`
+const ADD_ONS_HERO_PHOTO = `${MEDIA_BASE_URL}/media/Canopy_Lounge_Hero.jpg`
 
 export function AddOnsPage() {
   const { data: categories, isPending, isError } = useQuery({ queryKey: ["addon-categories"], queryFn: fetchAddOnCategories })

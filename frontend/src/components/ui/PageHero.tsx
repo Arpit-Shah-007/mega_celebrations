@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import type { LucideIcon } from "lucide-react"
 import { motion } from "framer-motion"
 import { PlaceholderPhoto } from "@/components/ui/PlaceholderPhoto"
+import { MEDIA_BASE_URL } from "@/lib/media"
 
 interface PageHeroProps {
   title: ReactNode
@@ -59,7 +60,7 @@ export function PageHero({
   return (
     <section
       className="relative overflow-hidden bg-navy bg-cover bg-center py-12 text-center sm:py-14"
-      style={{ backgroundImage: "url(/media/how-to-book-background.png)" }}
+      style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Navy_Background_Pattern.png)` }}
     >
       <motion.div
         initial={{ opacity: 0, y: 16 }}

@@ -4,6 +4,7 @@ import { PageHero } from "@/components/ui/PageHero"
 import { AccordionItem } from "@/components/ui/Accordion"
 import { faqs, faqCategories } from "@/data/faqs"
 import { revealVariants, revealViewport } from "@/lib/animation"
+import { MEDIA_BASE_URL } from "@/lib/media"
 
 export function FaqsPage() {
   return (
@@ -12,7 +13,7 @@ export function FaqsPage() {
 
       <section
         className="bg-white bg-cover bg-center bg-no-repeat pb-16 pt-8 sm:pb-20 sm:pt-10"
-        style={{ backgroundImage: "url(/media/gray-bg-shapes.png)" }}
+        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)` }}
       >
         <Container>
           <div className="mx-auto max-w-5xl space-y-14">

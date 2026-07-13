@@ -17,6 +17,7 @@ import { getTagIcon } from "@/components/packages/tagIcons"
 import { fetchPackageBySlug, fetchPackages } from "@/lib/api"
 import { getRelatedPackages } from "@/lib/relatedPackages"
 import { TestimonialsSection } from "@/components/home/TestimonialsSection"
+import { MEDIA_BASE_URL } from "@/lib/media"
 import type { PackageVariant } from "@/types"
 
 /**
@@ -248,7 +249,10 @@ export function PackageDetailPage() {
         </section>
       ) : null}
 
-      <section className="bg-white bg-cover bg-center bg-no-repeat py-14 sm:py-20" style={{ backgroundImage: "url(/media/gray-bg-shapes.png)" }}>
+      <section
+        className="bg-white bg-cover bg-center bg-no-repeat py-14 sm:py-20"
+        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)` }}
+      >
         <Container>
           <SectionHeading title="Frequently Asked" scriptSuffix="Questions" />
           <div className="mx-auto mt-10 max-w-5xl">

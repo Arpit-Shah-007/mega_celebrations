@@ -54,12 +54,12 @@ export function PackageCarousel() {
               type="button"
               onClick={goToPrevious}
               aria-label="Previous packages"
-              className="absolute left-0 top-1/2 z-20 flex -translate-y-1/2 cursor-pointer items-center justify-center p-1 text-navy/40 transition hover:text-navy sm:p-2 lg:p-3"
+              className="absolute left-0 top-1/2 z-20 flex -translate-y-1/2 cursor-pointer items-center justify-center p-1 text-navy/40 transition hover:text-navy sm:p-1 lg:p-2"
             >
-              <ChevronLeft className="h-6 w-6 sm:h-9 sm:w-9 lg:h-12 lg:w-12" strokeWidth={1.5} />
+              <ChevronLeft className="h-6 w-6 sm:h-7 sm:w-7 lg:h-10 lg:w-10" strokeWidth={1.5} />
             </button>
 
-            <div className="px-9 sm:px-14 lg:px-20">
+            <div className="px-9 sm:px-10 lg:px-16">
               <div className="overflow-hidden">
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
@@ -68,7 +68,7 @@ export function PackageCarousel() {
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: direction === 1 ? "-100%" : "100%", opacity: 0 }}
                     transition={{ duration: 0.45, ease: "easeInOut" }}
-                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                    className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
                   >
                     {visible.map((pkg) => (
                       <PackageCard key={pkg.slug} pkg={pkg} />
@@ -82,9 +82,9 @@ export function PackageCarousel() {
               type="button"
               onClick={goToNext}
               aria-label="Next packages"
-              className="absolute right-0 top-1/2 z-20 flex -translate-y-1/2 cursor-pointer items-center justify-center p-1 text-navy/40 transition hover:text-navy sm:p-2 lg:p-3"
+              className="absolute right-0 top-1/2 z-20 flex -translate-y-1/2 cursor-pointer items-center justify-center p-1 text-navy/40 transition hover:text-navy sm:p-1 lg:p-2"
             >
-              <ChevronRight className="h-6 w-6 sm:h-9 sm:w-9 lg:h-12 lg:w-12" strokeWidth={1.5} />
+              <ChevronRight className="h-6 w-6 sm:h-7 sm:w-7 lg:h-10 lg:w-10" strokeWidth={1.5} />
             </button>
           </div>
         </Reveal>
