@@ -4,7 +4,7 @@ import { MEDIA_BASE_URL } from "@/lib/media"
 /** Full-bleed video hero: centered script phrase over the main heading, with a readable paragraph below. */
 export function Hero() {
   return (
-    <section className="relative flex h-108 items-center overflow-hidden sm:h-148">
+    <section className="relative flex h-120 items-center overflow-hidden sm:h-160">
       <video
         className="absolute inset-0 h-full w-full object-cover"
         src={`${MEDIA_BASE_URL}/media/Home_Banner_Video.mp4`}

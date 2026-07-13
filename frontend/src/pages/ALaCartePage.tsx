@@ -10,6 +10,7 @@ import { PageLoadingState, PageErrorState } from "@/components/ui/PageLoadingSta
 import { TestimonialsSection } from "@/components/home/TestimonialsSection"
 import { realPhotos } from "@/data/realPhotos"
 import { fetchALaCarteItems } from "@/lib/api"
+import { MEDIA_BASE_URL } from "@/lib/media"
 import type { CatalogItem } from "@/types"
 
 const A_LA_CARTE_NAMESPACE = "a-la-carte"
@@ -96,7 +97,7 @@ export function ALaCartePage() {
 
       <section
         className="bg-white bg-cover bg-center bg-no-repeat py-16 sm:py-20"
-        style={{ backgroundImage: "url(/media/gray-bg-shapes.png)" }}
+        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)` }}
       >
         <Container>
           <SectionHeading align="center" title="Frequently Asked" scriptSuffix="Questions" />

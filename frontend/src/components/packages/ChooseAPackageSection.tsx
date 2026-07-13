@@ -17,7 +17,7 @@ const OPTIONS = [
     icon: Layers,
     // Same real "Tent Sleepover" card photo used on the Full Service Packages
     // listing card — a fixed design choice for this hub tile, not admin-editable.
-    src: `${MEDIA_BASE_URL}/media/MAIN-TS.jpeg`,
+    src: `${MEDIA_BASE_URL}/media/Tent_Sleepover_Card.jpeg`,
   },
   {
     to: "/packages/a-la-carte",
@@ -34,7 +34,7 @@ export function ChooseAPackageSection({ background = "bg-white" }: { background?
   return (
     <section
       className={`bg-cover bg-center bg-no-repeat py-16 sm:py-20 ${background}`}
-      style={{ backgroundImage: "url(/media/gray-bg-shapes.png)" }}
+      style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)` }}
     >
       <Container>
         <SectionHeading title="Start by" scriptSuffix="Choosing a Package" />

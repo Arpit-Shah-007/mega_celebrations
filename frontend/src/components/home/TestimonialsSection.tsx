@@ -45,15 +45,15 @@ function useVisibleCount() {
 
 function TestimonialCard({ testimonial }: { testimonial: (typeof testimonials)[number] }) {
   return (
-    <div className="relative flex h-56 flex-col items-center gap-2 border border-border bg-white p-5 text-center shadow-soft">
+    <div className="relative flex h-64 flex-col items-center gap-2 border border-border bg-white p-5 text-center shadow-soft">
       <GoogleG className="absolute right-3 top-3 h-4 w-4" />
       <div className="flex gap-0.5 text-blue">
         {Array.from({ length: testimonial.rating }).map((_, starIndex) => (
           <Star key={starIndex} className="h-4 w-4 fill-current" />
         ))}
       </div>
-      <p className="line-clamp-4 text-base leading-relaxed text-body">{testimonial.quote}</p>
-      <p className="mt-auto text-base font-bold uppercase tracking-wide text-navy">{testimonial.name}</p>
+      <p className="line-clamp-5 text-base leading-relaxed text-body">{testimonial.quote}</p>
+      <p className="mt-auto text-sm font-bold uppercase tracking-wide text-navy">{testimonial.name}</p>
     </div>
   )
 }

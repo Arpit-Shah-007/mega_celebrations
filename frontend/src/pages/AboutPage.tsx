@@ -3,6 +3,7 @@ import { Container } from "@/components/ui/Container"
 import { Button } from "@/components/ui/Button"
 import { FounderStory } from "@/components/about/FounderStory"
 import { TestimonialsSection } from "@/components/home/TestimonialsSection"
+import { MEDIA_BASE_URL } from "@/lib/media"
 
 export function AboutPage() {
   return (
@@ -13,7 +14,7 @@ export function AboutPage() {
 
       <section
         className="bg-navy bg-cover bg-center py-10 sm:py-14"
-        style={{ backgroundImage: "url(/media/how-to-book-background.png)" }}
+        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Navy_Background_Pattern.png)` }}
       >
         <Container className="text-center">
           <h2 className="text-3xl sm:text-4xl text-white">
