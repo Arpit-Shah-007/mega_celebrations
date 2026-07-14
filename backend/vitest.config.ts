@@ -17,9 +17,8 @@ export default defineConfig(async () => {
         miniflare: {
           bindings: {
             TEST_MIGRATIONS: migrations,
-            // Test-only credentials — never used outside the vitest-pool-workers sandbox.
-            ADMIN_USERNAME: "test-admin",
-            ADMIN_PASSWORD: "test-password",
+            // Admin username/password now live in the admin_credentials table (seeded
+            // by test/apply-migrations.ts) rather than an env binding — see lib/passwordHash.ts.
             SESSION_SECRET: "test-session-secret-not-for-production",
           },
         },

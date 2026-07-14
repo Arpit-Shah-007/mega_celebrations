@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: "/admin/packages", label: "Packages" },
   { to: "/admin/addon-categories", label: "Add-Ons" },
   { to: "/admin/a-la-carte", label: "A La Carte" },
+  { to: "/admin/account", label: "Account" },
 ]
 
 const NAV_LINK_BASE = "group relative py-2 text-sm font-semibold text-ui-gray transition-colors"

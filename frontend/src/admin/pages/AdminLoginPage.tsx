@@ -21,9 +21,9 @@ export function AdminLoginPage() {
   })
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy px-5 py-16">
+    <div className="relative flex h-screen items-center justify-center overflow-hidden bg-ui-gray px-5">
       <video
-        className="absolute inset-0 h-full w-full object-cover opacity-10"
+        className="absolute inset-0 h-full w-full object-cover opacity-10 grayscale"
         src={`${MEDIA_BASE_URL}/media/Home_Banner_Video.mp4`}
         autoPlay
         loop
@@ -37,7 +37,7 @@ export function AdminLoginPage() {
           e.preventDefault()
           mutation.mutate()
         }}
-        className="relative w-full max-w-70 border-t-4 border-blue bg-white p-6 shadow-lift"
+        className="relative w-full max-w-96 border-t-4 border-blue bg-white p-8 shadow-lift"
       >
         <span
           aria-hidden="true"
@@ -49,14 +49,10 @@ export function AdminLoginPage() {
         </span>
 
         <div className="flex justify-center">
-          <img src={logo} alt="Mega Celebrations" className="h-14 w-auto" width={261} height={98} />
+          <img src={logo} alt="Mega Celebrations" className="h-16 w-auto" width={261} height={98} />
         </div>
 
-        <h1 className="mt-4 -rotate-2 text-center font-script text-2xl leading-none text-pink-dark">
-          Wait&hellip; are you an admin?
-        </h1>
-
-        <div className="mt-5 flex flex-col gap-3">
+        <div className="mt-6 flex flex-col gap-4">
           <Field label="Username">
             <Input
               autoFocus

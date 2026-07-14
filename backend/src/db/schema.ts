@@ -143,3 +143,11 @@ export const adminLoginAttempts = sqliteTable("admin_login_attempts", {
   ip: text("ip").notNull(),
   createdAt: integer("created_at", { mode: "number" }).notNull(),
 })
+
+/** Single-row table holding the live admin username/password, so the credential pair can be changed from the admin portal itself instead of only via a `wrangler secret put` deploy-time command. `passwordHash` is a self-describing PBKDF2 string (see `lib/passwordHash.ts`), never a plaintext password. */
+export const adminCredentials = sqliteTable("admin_credentials", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  username: text("username").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  updatedAt: integer("updated_at", { mode: "number" }).notNull(),
+})
