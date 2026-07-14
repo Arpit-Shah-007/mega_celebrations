@@ -19,7 +19,7 @@ async function getSessionCookie(): Promise<string> {
   })
   const setCookie = response.headers.get("set-cookie")
   if (!setCookie) {
-    throw new Error("Admin login in test helper did not return a Set-Cookie header — check ADMIN_USERNAME/ADMIN_PASSWORD test bindings.")
+    throw new Error("Admin login in test helper did not return a Set-Cookie header — check the seeded admin_credentials row in test/apply-migrations.ts.")
   }
   // Only the first "name=value" segment matters for the request Cookie header.
   cachedSessionCookie = setCookie.split(";")[0]

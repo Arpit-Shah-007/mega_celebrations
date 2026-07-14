@@ -2,10 +2,11 @@ import { Hono } from "hono"
 import { z } from "zod"
 import { lt, eq, count } from "drizzle-orm"
 import { createDb } from "@/db/client"
-import { adminLoginAttempts } from "@/db/schema"
+import { adminLoginAttempts, adminCredentials } from "@/db/schema"
 import type { Env } from "@/types"
 import { ok, fail } from "@/lib/response"
 import { createAdminSession, clearAdminSession, hasValidAdminSession, timingSafeEqual } from "@/lib/adminSession"
+import { verifyPassword } from "@/lib/passwordHash"
 
 const loginInputSchema = z.object({
   username: z.string().min(1),
@@ -24,10 +25,6 @@ adminAuthRoute.post("/login", async (c) => {
   const parsed = loginInputSchema.safeParse(await c.req.json())
   if (!parsed.success) return fail(c, "Username and password are required.", 400)
 
-  if (!c.env.ADMIN_USERNAME || !c.env.ADMIN_PASSWORD) {
-    return fail(c, "Admin login is not configured on this environment.", 500)
-  }
-
   const db = createDb(c.env.DB)
   const ip = c.req.header("CF-Connecting-IP") ?? "unknown"
   const windowStart = Date.now() - WINDOW_MS
@@ -44,8 +41,13 @@ adminAuthRoute.post("/login", async (c) => {
     return fail(c, "Too many login attempts. Please try again in a few minutes.", 429)
   }
 
-  const validUsername = timingSafeEqual(parsed.data.username, c.env.ADMIN_USERNAME)
-  const validPassword = timingSafeEqual(parsed.data.password, c.env.ADMIN_PASSWORD)
+  const [credentials] = await db.select().from(adminCredentials).limit(1)
+  if (!credentials) {
+    return fail(c, "Admin login is not configured on this environment.", 500)
+  }
+
+  const validUsername = timingSafeEqual(parsed.data.username, credentials.username)
+  const validPassword = await verifyPassword(parsed.data.password, credentials.passwordHash)
   if (!validUsername || !validPassword) {
     await db.insert(adminLoginAttempts).values({ ip, createdAt: Date.now() })
     return fail(c, "Invalid username or password.", 401)

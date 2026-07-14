@@ -39,6 +39,9 @@ const AdminAddonCategoriesPage = lazy(() =>
 const AdminALaCartePage = lazy(() =>
   import("@/admin/pages/AdminALaCartePage").then((m) => ({ default: m.AdminALaCartePage })),
 )
+const AdminAccountPage = lazy(() =>
+  import("@/admin/pages/AdminAccountPage").then((m) => ({ default: m.AdminAccountPage })),
+)
 
 function App() {
   return (
@@ -69,6 +72,7 @@ function App() {
                 <Route path="packages" element={<AdminPackagesListPage />} />
                 <Route path="addon-categories" element={<AdminAddonCategoriesPage />} />
                 <Route path="a-la-carte" element={<AdminALaCartePage />} />
+                <Route path="account" element={<AdminAccountPage />} />
               </Route>
             </Routes>
           </WishlistProvider>
