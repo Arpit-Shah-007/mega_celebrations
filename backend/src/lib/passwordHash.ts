@@ -1,5 +1,9 @@
 const ALGORITHM_TAG = "pbkdf2-sha256"
-const ITERATIONS = 210_000
+// Cloudflare Workers' production edge runtime hard-caps PBKDF2 at 100,000
+// iterations (throws NotSupportedError above that) even though the local
+// vitest-pool-workers/Miniflare sandbox silently allows more — this is the
+// real ceiling, verified against a live deploy, not just local tests.
+const ITERATIONS = 100_000
 const SALT_BYTES = 16
 const KEY_LENGTH_BITS = 256
 
