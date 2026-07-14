@@ -2,6 +2,12 @@
 # (this also covers docs/r2_storage/, the local used-vs-unused R2 media export)
 docs/
 
+# Claude Code project config/session state — local tooling only, never pushed
+.claude/
+
+# Local holding area for removed-but-not-yet-deleted files
+trash/
+
 # Wrangler local cache/state
 .wrangler/
 
