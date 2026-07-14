@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom"
+import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { ImageOff } from "lucide-react"
-import { createAdminPackage, deleteAdminPackage, fetchAdminPackages } from "@/lib/adminApi"
+import { deleteAdminPackage, fetchAdminPackages } from "@/lib/adminApi"
 import { AdminButton, Badge } from "@/admin/components/AdminForm"
 import { PageLoadingState } from "@/components/ui/PageLoadingState"
+import { AddPackageModal } from "@/admin/components/AddPackageModal"
+import { PackageEditModal } from "@/admin/components/PackageEditModal"
 
 function currency(cents: number) {
   return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
@@ -12,37 +14,21 @@ function currency(cents: number) {
 export function AdminPackagesListPage() {
   const queryClient = useQueryClient()
   const { data: packages, isPending } = useQuery({ queryKey: ["admin", "packages"], queryFn: fetchAdminPackages })
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [editingPackageId, setEditingPackageId] = useState<number | null>(null)
 
-  const createMutation = useMutation({
-    mutationFn: () =>
-      createAdminPackage({
-        slug: `new-package-${Date.now()}`,
-        name: "New Package",
-        tagline: "",
-        description: "",
-        tags: [],
-        inclusions: [],
-        capacity: "",
-        spaceRequirement: "",
-        priceIsPlaceholder: true,
-        damageDepositCents: null,
-        bundleDiscount: null,
-        featured: false,
-        sortOrder: packages?.length ?? 0,
-      }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "packages"] }),
-  })
+  const invalidateList = () => queryClient.invalidateQueries({ queryKey: ["admin", "packages"] })
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteAdminPackage(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "packages"] }),
+    onSuccess: invalidateList,
   })
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Packages</h1>
-        <AdminButton variant="primary" onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
+        <AdminButton variant="primary" onClick={() => setIsAddOpen(true)}>
           + New Package
         </AdminButton>
       </div>
@@ -64,7 +50,11 @@ export function AdminPackagesListPage() {
             </thead>
             <tbody>
               {packages?.map((pkg) => (
-                <tr key={pkg.id} className="border-t border-border/60 align-top hover:bg-offwhite">
+                <tr
+                  key={pkg.id}
+                  onClick={() => setEditingPackageId(pkg.id)}
+                  className="cursor-pointer border-t border-border/60 align-top hover:bg-offwhite"
+                >
                   <td className="p-3">
                     {pkg.cardImageUrl ? (
                       <img src={pkg.cardImageUrl} alt="" className="h-16 w-16 object-cover" />
@@ -86,12 +76,13 @@ export function AdminPackagesListPage() {
                   </td>
                   <td className="p-3">{pkg.featured ? <Badge tone="blue">Featured</Badge> : null}</td>
                   <td className="p-3 text-right whitespace-nowrap">
-                    <Link to={`/admin/packages/${pkg.id}`} className="mr-3 text-sm font-bold uppercase tracking-wide text-blue hover:text-navy">
+                    <AdminButton onClick={() => setEditingPackageId(pkg.id)} className="mr-2">
                       Edit
-                    </Link>
+                    </AdminButton>
                     <AdminButton
                       variant="danger"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation()
                         if (window.confirm(`Delete "${pkg.name}"? This cannot be undone.`)) {
                           deleteMutation.mutate(pkg.id)
                         }
@@ -106,6 +97,26 @@ export function AdminPackagesListPage() {
           </table>
         </div>
       )}
+
+      {isAddOpen ? (
+        <AddPackageModal
+          nextSortOrder={packages?.length ?? 0}
+          onClose={() => setIsAddOpen(false)}
+          onCreated={(newId) => {
+            setIsAddOpen(false)
+            invalidateList()
+            setEditingPackageId(newId)
+          }}
+        />
+      ) : null}
+
+      {editingPackageId != null ? (
+        <PackageEditModal
+          packageId={editingPackageId}
+          onClose={() => setEditingPackageId(null)}
+          onSaved={invalidateList}
+        />
+      ) : null}
     </div>
   )
 }

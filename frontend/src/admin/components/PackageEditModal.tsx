@@ -1,6 +1,7 @@
-import { useState } from "react"
-import { useParams } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { X } from "lucide-react"
 import {
   createPackageImage,
   createPriceTier,
@@ -18,42 +19,80 @@ import {
   type AdminPackageImageRow,
   type AdminPackagePriceTierRow,
   type AdminPackageVariantRow,
+  type AdminPackageRow,
 } from "@/lib/adminApi"
 import { ALL_PACKAGE_TAGS } from "@/types"
 import { AdminButton, Card, Field, Input, TextArea } from "@/admin/components/AdminForm"
 import { ImageUploadField } from "@/admin/components/ImageUploadField"
 
-export function AdminPackageEditPage() {
-  const { id } = useParams<{ id: string }>()
-  const packageId = Number(id)
-  const queryClient = useQueryClient()
+interface PackageEditModalProps {
+  packageId: number
+  onClose: () => void
+  onSaved: () => void
+}
+
+/** Full package editor (details, images, pricing, themes, add-ons) as a modal — replaces the old dedicated /admin/packages/:id page so managing a package no longer means leaving the table. */
+export function PackageEditModal({ packageId, onClose, onSaved }: PackageEditModalProps) {
   const { data, isPending } = useQuery({ queryKey: ["admin", "package", packageId], queryFn: () => fetchAdminPackage(packageId) })
+  const queryClient = useQueryClient()
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin", "package", packageId] })
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin", "package", packageId] })
+    onSaved()
+  }
 
-  if (isPending || !data) return <p className="text-sm text-ui-gray">Loading…</p>
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose()
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [onClose])
 
-  return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold">{data.package.name}</h1>
-      <PackageBaseForm packageId={packageId} initial={data.package} onSaved={invalidate} />
-      <PackageImagesCard packageId={packageId} images={data.images} onChanged={invalidate} />
-      <PriceTiersCard packageId={packageId} tiers={data.priceTiers} onChanged={invalidate} />
-      <VariantsCard packageId={packageId} variants={data.variants} kind="theme" title="Themes" onChanged={invalidate} />
-      <VariantsCard packageId={packageId} variants={data.variants} kind="addon" title="Popular Add-Ons" onChanged={invalidate} />
-    </div>
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Edit package"
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden bg-white"
+      >
+        <div className="flex shrink-0 items-center justify-between bg-blue px-5 py-3">
+          <span className="font-bold text-white">{data ? data.package.name : "Edit Package"}</span>
+          <button type="button" onClick={onClose} aria-label="Close" className="cursor-pointer text-white transition-opacity hover:opacity-70">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-6 overflow-y-auto p-5 sm:p-6">
+          {isPending || !data ? (
+            <p className="text-sm text-ui-gray">Loading…</p>
+          ) : (
+            <>
+              <PackageBaseForm packageId={packageId} initial={data.package} onSaved={invalidate} />
+              <PackageImagesCard packageId={packageId} images={data.images} onChanged={invalidate} />
+              <PriceTiersCard packageId={packageId} tiers={data.priceTiers} onChanged={invalidate} />
+              <VariantsCard packageId={packageId} variants={data.variants} kind="theme" title="Themes" onChanged={invalidate} />
+              <VariantsCard packageId={packageId} variants={data.variants} kind="addon" title="Popular Add-Ons" onChanged={invalidate} />
+            </>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
   )
 }
 
-function PackageBaseForm({
-  packageId,
-  initial,
-  onSaved,
-}: {
-  packageId: number
-  initial: import("@/lib/adminApi").AdminPackageRow
-  onSaved: () => void
-}) {
+function PackageBaseForm({ packageId, initial, onSaved }: { packageId: number; initial: AdminPackageRow; onSaved: () => void }) {
   const [form, setForm] = useState(initial)
   const mutation = useMutation({
     mutationFn: () =>

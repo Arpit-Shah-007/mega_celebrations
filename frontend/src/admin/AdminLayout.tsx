@@ -6,11 +6,9 @@ import { PageLoadingState } from "@/components/ui/PageLoadingState"
 import logo from "@/assets/brand/mega-celebrations-logo.png"
 
 const NAV_ITEMS = [
-  { to: "/admin", label: "Dashboard", end: true },
   { to: "/admin/packages", label: "Packages" },
   { to: "/admin/addon-categories", label: "Add-Ons" },
   { to: "/admin/a-la-carte", label: "A La Carte" },
-  { to: "/admin/quote-inquiries", label: "Quote Inquiries" },
 ]
 
 const NAV_LINK_BASE = "group relative py-2 text-sm font-semibold text-ui-gray transition-colors"
@@ -50,7 +48,7 @@ export function AdminLayout() {
 
           <nav className="flex flex-1 flex-wrap items-center gap-6" aria-label="Admin sections">
             {NAV_ITEMS.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.end} className={NAV_LINK_BASE}>
+              <NavLink key={item.to} to={item.to} className={NAV_LINK_BASE}>
                 {({ isActive }) => (
                   <>
                     {item.label}
