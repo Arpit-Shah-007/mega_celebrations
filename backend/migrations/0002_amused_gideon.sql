@@ -1,0 +1,1 @@
+ALTER TABLE `package_variants` ADD `additional_image_urls` text;

@@ -50,6 +50,7 @@ export interface AdminPackageVariantRow {
   priceCents: number | null
   isPriceOnRequest: boolean
   imageUrl: string | null
+  additionalImageUrls: string[] | null
   description: string[] | null
   sortOrder: number
 }

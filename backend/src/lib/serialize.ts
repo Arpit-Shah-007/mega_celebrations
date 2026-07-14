@@ -18,6 +18,7 @@ export function serializeVariant(row: PackageVariantRow) {
     name: row.name,
     price: formatPriceDisplay(row.priceCents, row.isPriceOnRequest),
     image: row.imageUrl ?? undefined,
+    additionalImages: row.additionalImageUrls ?? undefined,
     description: row.description ?? undefined,
   }
 }

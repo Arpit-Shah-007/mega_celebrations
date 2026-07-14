@@ -65,6 +65,8 @@ export const packageVariants = sqliteTable("package_variants", {
   priceCents: integer("price_cents", { mode: "number" }),
   isPriceOnRequest: integer("is_price_on_request", { mode: "boolean" }).notNull().default(false),
   imageUrl: text("image_url"),
+  /** Extra photos for a variant with more than one real product shot — shown as a switchable thumbnail strip in VariantDetailModal, matching catalogItems.additionalImageUrls. */
+  additionalImageUrls: text("additional_image_urls", { mode: "json" }).$type<string[]>(),
   description: text("description", { mode: "json" }).$type<string[]>(),
   sortOrder: integer("sort_order", { mode: "number" }).notNull().default(0),
 })

@@ -19,6 +19,8 @@ export interface PackageVariant {
   price: string
   /** Real product photo scraped from the live GoodShuffle widget — absent for variants the live site itself shows with no photo. */
   image?: string
+  /** Extra photos for a variant with more than one real product shot — shown as a thumbnail strip alongside the primary image, matching CatalogItem's additionalImages. */
+  additionalImages?: string[]
   /** Short blurb shown in the variant's detail modal. The live site's theme/add-on descriptions load through a JS-rendered catalog widget we can't scrape, so these are written in-house from the variant name rather than copied. */
   description?: string[]
 }
