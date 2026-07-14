@@ -47,19 +47,19 @@ export function PackageCard({ pkg, className = "" }: PackageCardProps) {
           className="pointer-events-none absolute inset-x-0 bottom-0 bg-white px-4 py-3 transition-opacity duration-200"
           style={{ opacity: hovered ? 0 : 1 }}
         >
-          <p className="truncate text-center text-sm font-semibold uppercase tracking-wide text-navy">
+          <p className="truncate text-center text-base font-semibold uppercase tracking-wide text-navy">
             {pkg.name}
           </p>
         </div>
 
         <div
-          className={`absolute inset-x-0 bottom-0 z-30 flex h-1/2 flex-col justify-center overflow-hidden bg-white px-5 py-3 text-center transition-transform duration-1100 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`absolute inset-x-0 bottom-0 z-30 flex h-full flex-col justify-center overflow-hidden bg-white px-5 py-3 text-center transition-transform duration-1100 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             hovered ? "translate-y-0" : "translate-y-full"
           }`}
         >
           <Link
             to={`/packages/${pkg.slug}`}
-            className="relative z-30 inline-block cursor-pointer text-sm font-semibold uppercase tracking-wide text-navy transition-colors hover:text-pink"
+            className="relative z-30 inline-block cursor-pointer text-base font-semibold uppercase tracking-wide text-navy transition-colors hover:text-pink"
           >
             {pkg.name}
           </Link>

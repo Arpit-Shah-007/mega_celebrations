@@ -8,6 +8,13 @@
       "when": 1783613088771,
       "tag": "0000_strong_charles_xavier",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1784047293902,
+      "tag": "0001_ancient_exodus",
+      "breakpoints": true
     }
   ]
 }

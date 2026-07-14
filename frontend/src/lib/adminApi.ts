@@ -20,6 +20,10 @@ export interface AdminPackageRow {
   updatedAt: number
 }
 
+export interface AdminPackageListRow extends AdminPackageRow {
+  cardImageUrl: string | null
+}
+
 export interface AdminPackageImageRow {
   id: number
   packageId: number
@@ -116,10 +120,35 @@ export type PackageVariantInput = Omit<AdminPackageVariantRow, "id" | "packageId
 export type AddonCategoryInput = Omit<AdminAddonCategoryRow, "id">
 export type CatalogItemInput = Omit<AdminCatalogItemRow, "id">
 
+// --- Auth ---
+
+export interface AdminAuthStatus {
+  authenticated: boolean
+}
+
+export function fetchAdminAuthStatus(): Promise<AdminAuthStatus> {
+  return request<AdminAuthStatus>("/api/admin/auth/me")
+}
+
+export function loginAdmin(username: string, password: string): Promise<AdminAuthStatus> {
+  return request<AdminAuthStatus>("/api/admin/auth/login", { method: "POST", body: JSON.stringify({ username, password }) })
+}
+
+export function logoutAdmin(): Promise<AdminAuthStatus> {
+  // The custom header has no meaning to the server — its only job is to turn
+  // this into a non-"simple" CORS request, so a cross-site page can't trigger
+  // it via a bare fetch/form post; only our own allowlisted origin's preflight
+  // will succeed.
+  return request<AdminAuthStatus>("/api/admin/auth/logout", {
+    method: "POST",
+    headers: { "X-Requested-With": "mega-celebrations-admin" },
+  })
+}
+
 // --- Packages ---
 
-export function fetchAdminPackages(): Promise<AdminPackageRow[]> {
-  return request<AdminPackageRow[]>("/api/admin/packages")
+export function fetchAdminPackages(): Promise<AdminPackageListRow[]> {
+  return request<AdminPackageListRow[]>("/api/admin/packages")
 }
 
 export function fetchAdminPackage(id: number): Promise<AdminFullPackage> {
@@ -234,7 +263,7 @@ export async function uploadImage(file: File): Promise<{ url: string }> {
   formData.append("file", file)
   // Deliberately not using request() — it always sets Content-Type: application/json,
   // which would break the multipart boundary the browser sets for FormData bodies.
-  const response = await fetch(`${API_BASE_URL}/api/admin/uploads`, { method: "POST", body: formData })
+  const response = await fetch(`${API_BASE_URL}/api/admin/uploads`, { method: "POST", body: formData, credentials: "include" })
   const body = (await response.json()) as { success: true; data: { url: string } } | { success: false; error: string }
   if (!body.success) throw new Error(body.error)
   return body.data

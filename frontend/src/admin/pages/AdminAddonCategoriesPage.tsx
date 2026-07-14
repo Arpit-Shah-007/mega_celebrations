@@ -34,7 +34,7 @@ export function AdminAddonCategoriesPage() {
   }
 
   if (categoriesPending || itemsPending || !categories || !items) {
-    return <p className="text-sm text-slate-500">Loading…</p>
+    return <p className="text-sm text-ui-gray">Loading…</p>
   }
 
   const sorted = [...categories].sort((a, b) => a.sortOrder - b.sortOrder)
@@ -199,7 +199,7 @@ function CategoryCard({
 
       <div className="mt-5">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-700">Items ({items.length})</p>
+          <p className="text-sm font-semibold text-navy">Items ({items.length})</p>
           <AdminButton
             onClick={async () => {
               await createCatalogItem({

@@ -15,7 +15,13 @@ export default defineConfig(async () => {
       cloudflareTest({
         wrangler: { configPath: "./wrangler.jsonc" },
         miniflare: {
-          bindings: { TEST_MIGRATIONS: migrations },
+          bindings: {
+            TEST_MIGRATIONS: migrations,
+            // Test-only credentials — never used outside the vitest-pool-workers sandbox.
+            ADMIN_USERNAME: "test-admin",
+            ADMIN_PASSWORD: "test-password",
+            SESSION_SECRET: "test-session-secret-not-for-production",
+          },
         },
       }),
     ],

@@ -28,6 +28,7 @@ const WishlistPage = lazy(() => import("@/pages/WishlistPage").then((m) => ({ de
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })))
 
 const AdminLayout = lazy(() => import("@/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })))
+const AdminLoginPage = lazy(() => import("@/admin/pages/AdminLoginPage").then((m) => ({ default: m.AdminLoginPage })))
 const AdminHomePage = lazy(() => import("@/admin/pages/AdminHomePage").then((m) => ({ default: m.AdminHomePage })))
 const AdminPackagesListPage = lazy(() =>
   import("@/admin/pages/AdminPackagesListPage").then((m) => ({ default: m.AdminPackagesListPage })),
@@ -71,6 +72,7 @@ function App() {
                 <Route path="*" element={<NotFoundPage />} />
               </Route>
 
+              <Route path="admin/login" element={<AdminLoginPage />} />
               <Route path="admin" element={<AdminLayout />}>
                 <Route index element={<AdminHomePage />} />
                 <Route path="packages" element={<AdminPackagesListPage />} />

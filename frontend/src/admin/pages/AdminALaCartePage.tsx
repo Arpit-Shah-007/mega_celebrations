@@ -53,7 +53,7 @@ export function AdminALaCartePage() {
       </div>
 
       {isPending || !items ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <p className="mt-6 text-sm text-ui-gray">Loading…</p>
       ) : (
         <div className="mt-6 flex flex-col gap-3">
           {sorted.map((item, index) => (

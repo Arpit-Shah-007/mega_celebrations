@@ -2,11 +2,13 @@ import { Hono } from "hono"
 import { cors } from "hono/cors"
 import type { Env } from "@/types"
 import { requireAccess } from "@/lib/auth"
+import { requireAdminSession } from "@/lib/adminSession"
 import { fail } from "@/lib/response"
 import { publicPackagesRoute } from "@/routes/public/packages"
 import { publicAddonCategoriesRoute } from "@/routes/public/addOnCategories"
 import { publicCatalogItemsRoute } from "@/routes/public/catalogItems"
 import { publicQuoteInquiriesRoute } from "@/routes/public/quoteInquiries"
+import { adminAuthRoute } from "@/routes/admin/auth"
 import { adminPackagesRoute } from "@/routes/admin/packages"
 import { adminAddonCategoriesRoute } from "@/routes/admin/addOnCategories"
 import { adminCatalogItemsRoute } from "@/routes/admin/catalogItems"
@@ -31,6 +33,7 @@ app.use(
       "http://127.0.0.1:5173",
       "https://mega-celebrations-test.ashah10-b13.workers.dev",
     ],
+    credentials: true,
   }),
 )
 
@@ -39,7 +42,8 @@ app.route("/api/addon-categories", publicAddonCategoriesRoute)
 app.route("/api/catalog-items", publicCatalogItemsRoute)
 app.route("/api/quote-inquiries", publicQuoteInquiriesRoute)
 
-app.use("/api/admin/*", requireAccess)
+app.use("/api/admin/*", requireAdminSession, requireAccess)
+app.route("/api/admin/auth", adminAuthRoute)
 app.route("/api/admin/packages", adminPackagesRoute)
 app.route("/api/admin/addon-categories", adminAddonCategoriesRoute)
 app.route("/api/admin/catalog-items", adminCatalogItemsRoute)

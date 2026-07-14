@@ -1,6 +1,5 @@
-import { exports } from "cloudflare:workers"
 import { it, expect } from "vitest"
-import { readJson } from "./helpers"
+import { adminFetch, readJson } from "./helpers"
 
 interface AdminPackage {
   id: number
@@ -11,7 +10,7 @@ interface AdminPackage {
 // file, not per test), so every created package uses a slug unique to its
 // own test to avoid UNIQUE constraint collisions between tests.
 async function createPackage(slug: string): Promise<AdminPackage> {
-  const response = await exports.default.fetch("https://example.com/api/admin/packages", {
+  const response = await adminFetch("https://example.com/api/admin/packages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -30,8 +29,8 @@ async function createPackage(slug: string): Promise<AdminPackage> {
   return body.data
 }
 
-it("admin routes are reachable without a token when Access is unconfigured (local dev)", async () => {
-  const response = await exports.default.fetch("https://example.com/api/admin/packages")
+it("admin routes are reachable with a valid admin session", async () => {
+  const response = await adminFetch("https://example.com/api/admin/packages")
   expect(response.status).toBe(200)
 })
 
@@ -43,32 +42,32 @@ it("creating a package defaults startingPriceCents to 0 with no price tiers", as
 it("adding price tiers recomputes startingPriceCents to the minimum tier price", async () => {
   const pkg = await createPackage("test-package-tiers")
 
-  await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}/price-tiers`, {
+  await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/price-tiers`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ label: "8 guests", priceCents: 50000 }),
   })
-  const secondTierResponse = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}/price-tiers`, {
+  const secondTierResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/price-tiers`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ label: "16 guests", priceCents: 80000 }),
   })
   const secondTier = (await readJson<{ data: { id: number } }>(secondTierResponse)).data
 
-  const afterAdd = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}`)
+  const afterAdd = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
   const afterAddBody = await readJson<{ data: { package: AdminPackage } }>(afterAdd)
   expect(afterAddBody.data.package.startingPriceCents).toBe(50000)
 
-  await exports.default.fetch(`https://example.com/api/admin/packages/price-tiers/${secondTier.id}`, { method: "DELETE" })
+  await adminFetch(`https://example.com/api/admin/packages/price-tiers/${secondTier.id}`, { method: "DELETE" })
 
-  const afterDelete = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}`)
+  const afterDelete = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
   const afterDeleteBody = await readJson<{ data: { package: AdminPackage; priceTiers: unknown[] } }>(afterDelete)
   expect(afterDeleteBody.data.package.startingPriceCents).toBe(50000)
   expect(afterDeleteBody.data.priceTiers).toHaveLength(1)
 })
 
 it("rejects a package payload missing required fields", async () => {
-  const response = await exports.default.fetch("https://example.com/api/admin/packages", {
+  const response = await adminFetch("https://example.com/api/admin/packages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: "Missing slug and other fields" }),
@@ -78,16 +77,16 @@ it("rejects a package payload missing required fields", async () => {
 
 it("deleting a package cascades to its images, tiers, and variants", async () => {
   const pkg = await createPackage("test-package-delete")
-  await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}/images`, {
+  await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/images`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ kind: "hero", url: "/media/hero.jpg", alt: "Hero" }),
   })
 
-  const deleteResponse = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}`, { method: "DELETE" })
+  const deleteResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`, { method: "DELETE" })
   expect(deleteResponse.status).toBe(200)
 
-  const getResponse = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}`)
+  const getResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
   expect(getResponse.status).toBe(404)
 })
 
@@ -95,7 +94,7 @@ it("reordering gallery images persists the new sort order via a single batch", a
   const pkg = await createPackage("test-package-reorder-images")
   const imageIds: number[] = []
   for (const url of ["/media/one.jpg", "/media/two.jpg", "/media/three.jpg"]) {
-    const response = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}/images`, {
+    const response = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/images`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ kind: "gallery", url, alt: "Gallery photo" }),
@@ -105,14 +104,14 @@ it("reordering gallery images persists the new sort order via a single batch", a
   }
 
   const reversedIds = [...imageIds].reverse()
-  const reorderResponse = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}/images/reorder`, {
+  const reorderResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/images/reorder`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ orderedIds: reversedIds }),
   })
   expect(reorderResponse.status).toBe(200)
 
-  const getResponse = await exports.default.fetch(`https://example.com/api/admin/packages/${pkg.id}`)
+  const getResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
   const getBody = await readJson<{ data: { images: { id: number; sortOrder: number }[] } }>(getResponse)
   const gallery = getBody.data.images.filter((image) => reversedIds.includes(image.id)).sort((a, b) => a.sortOrder - b.sortOrder)
   expect(gallery.map((image) => image.id)).toEqual(reversedIds)
