@@ -1,5 +1,5 @@
 import { lazy } from "react"
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Layout } from "@/components/layout/Layout"
 import { WishlistProvider } from "@/context/WishlistContext"
@@ -29,6 +29,7 @@ const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then((m) => ({ de
 
 const AdminLayout = lazy(() => import("@/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })))
 const AdminLoginPage = lazy(() => import("@/admin/pages/AdminLoginPage").then((m) => ({ default: m.AdminLoginPage })))
+const AdminHomePage = lazy(() => import("@/admin/pages/AdminHomePage").then((m) => ({ default: m.AdminHomePage })))
 const AdminPackagesListPage = lazy(() =>
   import("@/admin/pages/AdminPackagesListPage").then((m) => ({ default: m.AdminPackagesListPage })),
 )
@@ -64,7 +65,7 @@ function App() {
 
               <Route path="admin/login" element={<AdminLoginPage />} />
               <Route path="admin" element={<AdminLayout />}>
-                <Route index element={<Navigate to="packages" replace />} />
+                <Route index element={<AdminHomePage />} />
                 <Route path="packages" element={<AdminPackagesListPage />} />
                 <Route path="addon-categories" element={<AdminAddonCategoriesPage />} />
                 <Route path="a-la-carte" element={<AdminALaCartePage />} />
