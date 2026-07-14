@@ -44,6 +44,7 @@ export const packageVariantInputSchema = z.object({
   priceCents: z.number().int().nonnegative().nullable().optional(),
   isPriceOnRequest: z.boolean().optional().default(false),
   imageUrl: z.string().nullable().optional(),
+  additionalImageUrls: z.array(z.string()).nullable().optional(),
   description: z.array(z.string().min(1)).nullable().optional(),
   sortOrder: z.number().int().optional().default(0),
 })

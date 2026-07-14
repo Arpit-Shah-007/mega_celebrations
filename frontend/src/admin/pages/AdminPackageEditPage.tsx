@@ -362,6 +362,7 @@ function VariantsCard({
               priceCents: 0,
               isPriceOnRequest: false,
               imageUrl: null,
+              additionalImageUrls: null,
               description: null,
               sortOrder: filtered.length,
             })
@@ -448,6 +449,36 @@ function VariantsCard({
                   }}
                 />
               </Field>
+            </div>
+
+            <div className="mt-2">
+              <span className="text-sm font-semibold text-navy">Additional photos (shown as switchable thumbnails on the variant's detail popup)</span>
+              <div className="mt-1 flex flex-wrap items-end gap-3">
+                {(variant.additionalImageUrls ?? []).map((url, index) => (
+                  <div key={url} className="flex flex-col items-center gap-1">
+                    <img src={url} alt="" className="h-16 w-16 object-cover" />
+                    <AdminButton
+                      variant="danger"
+                      onClick={async () => {
+                        const next = (variant.additionalImageUrls ?? []).filter((_, i) => i !== index)
+                        await updateVariant(variant.id, { additionalImageUrls: next.length > 0 ? next : null })
+                        onChanged()
+                      }}
+                    >
+                      Remove
+                    </AdminButton>
+                  </div>
+                ))}
+                <ImageUploadField
+                  label="Add photo"
+                  currentUrl=""
+                  onUploaded={async (url) => {
+                    const next = [...(variant.additionalImageUrls ?? []), url]
+                    await updateVariant(variant.id, { additionalImageUrls: next })
+                    onChanged()
+                  }}
+                />
+              </div>
             </div>
           </div>
         ))}

@@ -132,7 +132,7 @@ export function AdminHomePage() {
                   <Tooltip
                     cursor={{ fill: "rgba(11,93,155,0.06)" }}
                     contentStyle={{ border: "1px solid #e1e0d9", fontSize: 13 }}
-                    formatter={(value: number) => [value, "Inquiries"]}
+                    formatter={(value) => [Number(value), "Inquiries"]}
                   />
                   <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={28}>
                     {statusData.map((entry) => (
@@ -179,14 +179,14 @@ export function AdminHomePage() {
                   <Tooltip
                     cursor={{ fill: "rgba(11,93,155,0.06)" }}
                     contentStyle={{ border: "1px solid #e1e0d9", fontSize: 13 }}
-                    formatter={(value: number) => [currency(value * 100), "Starting price"]}
+                    formatter={(value) => [currency(Number(value) * 100), "Starting price"]}
                   />
                   <Bar dataKey="price" fill="#2a78d6" radius={[0, 4, 4, 0]} maxBarSize={16}>
                     <LabelList
                       dataKey="price"
                       position="right"
                       style={{ fill: "#0b0b0b", fontSize: 11, fontWeight: 700 }}
-                      formatter={(value: number) => currency(value * 100)}
+                      formatter={(value) => currency(Number(value) * 100)}
                     />
                   </Bar>
                 </BarChart>
