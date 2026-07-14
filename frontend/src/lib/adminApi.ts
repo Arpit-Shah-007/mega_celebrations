@@ -97,23 +97,6 @@ export interface AdminCatalogItemRow {
   sortOrder: number
 }
 
-export interface AdminQuoteInquiryRow {
-  id: number
-  name: string
-  email: string
-  phone: string
-  eventDate: string
-  venue: string
-  guestCount: string
-  notes: string | null
-  status: "new" | "contacted" | "quoted" | "won" | "lost"
-  createdAt: number
-}
-
-export interface AdminQuoteInquiryDetail extends AdminQuoteInquiryRow {
-  items: { id: number; itemSlug: string; itemName: string; itemPriceCents: number | null; sortOrder: number }[]
-}
-
 export type PackageInput = Omit<AdminPackageRow, "id" | "startingPriceCents" | "createdAt" | "updatedAt">
 export type PackageImageInput = Omit<AdminPackageImageRow, "id" | "packageId">
 export type PackagePriceTierInput = Omit<AdminPackagePriceTierRow, "id" | "packageId">
@@ -268,18 +251,4 @@ export async function uploadImage(file: File): Promise<{ url: string }> {
   const body = (await response.json()) as { success: true; data: { url: string } } | { success: false; error: string }
   if (!body.success) throw new Error(body.error)
   return body.data
-}
-
-// --- Quote inquiries ---
-
-export function fetchAdminQuoteInquiries(): Promise<AdminQuoteInquiryRow[]> {
-  return request<AdminQuoteInquiryRow[]>("/api/admin/quote-inquiries")
-}
-
-export function fetchAdminQuoteInquiry(id: number): Promise<AdminQuoteInquiryDetail> {
-  return request<AdminQuoteInquiryDetail>(`/api/admin/quote-inquiries/${id}`)
-}
-
-export function updateQuoteInquiryStatus(id: number, status: AdminQuoteInquiryRow["status"]): Promise<AdminQuoteInquiryRow> {
-  return request(`/api/admin/quote-inquiries/${id}`, { method: "PATCH", body: JSON.stringify({ status }) })
 }
