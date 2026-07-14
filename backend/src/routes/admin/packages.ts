@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { and, eq } from "drizzle-orm"
+import { and, eq, getTableColumns } from "drizzle-orm"
 import { createDb, type Database } from "@/db/client"
 import { packageImages, packagePriceTiers, packages, packageVariants } from "@/db/schema"
 import {
@@ -40,9 +40,15 @@ async function deletePackageCascade(db: Database, packageId: number) {
   ])
 }
 
+// Includes each package's "card" thumbnail alongside its own columns so the
+// admin list view can show a photo without an N+1 fetch per row.
 adminPackagesRoute.get("/", async (c) => {
   const db = createDb(c.env.DB)
-  const rows = await db.select().from(packages).orderBy(packages.sortOrder)
+  const rows = await db
+    .select({ ...getTableColumns(packages), cardImageUrl: packageImages.url })
+    .from(packages)
+    .leftJoin(packageImages, and(eq(packageImages.packageId, packages.id), eq(packageImages.kind, "card")))
+    .orderBy(packages.sortOrder)
   return ok(c, rows)
 })
 

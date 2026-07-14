@@ -1,7 +1,13 @@
 import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { ImageOff } from "lucide-react"
 import { createAdminPackage, deleteAdminPackage, fetchAdminPackages } from "@/lib/adminApi"
-import { AdminButton } from "@/admin/components/AdminForm"
+import { AdminButton, Badge } from "@/admin/components/AdminForm"
+import { PageLoadingState } from "@/components/ui/PageLoadingState"
+
+function currency(cents: number) {
+  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+}
 
 export function AdminPackagesListPage() {
   const queryClient = useQueryClient()
@@ -42,44 +48,63 @@ export function AdminPackagesListPage() {
       </div>
 
       {isPending ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <PageLoadingState />
       ) : (
-        <table className="mt-6 w-full border border-slate-200 bg-white text-sm">
-          <thead className="bg-slate-100 text-left">
-            <tr>
-              <th className="p-3">Name</th>
-              <th className="p-3">Slug</th>
-              <th className="p-3">Sort</th>
-              <th className="p-3">Featured</th>
-              <th className="p-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {packages?.map((pkg) => (
-              <tr key={pkg.id} className="border-t border-slate-100">
-                <td className="p-3 font-medium">{pkg.name}</td>
-                <td className="p-3 text-slate-500">{pkg.slug}</td>
-                <td className="p-3">{pkg.sortOrder}</td>
-                <td className="p-3">{pkg.featured ? "Yes" : ""}</td>
-                <td className="p-3 text-right">
-                  <Link to={`/admin/packages/${pkg.id}`} className="mr-3 text-slate-700 underline">
-                    Edit
-                  </Link>
-                  <AdminButton
-                    variant="danger"
-                    onClick={() => {
-                      if (window.confirm(`Delete "${pkg.name}"? This cannot be undone.`)) {
-                        deleteMutation.mutate(pkg.id)
-                      }
-                    }}
-                  >
-                    Delete
-                  </AdminButton>
-                </td>
+        <div className="mt-6 overflow-x-auto border-t-4 border-blue bg-white shadow-soft">
+          <table className="w-full text-sm">
+            <thead className="bg-graytint text-left">
+              <tr>
+                <th className="p-3 font-bold uppercase tracking-wide text-navy">Photo</th>
+                <th className="p-3 font-bold uppercase tracking-wide text-navy">Name</th>
+                <th className="p-3 font-bold uppercase tracking-wide text-navy">Description</th>
+                <th className="p-3 font-bold uppercase tracking-wide text-navy">Starting Price</th>
+                <th className="p-3 font-bold uppercase tracking-wide text-navy">Featured</th>
+                <th className="p-3" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {packages?.map((pkg) => (
+                <tr key={pkg.id} className="border-t border-border/60 align-top hover:bg-offwhite">
+                  <td className="p-3">
+                    {pkg.cardImageUrl ? (
+                      <img src={pkg.cardImageUrl} alt="" className="h-16 w-16 object-cover" />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center bg-graytint text-ui-gray">
+                        <ImageOff className="h-5 w-5" />
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    <p className="font-bold text-navy">{pkg.name}</p>
+                    <p className="text-xs text-ui-gray">{pkg.slug}</p>
+                  </td>
+                  <td className="max-w-xs p-3 text-body">
+                    <p className="line-clamp-2">{pkg.description || <span className="italic text-ui-gray">No description yet</span>}</p>
+                  </td>
+                  <td className="p-3 font-semibold text-navy">
+                    {pkg.priceIsPlaceholder ? <Badge tone="pink">Coming Soon</Badge> : currency(pkg.startingPriceCents)}
+                  </td>
+                  <td className="p-3">{pkg.featured ? <Badge tone="blue">Featured</Badge> : null}</td>
+                  <td className="p-3 text-right whitespace-nowrap">
+                    <Link to={`/admin/packages/${pkg.id}`} className="mr-3 text-sm font-bold uppercase tracking-wide text-blue hover:text-navy">
+                      Edit
+                    </Link>
+                    <AdminButton
+                      variant="danger"
+                      onClick={() => {
+                        if (window.confirm(`Delete "${pkg.name}"? This cannot be undone.`)) {
+                          deleteMutation.mutate(pkg.id)
+                        }
+                      }}
+                    >
+                      Delete
+                    </AdminButton>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

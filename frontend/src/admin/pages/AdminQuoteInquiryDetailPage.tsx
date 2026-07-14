@@ -22,7 +22,7 @@ export function AdminQuoteInquiryDetailPage() {
     },
   })
 
-  if (isPending || !inquiry) return <p className="text-sm text-slate-500">Loading…</p>
+  if (isPending || !inquiry) return <p className="text-sm text-ui-gray">Loading…</p>
 
   return (
     <div className="flex flex-col gap-6">
@@ -31,29 +31,29 @@ export function AdminQuoteInquiryDetailPage() {
       <Card title="Contact">
         <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-slate-500">Email</dt>
+            <dt className="text-ui-gray">Email</dt>
             <dd>{inquiry.email}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Phone</dt>
+            <dt className="text-ui-gray">Phone</dt>
             <dd>{inquiry.phone}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Event Date</dt>
+            <dt className="text-ui-gray">Event Date</dt>
             <dd>{inquiry.eventDate}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Venue</dt>
+            <dt className="text-ui-gray">Venue</dt>
             <dd>{inquiry.venue}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Guest Count</dt>
+            <dt className="text-ui-gray">Guest Count</dt>
             <dd>{inquiry.guestCount}</dd>
           </div>
         </dl>
         {inquiry.notes ? (
           <div className="mt-3">
-            <p className="text-slate-500">Notes</p>
+            <p className="text-ui-gray">Notes</p>
             <p className="whitespace-pre-wrap">{inquiry.notes}</p>
           </div>
         ) : null}
@@ -63,7 +63,7 @@ export function AdminQuoteInquiryDetailPage() {
         <select
           value={inquiry.status}
           onChange={(e) => statusMutation.mutate(e.target.value as AdminQuoteInquiryRow["status"])}
-          className="border border-slate-300 px-3 py-2 text-sm"
+          className="border border-border px-3 py-2 text-sm"
         >
           {STATUSES.map((status) => (
             <option key={status} value={status}>
@@ -76,9 +76,9 @@ export function AdminQuoteInquiryDetailPage() {
       <Card title="Wishlist at Submission">
         <ul className="flex flex-col gap-2 text-sm">
           {inquiry.items.map((item) => (
-            <li key={item.id} className="flex justify-between border-b border-slate-100 pb-1">
+            <li key={item.id} className="flex justify-between border-b border-border/60 pb-1">
               <span>{item.itemName}</span>
-              <span className="text-slate-500">{item.itemPriceCents != null ? `$${(item.itemPriceCents / 100).toFixed(2)}` : "Contact us"}</span>
+              <span className="text-ui-gray">{item.itemPriceCents != null ? `$${(item.itemPriceCents / 100).toFixed(2)}` : "Contact us"}</span>
             </li>
           ))}
         </ul>

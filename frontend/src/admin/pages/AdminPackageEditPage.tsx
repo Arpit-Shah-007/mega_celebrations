@@ -31,7 +31,7 @@ export function AdminPackageEditPage() {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin", "package", packageId] })
 
-  if (isPending || !data) return <p className="text-sm text-slate-500">Loading…</p>
+  if (isPending || !data) return <p className="text-sm text-ui-gray">Loading…</p>
 
   return (
     <div className="flex flex-col gap-6">
@@ -208,7 +208,7 @@ function PackageImagesCard({
       </div>
 
       <div className="mt-5">
-        <p className="mb-2 text-sm font-semibold text-slate-700">Gallery ({gallery.length})</p>
+        <p className="mb-2 text-sm font-semibold text-navy">Gallery ({gallery.length})</p>
         <div className="flex flex-wrap gap-3">
           {gallery.map((image, index) => (
             <div key={image.id} className="relative w-24">
@@ -374,7 +374,7 @@ function VariantsCard({
     >
       <div className="flex flex-col gap-3">
         {filtered.map((variant, index) => (
-          <div key={variant.id} className="border border-slate-100 p-3">
+          <div key={variant.id} className="border border-border/60 p-3">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_auto_auto_auto_auto]">
               <Field label="Name">
                 <Input

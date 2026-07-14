@@ -34,12 +34,12 @@ export function ImageUploadField({ label, currentUrl, onUploaded }: ImageUploadF
         {currentUrl ? (
           <img src={currentUrl} alt="" className="h-16 w-16 object-cover" />
         ) : (
-          <div className="flex h-16 w-16 items-center justify-center bg-slate-100 text-[10px] text-slate-400">
+          <div className="flex h-16 w-16 items-center justify-center bg-graytint text-[10px] text-ui-gray">
             No image
           </div>
         )}
         <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleChange} disabled={isUploading} className="text-sm" />
-        {isUploading ? <span className="text-xs text-slate-500">Uploading…</span> : null}
+        {isUploading ? <span className="text-xs text-ui-gray">Uploading…</span> : null}
       </div>
       {error ? <p className="text-xs text-red-600">{error}</p> : null}
     </Field>

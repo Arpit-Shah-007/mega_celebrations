@@ -134,3 +134,10 @@ export const quoteInquiryItems = sqliteTable("quote_inquiry_items", {
   itemPriceCents: integer("item_price_cents", { mode: "number" }),
   sortOrder: integer("sort_order", { mode: "number" }).notNull().default(0),
 })
+
+/** One row per failed /api/admin/auth/login attempt, keyed by client IP — throttles brute-force guessing of the single admin credential pair. Rows older than the throttle window are pruned opportunistically on each check rather than via a cron. */
+export const adminLoginAttempts = sqliteTable("admin_login_attempts", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  ip: text("ip").notNull(),
+  createdAt: integer("created_at", { mode: "number" }).notNull(),
+})

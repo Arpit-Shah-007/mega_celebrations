@@ -4,6 +4,9 @@ export interface Env {
   ACCESS_TEAM_DOMAIN: string
   ACCESS_AUD: string
   PUBLIC_MEDIA_BASE_URL: string
+  ADMIN_USERNAME: string
+  ADMIN_PASSWORD: string
+  SESSION_SECRET: string
 }
 
 export interface ApiSuccess<T> {

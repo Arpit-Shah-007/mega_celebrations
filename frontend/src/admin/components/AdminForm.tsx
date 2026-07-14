@@ -2,14 +2,15 @@ import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, TextareaHTML
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="flex flex-col gap-1 text-sm">
-      <span className="font-semibold text-slate-700">{label}</span>
+    <label className="flex flex-col gap-1.5 text-sm">
+      <span className="font-semibold text-navy">{label}</span>
       {children}
     </label>
   )
 }
 
-const inputClass = "border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
+const inputClass =
+  "border border-border bg-white px-3 py-2 text-sm text-body outline-none transition-colors focus:border-blue"
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${inputClass} ${props.className ?? ""}`} />
@@ -26,28 +27,36 @@ interface AdminButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export function AdminButton({ variant = "secondary", className = "", ...rest }: AdminButtonProps) {
   const variantClass =
     variant === "primary"
-      ? "bg-slate-900 text-white hover:bg-slate-700"
+      ? "bg-pink text-white hover:bg-blue"
       : variant === "danger"
-        ? "bg-red-600 text-white hover:bg-red-700"
-        : "border border-slate-300 text-slate-700 hover:bg-slate-100"
+        ? "border border-red-300 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600"
+        : "border border-navy/30 text-navy hover:bg-navy hover:text-white"
 
   return (
     <button
       type="button"
       {...rest}
-      className={`cursor-pointer px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variantClass} ${className}`}
+      className={`cursor-pointer px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${variantClass} ${className}`}
     />
   )
 }
 
-export function Card({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
+export function Card({ title, children, action }: { title: ReactNode; children: ReactNode; action?: ReactNode }) {
   return (
-    <section className="border border-slate-200 bg-white p-5">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-base font-bold text-slate-900">{title}</h2>
+    <section className="border-t-4 border-blue bg-white p-5 shadow-soft sm:p-6">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-lg font-bold text-navy">{title}</h2>
         {action}
       </div>
       {children}
     </section>
   )
+}
+
+/** Small uppercase pill for counts/statuses — used across admin tables and the dashboard. */
+export function Badge({ tone = "neutral", children }: { tone?: "neutral" | "pink" | "blue"; children: ReactNode }) {
+  const toneClass =
+    tone === "pink" ? "bg-pink/15 text-pink-dark" : tone === "blue" ? "bg-blue/10 text-blue" : "bg-graytint text-ui-gray"
+
+  return <span className={`inline-block px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${toneClass}`}>{children}</span>
 }

@@ -12,7 +12,7 @@ interface CatalogItemRowProps {
 
 export function CatalogItemRow({ item, onChanged, onMove, canMoveUp = false, canMoveDown = false }: CatalogItemRowProps) {
   return (
-    <div className="border border-slate-100 p-3">
+    <div className="border border-border/60 p-3">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_1fr_auto_auto_auto_auto]">
         <Field label="Name">
           <Input
@@ -107,7 +107,7 @@ export function CatalogItemRow({ item, onChanged, onMove, canMoveUp = false, can
       </div>
 
       <div className="mt-2">
-        <span className="text-sm font-semibold text-slate-700">Additional photos (shown as switchable thumbnails on the item's detail popup)</span>
+        <span className="text-sm font-semibold text-navy">Additional photos (shown as switchable thumbnails on the item's detail popup)</span>
         <div className="mt-1 flex flex-wrap items-end gap-3">
           {(item.additionalImageUrls ?? []).map((url, index) => (
             <div key={url} className="flex flex-col items-center gap-1">
