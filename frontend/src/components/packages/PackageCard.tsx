@@ -53,7 +53,7 @@ export function PackageCard({ pkg, className = "" }: PackageCardProps) {
         </div>
 
         <div
-          className={`absolute inset-x-0 bottom-0 z-30 flex h-2/5 flex-col justify-center overflow-hidden bg-white px-5 py-3 text-center transition-transform duration-1100 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`absolute inset-x-0 bottom-0 z-30 flex h-1/2 flex-col justify-center overflow-hidden bg-white px-5 py-3 text-center transition-transform duration-1100 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             hovered ? "translate-y-0" : "translate-y-full"
           }`}
         >
