@@ -57,7 +57,7 @@ export function Footer() {
 
         <div>
           <h3 className="text-[19px] font-extrabold uppercase tracking-wide text-navy">Quick Links</h3>
-          <ul className="mt-4">
+          <ul className="mt-4 space-y-1.5">
             {footerNav.map((link) => (
               <li key={link.to}>
                 <Link to={link.to} className="inline-block text-sm text-ui-gray transition hover:text-blue">

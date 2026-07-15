@@ -312,7 +312,7 @@ function PriceTiersCard({
     >
       <div className="flex flex-col gap-2">
         {sorted.map((tier) => (
-          <div key={tier.id} className="grid grid-cols-[1fr_120px_1fr_auto] items-end gap-2">
+          <div key={tier.id} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_120px_1fr_auto] sm:items-end">
             <Field label="Label">
               <Input
                 defaultValue={tier.label}

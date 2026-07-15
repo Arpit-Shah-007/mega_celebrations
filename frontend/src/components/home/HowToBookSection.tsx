@@ -48,7 +48,7 @@ export function HowToBookSection({ showFaqsCta = true }: HowToBookSectionProps) 
               initial="hidden"
               whileInView="visible"
               viewport={revealViewport}
-              variants={revealVariants["right-to-left"]}
+              variants={revealVariants["bottom-to-top"]}
               className="relative flex flex-col items-center text-center"
             >
               {index < STEPS.length - 1 ? (

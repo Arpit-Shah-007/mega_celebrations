@@ -188,8 +188,8 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
             <TextArea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
           </Field>
 
-          <div className="flex items-end gap-4">
-            <div className="flex-1">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="min-w-[8rem] flex-1">
               <Field label="Price ($)" required={!isPriceOnRequest}>
                 <Input
                   type="number"
@@ -199,7 +199,7 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
                 />
               </Field>
             </div>
-            <label className="mb-2.5 flex items-center gap-1.5 text-sm">
+            <label className="mb-2.5 flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm">
               <input
                 type="checkbox"
                 checked={isPriceOnRequest}

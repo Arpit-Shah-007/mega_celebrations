@@ -69,7 +69,7 @@ export function CatalogItemCard({ name, price, namespace, icon, image, delay = 0
           <button
             type="button"
             onClick={onOpenDetails}
-            className="cursor-pointer text-base font-bold leading-tight text-navy transition-colors hover:text-pink"
+            className="cursor-pointer py-1 text-base font-bold leading-tight text-navy transition-colors hover:text-pink"
           >
             {name}
           </button>

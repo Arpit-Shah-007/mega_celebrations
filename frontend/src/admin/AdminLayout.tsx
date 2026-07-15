@@ -27,9 +27,9 @@ export function AdminLayout() {
   return (
     <div className="min-h-screen bg-offwhite text-body">
       <header className="sticky top-0 z-50 bg-white shadow-[0_4px_16px_-4px_rgba(2,40,67,0.18)]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-8">
           <Link to="/admin" className="shrink-0">
-            <img src={logo} alt="Mega Celebrations" className="h-12 w-auto sm:h-14" width={261} height={98} />
+            <img src={logo} alt="Mega Celebrations" className="h-10 w-auto sm:h-12 md:h-14" width={261} height={98} />
           </Link>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
@@ -55,7 +55,7 @@ export function AdminLayout() {
               onClick={() => logoutMutation.mutate()}
               disabled={logoutMutation.isPending}
               aria-label="Log Out"
-              className="ml-1 flex shrink-0 cursor-pointer items-center gap-2 bg-pink px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-blue disabled:cursor-wait disabled:opacity-60 sm:px-4"
+              className="flex shrink-0 cursor-pointer items-center gap-2 bg-pink px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-blue disabled:cursor-wait disabled:opacity-60 sm:px-4"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Log Out</span>
