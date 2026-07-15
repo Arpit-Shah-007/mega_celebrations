@@ -1,9 +1,12 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react"
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+export function Field({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
   return (
     <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-semibold text-navy">{label}</span>
+      <span className="font-semibold text-navy">
+        {label}
+        {required ? <span className="text-red-600"> *</span> : null}
+      </span>
       {children}
     </label>
   )

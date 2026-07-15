@@ -64,7 +64,6 @@ export function AddPackageModal({ nextSortOrder, onClose, onCreated }: AddPackag
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
-      onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="Add package"

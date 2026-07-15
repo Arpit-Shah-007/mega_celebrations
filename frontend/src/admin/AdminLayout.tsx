@@ -1,6 +1,6 @@
 import { Link, NavLink, Navigate, Outlet, useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { LogOut, User } from "lucide-react"
+import { ExternalLink, LogOut, User } from "lucide-react"
 import { fetchAdminAuthStatus, logoutAdmin } from "@/lib/adminApi"
 import { PageLoadingState } from "@/components/ui/PageLoadingState"
 import logo from "@/assets/brand/mega-celebrations-logo.png"
@@ -33,6 +33,16 @@ export function AdminLayout() {
           </Link>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Site"
+              title="View Site"
+              className={ICON_LINK_BASE}
+            >
+              <ExternalLink className="h-5 w-5" />
+            </a>
             <NavLink
               to="/admin/account"
               aria-label="Account"
