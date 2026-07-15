@@ -111,12 +111,15 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
     },
   })
 
-  const canSubmit = name.trim().length > 0 && (isPriceOnRequest || priceDollars.trim().length > 0)
+  const canSubmit =
+    name.trim().length > 0 &&
+    images.length > 0 &&
+    description.trim().length > 0 &&
+    (isPriceOnRequest || priceDollars.trim().length > 0)
 
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
-      onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={item ? "Edit item" : "Add item"}
@@ -139,22 +142,21 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
           }}
           className="flex flex-col gap-4 overflow-y-auto p-5 sm:p-6"
         >
-          <Field label="Name">
+          <Field label="Name" required>
             <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
 
-          <Field label="Media">
+          <Field label="Media" required>
             <div className="flex flex-wrap gap-3 bg-graytint p-3">
               {images.map((url, index) => (
-                <div key={url} className="group relative h-16 w-16 shrink-0">
+                <div key={url} className="flex shrink-0 flex-col items-center gap-1">
                   <img src={url} alt="" className="h-16 w-16 object-cover" />
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(index)}
-                    aria-label="Remove photo"
-                    className="absolute -top-1.5 -right-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-navy text-white opacity-0 transition-opacity group-hover:opacity-100"
+                    className="cursor-pointer text-[11px] font-semibold text-red-600 transition-colors hover:text-red-700 hover:underline"
                   >
-                    <X className="h-3 w-3" />
+                    Remove
                   </button>
                 </div>
               ))}
@@ -181,7 +183,7 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
             {uploadError ? <p className="text-xs text-red-600">{uploadError}</p> : null}
           </Field>
 
-          <Field label="Description (each line shows as a bullet point)">
+          <Field label="Description (each line shows as a bullet point)" required>
             <TextArea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
           </Field>
 

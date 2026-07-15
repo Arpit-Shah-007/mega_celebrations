@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Plus } from "lucide-react"
 import { fetchAdminCatalogItems } from "@/lib/adminApi"
 import { AdminButton } from "@/admin/components/AdminForm"
 import { CatalogItemsTable } from "@/admin/components/CatalogItemsTable"
@@ -28,8 +28,8 @@ export function AdminALaCartePage() {
       </Link>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">A La Carte</h1>
-        <AdminButton variant="primary" onClick={() => setIsAddOpen(true)}>
-          + Add Item
+        <AdminButton variant="primary" aria-label="Add item" onClick={() => setIsAddOpen(true)}>
+          <Plus className="h-4 w-4" />
         </AdminButton>
       </div>
 

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 import {
   createAddonCategory,
   deleteAddonCategory,
@@ -62,6 +62,7 @@ export function AdminAddonCategoriesPage() {
         <h1 className="text-2xl font-bold">Add-On Categories</h1>
         <AdminButton
           variant="primary"
+          aria-label="New Category"
           onClick={async () => {
             try {
               await createAddonCategory({
@@ -81,7 +82,7 @@ export function AdminAddonCategoriesPage() {
             }
           }}
         >
-          + New Category
+          <Plus className="h-4 w-4" />
         </AdminButton>
       </div>
       {sorted.map((category, index) => (
@@ -131,6 +132,8 @@ function CategoryCard({
   canMoveDown: boolean
 }) {
   const [isAddItemOpen, setIsAddItemOpen] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
+  const [isItemsExpanded, setIsItemsExpanded] = useState(true)
   const sortedItems = [...items].sort((a, b) => a.sortOrder - b.sortOrder)
 
   return (
@@ -144,78 +147,113 @@ function CategoryCard({
           <AdminButton onClick={() => onMove(1)} disabled={!canMoveDown}>
             ↓
           </AdminButton>
-          <AdminButton variant="danger" onClick={onDelete}>
-            Delete Category
+          <AdminButton variant="danger" aria-label="Delete category" onClick={onDelete}>
+            <Trash2 className="h-3.5 w-3.5" />
           </AdminButton>
+          <button
+            type="button"
+            onClick={() => setIsExpanded((current) => !current)}
+            aria-label={isExpanded ? "Collapse category" : "Expand category"}
+            aria-expanded={isExpanded}
+            className="flex h-8 w-8 cursor-pointer items-center justify-center text-ui-gray transition-colors hover:bg-graytint hover:text-navy"
+          >
+            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
         </div>
       }
     >
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Name">
-          <Input
-            defaultValue={category.name}
-            onBlur={async (e) => {
-              if (e.target.value !== category.name) {
-                await updateAddonCategory(category.id, { name: e.target.value })
-                onChanged()
-              }
-            }}
-          />
-        </Field>
-        <Field label="Tagline">
-          <Input
-            defaultValue={category.tagline}
-            onBlur={async (e) => {
-              if (e.target.value !== category.tagline) {
-                await updateAddonCategory(category.id, { tagline: e.target.value })
-                onChanged()
-              }
-            }}
-          />
-        </Field>
-      </div>
+      {isExpanded ? (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Name" required>
+              <Input
+                defaultValue={category.name}
+                onBlur={async (e) => {
+                  const value = e.target.value.trim()
+                  if (value.length > 0 && value !== category.name) {
+                    await updateAddonCategory(category.id, { name: value })
+                    onChanged()
+                  }
+                }}
+              />
+            </Field>
+            <Field label="Tagline" required>
+              <Input
+                defaultValue={category.tagline}
+                onBlur={async (e) => {
+                  const value = e.target.value.trim()
+                  if (value.length > 0 && value !== category.tagline) {
+                    await updateAddonCategory(category.id, { tagline: value })
+                    onChanged()
+                  }
+                }}
+              />
+            </Field>
+          </div>
 
-      <div className="mt-4">
-        <Field label="Description">
-          <TextArea
-            rows={2}
-            defaultValue={category.description}
-            onBlur={async (e) => {
-              if (e.target.value !== category.description) {
-                await updateAddonCategory(category.id, { description: e.target.value })
+          <div className="mt-4">
+            <Field label="Description" required>
+              <TextArea
+                rows={2}
+                defaultValue={category.description}
+                onBlur={async (e) => {
+                  const value = e.target.value.trim()
+                  if (value.length > 0 && value !== category.description) {
+                    await updateAddonCategory(category.id, { description: value })
+                    onChanged()
+                  }
+                }}
+              />
+            </Field>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <ImageUploadField
+              label="Hero (category page banner)"
+              required
+              currentUrl={category.heroImageUrl === PENDING_IMAGE ? "" : category.heroImageUrl}
+              onUploaded={async (url) => {
+                await updateAddonCategory(category.id, { heroImageUrl: url })
                 onChanged()
-              }
-            }}
-          />
-        </Field>
-      </div>
+              }}
+            />
+            <ImageUploadField
+              label="Card (Add-Ons hub thumbnail)"
+              required
+              currentUrl={category.cardImageUrl === PENDING_IMAGE ? "" : category.cardImageUrl}
+              onUploaded={async (url) => {
+                await updateAddonCategory(category.id, { cardImageUrl: url })
+                onChanged()
+              }}
+            />
+          </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <ImageUploadField
-          label="Hero (category page banner)"
-          currentUrl={category.heroImageUrl === PENDING_IMAGE ? "" : category.heroImageUrl}
-          onUploaded={async (url) => {
-            await updateAddonCategory(category.id, { heroImageUrl: url })
-            onChanged()
-          }}
-        />
-        <ImageUploadField
-          label="Card (Add-Ons hub thumbnail)"
-          currentUrl={category.cardImageUrl === PENDING_IMAGE ? "" : category.cardImageUrl}
-          onUploaded={async (url) => {
-            await updateAddonCategory(category.id, { cardImageUrl: url })
-            onChanged()
-          }}
-        />
-      </div>
-
-      <div className="mt-5">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-semibold text-navy">Items ({items.length})</p>
-          <AdminButton onClick={() => setIsAddItemOpen(true)}>+ Add Item</AdminButton>
-        </div>
-        <CatalogItemsTable items={sortedItems} onChanged={onChanged} emptyMessage="No items in this category yet." />
-      </div>
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-sm font-semibold text-navy">Items ({items.length})</p>
+              <div className="flex items-center gap-2">
+                {isItemsExpanded ? (
+                  <AdminButton aria-label="Add item" onClick={() => setIsAddItemOpen(true)}>
+                    <Plus className="h-3.5 w-3.5" />
+                  </AdminButton>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setIsItemsExpanded((current) => !current)}
+                  aria-label={isItemsExpanded ? "Collapse items" : "Expand items"}
+                  aria-expanded={isItemsExpanded}
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center text-ui-gray transition-colors hover:bg-graytint hover:text-navy"
+                >
+                  {isItemsExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            {isItemsExpanded ? (
+              <CatalogItemsTable items={sortedItems} onChanged={onChanged} emptyMessage="No items in this category yet." />
+            ) : null}
+          </div>
+        </>
+      ) : null}
 
       {isAddItemOpen ? (
         <CatalogItemModal

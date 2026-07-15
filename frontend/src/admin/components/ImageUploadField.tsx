@@ -6,9 +6,10 @@ interface ImageUploadFieldProps {
   label: string
   currentUrl: string
   onUploaded: (url: string) => void
+  required?: boolean
 }
 
-export function ImageUploadField({ label, currentUrl, onUploaded }: ImageUploadFieldProps) {
+export function ImageUploadField({ label, currentUrl, onUploaded, required }: ImageUploadFieldProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -29,17 +30,25 @@ export function ImageUploadField({ label, currentUrl, onUploaded }: ImageUploadF
   }
 
   return (
-    <Field label={label}>
+    <Field label={label} required={required}>
       <div className="flex items-center gap-3">
         {currentUrl ? (
           <img src={currentUrl} alt="" className="h-16 w-16 object-cover" />
         ) : (
-          <div className="flex h-16 w-16 items-center justify-center bg-graytint text-[10px] text-ui-gray">
-            No image
+          <div className="flex h-16 w-16 items-center justify-center bg-graytint text-center text-[10px] text-ui-gray">
+            {required ? <span className="text-red-600">Required</span> : "No image"}
           </div>
         )}
-        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleChange} disabled={isUploading} className="text-sm" />
-        {isUploading ? <span className="text-xs text-ui-gray">Uploading…</span> : null}
+        <label className="cursor-pointer bg-pink px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-blue">
+          {isUploading ? "Uploading…" : currentUrl ? "Change" : "Upload"}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleChange}
+            disabled={isUploading}
+            className="hidden"
+          />
+        </label>
       </div>
       {error ? <p className="text-xs text-red-600">{error}</p> : null}
     </Field>
