@@ -7,23 +7,30 @@ import type { Env } from "@/types"
 import { ok, fail } from "@/lib/response"
 import { hashPassword, verifyPassword } from "@/lib/passwordHash"
 
-const changeCredentialsSchema = z
-  .object({
-    currentPassword: z.string().min(1),
-    newUsername: z.string().trim().min(1).max(64).optional(),
-    newPassword: z.string().min(8).max(200).optional(),
-  })
-  .refine((data) => data.newUsername || data.newPassword, {
-    message: "Provide a new username and/or a new password.",
-  })
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(8).max(200),
+})
 
 export const adminAccountRoute = new Hono<{ Bindings: Env }>()
 
 // Mounted under /api/admin/account, so it's gated by the same requireAdminSession
 // middleware as every other admin route (unlike /api/admin/auth/*, which is
 // deliberately exempt so login itself stays reachable while logged out).
+adminAccountRoute.get("/", async (c) => {
+  const db = createDb(c.env.DB)
+  const [current] = await db.select().from(adminCredentials).limit(1)
+  if (!current) {
+    return fail(c, "Admin login is not configured on this environment.", 500)
+  }
+  return ok(c, { name: current.name, username: current.username })
+})
+
+// Name and username are DB-managed only (edited directly in D1) — this endpoint
+// only ever rotates the password, which is why it's the sole field the admin
+// portal UI exposes an editor for.
 adminAccountRoute.post("/credentials", async (c) => {
-  const parsed = changeCredentialsSchema.safeParse(await c.req.json())
+  const parsed = changePasswordSchema.safeParse(await c.req.json())
   if (!parsed.success) {
     return fail(c, parsed.error.issues[0]?.message ?? "Invalid input.", 400)
   }
@@ -39,13 +46,12 @@ adminAccountRoute.post("/credentials", async (c) => {
     return fail(c, "Current password is incorrect.", 401)
   }
 
-  const nextUsername = parsed.data.newUsername ?? current.username
-  const nextPasswordHash = parsed.data.newPassword ? await hashPassword(parsed.data.newPassword) : current.passwordHash
+  const nextPasswordHash = await hashPassword(parsed.data.newPassword)
 
   await db
     .update(adminCredentials)
-    .set({ username: nextUsername, passwordHash: nextPasswordHash, updatedAt: Date.now() })
+    .set({ passwordHash: nextPasswordHash, updatedAt: Date.now() })
     .where(eq(adminCredentials.id, current.id))
 
-  return ok(c, { username: nextUsername })
+  return ok(c, { success: true })
 })

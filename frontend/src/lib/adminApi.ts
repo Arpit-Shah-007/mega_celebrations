@@ -129,14 +129,22 @@ export function logoutAdmin(): Promise<AdminAuthStatus> {
   })
 }
 
-export interface ChangeAdminCredentialsInput {
-  currentPassword: string
-  newUsername?: string
-  newPassword?: string
+export interface AdminAccountInfo {
+  name: string
+  username: string
 }
 
-export function changeAdminCredentials(input: ChangeAdminCredentialsInput): Promise<{ username: string }> {
-  return request<{ username: string }>("/api/admin/account/credentials", {
+export function fetchAdminAccount(): Promise<AdminAccountInfo> {
+  return request<AdminAccountInfo>("/api/admin/account")
+}
+
+export interface ChangeAdminCredentialsInput {
+  currentPassword: string
+  newPassword: string
+}
+
+export function changeAdminCredentials(input: ChangeAdminCredentialsInput): Promise<{ success: true }> {
+  return request<{ success: true }>("/api/admin/account/credentials", {
     method: "POST",
     body: JSON.stringify(input),
   })

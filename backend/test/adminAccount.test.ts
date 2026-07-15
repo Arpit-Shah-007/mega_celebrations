@@ -2,6 +2,21 @@ import { exports } from "cloudflare:workers"
 import { it, expect } from "vitest"
 import { adminFetch, readJson } from "./helpers"
 
+it("rejects fetching account info with no session cookie", async () => {
+  const response = await exports.default.fetch("https://example.com/api/admin/account", {
+    method: "GET",
+  })
+  expect(response.status).toBe(401)
+})
+
+it("returns the admin's name and username with a valid session", async () => {
+  const response = await adminFetch("https://example.com/api/admin/account", { method: "GET" })
+  const body = await readJson<{ data: { name: string; username: string } }>(response)
+  expect(response.status).toBe(200)
+  expect(body.data.username).toBe("test-admin")
+  expect(body.data.name).toBeTruthy()
+})
+
 it("rejects a credentials-change request with no session cookie", async () => {
   const response = await exports.default.fetch("https://example.com/api/admin/account/credentials", {
     method: "POST",
@@ -20,7 +35,7 @@ it("rejects a credentials change with the wrong current password", async () => {
   expect(response.status).toBe(401)
 })
 
-it("rejects a credentials change with neither a new username nor a new password", async () => {
+it("rejects a credentials change with no new password", async () => {
   const response = await adminFetch("https://example.com/api/admin/account/credentials", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -67,40 +82,6 @@ it("changes the password, and the new password (not the old one) works on the ne
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: restoreCookie },
     body: JSON.stringify({ currentPassword: "brand-new-password-123", newPassword: "test-password" }),
-  })
-  expect(restoreResponse.status).toBe(200)
-})
-
-it("changes the username, and login requires the new username afterward", async () => {
-  const changeResponse = await adminFetch("https://example.com/api/admin/account/credentials", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ currentPassword: "test-password", newUsername: "renamed-test-admin" }),
-  })
-  const changeBody = await readJson<{ data: { username: string } }>(changeResponse)
-  expect(changeResponse.status).toBe(200)
-  expect(changeBody.data.username).toBe("renamed-test-admin")
-
-  const oldUsernameLogin = await exports.default.fetch("https://example.com/api/admin/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: "test-admin", password: "test-password" }),
-  })
-  expect(oldUsernameLogin.status).toBe(401)
-
-  const newUsernameLogin = await exports.default.fetch("https://example.com/api/admin/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: "renamed-test-admin", password: "test-password" }),
-  })
-  expect(newUsernameLogin.status).toBe(200)
-
-  // Restore the shared test-admin username for other tests in this file/session.
-  const restoreCookie = newUsernameLogin.headers.get("set-cookie")!.split(";")[0]
-  const restoreResponse = await exports.default.fetch("https://example.com/api/admin/account/credentials", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Cookie: restoreCookie },
-    body: JSON.stringify({ currentPassword: "test-password", newUsername: "test-admin" }),
   })
   expect(restoreResponse.status).toBe(200)
 })

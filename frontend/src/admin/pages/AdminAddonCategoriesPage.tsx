@@ -1,5 +1,7 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { ArrowLeft } from "lucide-react"
 import {
   createAddonCategory,
   deleteAddonCategory,
@@ -13,12 +15,14 @@ import { AdminButton, Card, Field, Input, TextArea } from "@/admin/components/Ad
 import { ImageUploadField } from "@/admin/components/ImageUploadField"
 import { CatalogItemsTable } from "@/admin/components/CatalogItemsTable"
 import { CatalogItemModal } from "@/admin/components/CatalogItemModal"
+import { ConfirmDeleteModal } from "@/admin/components/ConfirmDeleteModal"
 
 /** Sentinel for a brand-new category's not-yet-uploaded hero/card photo — the DB column is NOT NULL, but ImageUploadField should still show its empty state rather than a broken <img>. */
 const PENDING_IMAGE = "pending-upload"
 
 export function AdminAddonCategoriesPage() {
   const queryClient = useQueryClient()
+  const [deletingCategory, setDeletingCategory] = useState<AdminAddonCategoryRow | null>(null)
   const { data: categories, isPending: categoriesPending } = useQuery({
     queryKey: ["admin", "addon-categories"],
     queryFn: fetchAdminAddonCategories,
@@ -50,6 +54,10 @@ export function AdminAddonCategoriesPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <Link to="/admin" className="inline-flex items-center gap-1.5 self-start text-sm font-semibold text-ui-gray transition-colors hover:text-blue">
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </Link>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Add-On Categories</h1>
         <AdminButton
@@ -83,16 +91,24 @@ export function AdminAddonCategoriesPage() {
           items={items.filter((item) => item.addonCategoryId === category.id)}
           onChanged={invalidate}
           onMove={(direction) => moveCategory(index, direction)}
-          onDelete={async () => {
-            if (window.confirm(`Delete "${category.name}"? This will also delete its ${items.filter((item) => item.addonCategoryId === category.id).length} item(s). This cannot be undone.`)) {
-              await deleteAddonCategory(category.id)
-              invalidate()
-            }
-          }}
+          onDelete={() => setDeletingCategory(category)}
           canMoveUp={index > 0}
           canMoveDown={index < sorted.length - 1}
         />
       ))}
+
+      {deletingCategory ? (
+        <ConfirmDeleteModal
+          title="Delete category?"
+          message={`Delete "${deletingCategory.name}"? This will also delete its ${items.filter((item) => item.addonCategoryId === deletingCategory.id).length} item(s). This cannot be undone.`}
+          onCancel={() => setDeletingCategory(null)}
+          onConfirm={async () => {
+            await deleteAddonCategory(deletingCategory.id)
+            invalidate()
+            setDeletingCategory(null)
+          }}
+        />
+      ) : null}
     </div>
   )
 }
