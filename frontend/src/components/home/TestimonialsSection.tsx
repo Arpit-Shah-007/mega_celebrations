@@ -142,7 +142,7 @@ export function TestimonialsSection() {
             </div>
           </div>
 
-          <div className="mt-8 flex items-center justify-center gap-0">
+          <div className="mt-8 flex items-center justify-center gap-1">
             {testimonials.map((item, dotIndex) => (
               <button
                 key={item.id}
@@ -150,7 +150,7 @@ export function TestimonialsSection() {
                 onClick={() => goTo(dotIndex)}
                 aria-label={`Show testimonial ${dotIndex + 1}`}
                 aria-current={dotIndex === activeDot}
-                className="cursor-pointer p-1"
+                className="cursor-pointer p-2.5"
               >
                 <span
                   className={`block h-2.5 w-2.5 rounded-full transition ${dotIndex === activeDot ? "bg-pink" : "bg-navy/20 hover:bg-navy/40"}`}
