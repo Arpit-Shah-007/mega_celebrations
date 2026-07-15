@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
+import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Pencil, X } from "lucide-react"
+import { ArrowLeft, Pencil, X } from "lucide-react"
 import { changeAdminCredentials, fetchAdminAccount } from "@/lib/adminApi"
 import { AdminButton, Card, Field, Input } from "@/admin/components/AdminForm"
 
@@ -11,38 +12,44 @@ export function AdminAccountPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <Link to="/admin" className="inline-flex items-center gap-1.5 self-start text-sm font-semibold text-ui-gray transition-colors hover:text-blue">
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </Link>
       <h1 className="text-2xl font-bold">Account</h1>
 
-      <Card title="Login Credentials">
-        {isPending || !account ? (
-          <p className="text-sm text-ui-gray">Loading…</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 text-sm sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5 border-border sm:border-r sm:pr-6">
-              <span className="text-xs font-bold uppercase tracking-wide text-ui-gray">Name</span>
-              <span className="text-lg text-body">{account.name}</span>
-            </div>
-            <div className="flex flex-col gap-1.5 border-border sm:border-r sm:pr-6">
-              <span className="text-xs font-bold uppercase tracking-wide text-ui-gray">Username</span>
-              <span className="text-lg text-body">{account.username}</span>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wide text-ui-gray">Password</span>
-              <div className="flex items-center gap-3">
-                <span className="text-lg tracking-widest text-body">••••••••</span>
-                <button
-                  type="button"
-                  onClick={() => setIsChangingPassword(true)}
-                  aria-label="Change password"
-                  className="cursor-pointer text-ui-gray transition-colors hover:text-blue"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
+      <div className="max-w-sm">
+        <Card title="Login Credentials">
+          {isPending || !account ? (
+            <p className="text-sm text-ui-gray">Loading…</p>
+          ) : (
+            <div className="flex flex-col gap-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-navy">Name</span>
+                <span className="text-body">{account.name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-navy">Username</span>
+                <span className="text-body">{account.username}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-navy">Password</span>
+                <div className="flex items-center gap-3">
+                  <span className="tracking-widest text-body">••••••••</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsChangingPassword(true)}
+                    aria-label="Change password"
+                    className="cursor-pointer text-ui-gray transition-colors hover:text-blue"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </Card>
+          )}
+        </Card>
+      </div>
 
       {isChangingPassword ? <ChangePasswordModal onClose={() => setIsChangingPassword(false)} /> : null}
     </div>
