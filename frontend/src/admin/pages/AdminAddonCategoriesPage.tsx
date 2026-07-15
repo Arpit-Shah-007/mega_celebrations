@@ -1,18 +1,18 @@
+import { useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createAddonCategory,
-  createCatalogItem,
   deleteAddonCategory,
   fetchAdminAddonCategories,
   fetchAdminCatalogItems,
   reorderAddonCategories,
-  reorderCatalogItems,
   updateAddonCategory,
   type AdminAddonCategoryRow,
 } from "@/lib/adminApi"
 import { AdminButton, Card, Field, Input, TextArea } from "@/admin/components/AdminForm"
 import { ImageUploadField } from "@/admin/components/ImageUploadField"
-import { CatalogItemRow } from "@/admin/components/CatalogItemRow"
+import { CatalogItemsTable } from "@/admin/components/CatalogItemsTable"
+import { CatalogItemModal } from "@/admin/components/CatalogItemModal"
 
 /** Sentinel for a brand-new category's not-yet-uploaded hero/card photo — the DB column is NOT NULL, but ImageUploadField should still show its empty state rather than a broken <img>. */
 const PENDING_IMAGE = "pending-upload"
@@ -55,18 +55,22 @@ export function AdminAddonCategoriesPage() {
         <AdminButton
           variant="primary"
           onClick={async () => {
-            await createAddonCategory({
-              slug: `new-category-${Date.now()}`,
-              name: "New Category",
-              tagline: "",
-              description: "",
-              heroImageUrl: PENDING_IMAGE,
-              heroImageAlt: "New category hero image",
-              cardImageUrl: PENDING_IMAGE,
-              cardImageAlt: "New category card image",
-              sortOrder: sorted.length,
-            })
-            invalidate()
+            try {
+              await createAddonCategory({
+                slug: `new-category-${Date.now()}`,
+                name: "New Category",
+                tagline: "New tagline — edit me",
+                description: "New category description — edit me.",
+                heroImageUrl: PENDING_IMAGE,
+                heroImageAlt: "New category hero image",
+                cardImageUrl: PENDING_IMAGE,
+                cardImageAlt: "New category card image",
+                sortOrder: sorted.length,
+              })
+              invalidate()
+            } catch (error) {
+              window.alert(error instanceof Error ? error.message : "Failed to create category.")
+            }
           }}
         >
           + New Category
@@ -110,16 +114,8 @@ function CategoryCard({
   canMoveUp: boolean
   canMoveDown: boolean
 }) {
+  const [isAddItemOpen, setIsAddItemOpen] = useState(false)
   const sortedItems = [...items].sort((a, b) => a.sortOrder - b.sortOrder)
-
-  const moveItem = async (index: number, direction: -1 | 1) => {
-    const targetIndex = index + direction
-    if (targetIndex < 0 || targetIndex >= sortedItems.length) return
-    const reordered = [...sortedItems]
-    ;[reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]]
-    await reorderCatalogItems(reordered.map((item) => item.id))
-    onChanged()
-  }
 
   return (
     <Card
@@ -200,42 +196,23 @@ function CategoryCard({
       <div className="mt-5">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-sm font-semibold text-navy">Items ({items.length})</p>
-          <AdminButton
-            onClick={async () => {
-              await createCatalogItem({
-                placement: "add_on_category",
-                addonCategoryId: category.id,
-                slug: `new-item-${Date.now()}`,
-                name: "New item",
-                priceCents: 0,
-                isPriceOnRequest: false,
-                categoryBreadcrumb: category.name,
-                imageUrl: null,
-                additionalImageUrls: null,
-                description: [],
-                details: null,
-                pricing: [],
-                sortOrder: sortedItems.length,
-              })
-              onChanged()
-            }}
-          >
-            + Add Item
-          </AdminButton>
+          <AdminButton onClick={() => setIsAddItemOpen(true)}>+ Add Item</AdminButton>
         </div>
-        <div className="flex flex-col gap-3">
-          {sortedItems.map((item, index) => (
-            <CatalogItemRow
-              key={item.id}
-              item={item}
-              onChanged={onChanged}
-              onMove={(direction) => moveItem(index, direction)}
-              canMoveUp={index > 0}
-              canMoveDown={index < sortedItems.length - 1}
-            />
-          ))}
-        </div>
+        <CatalogItemsTable items={sortedItems} onChanged={onChanged} emptyMessage="No items in this category yet." />
       </div>
+
+      {isAddItemOpen ? (
+        <CatalogItemModal
+          createContext={{
+            placement: "add_on_category",
+            addonCategoryId: category.id,
+            categoryBreadcrumb: category.name,
+            sortOrder: sortedItems.length,
+          }}
+          onClose={() => setIsAddItemOpen(false)}
+          onSaved={onChanged}
+        />
+      ) : null}
     </Card>
   )
 }

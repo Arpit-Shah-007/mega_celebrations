@@ -21,7 +21,7 @@ export function AdminLoginPage() {
   })
 
   return (
-    <div className="relative flex h-screen items-center justify-center overflow-hidden bg-ui-gray px-5">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-ui-gray px-5">
       <video
         className="absolute inset-0 h-full w-full object-cover opacity-10 grayscale"
         src={`${MEDIA_BASE_URL}/media/Home_Banner_Video.mp4`}
@@ -32,57 +32,63 @@ export function AdminLoginPage() {
         aria-hidden="true"
       />
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          mutation.mutate()
-        }}
-        className="relative w-full max-w-96 border-t-4 border-blue bg-white p-8 shadow-lift"
-      >
-        <span
-          aria-hidden="true"
-          className="absolute -top-5 -right-5 flex h-16 w-16 rotate-12 select-none items-center justify-center rounded-full border-2 border-dashed border-navy bg-pink text-center text-[10px] font-extrabold uppercase leading-tight tracking-wide text-white shadow-lift"
+      <div className="relative flex flex-1 items-center justify-center">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            mutation.mutate()
+          }}
+          className="relative w-full max-w-96 border-t-4 border-blue bg-white p-6 shadow-lift sm:p-8"
         >
-          Admins
-          <br />
-          Only
-        </span>
+          <span
+            aria-hidden="true"
+            className="absolute -top-5 -right-5 flex h-16 w-16 rotate-12 select-none items-center justify-center rounded-full border-2 border-dashed border-navy bg-pink text-center text-[10px] font-extrabold uppercase leading-tight tracking-wide text-white shadow-lift"
+          >
+            Admins
+            <br />
+            Only
+          </span>
 
-        <div className="flex justify-center">
-          <img src={logo} alt="Mega Celebrations" className="h-16 w-auto" width={261} height={98} />
-        </div>
+          <div className="flex justify-center">
+            <img src={logo} alt="Mega Celebrations" className="h-16 w-auto" width={261} height={98} />
+          </div>
 
-        <div className="mt-6 flex flex-col gap-4">
-          <Field label="Username">
-            <Input
-              autoFocus
-              autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </Field>
-          <Field label="Password">
-            <Input
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Field>
-        </div>
+          <div className="mt-6 flex flex-col gap-4">
+            <Field label="Username">
+              <Input
+                autoFocus
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </Field>
+            <Field label="Password">
+              <Input
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Field>
+          </div>
 
-        {mutation.isError ? (
-          <p className="mt-3 text-sm font-semibold text-red-600">{mutation.error.message}</p>
-        ) : null}
+          {mutation.isError ? (
+            <p className="mt-3 text-sm font-semibold text-red-600">{mutation.error.message}</p>
+          ) : null}
 
-        <button
-          type="submit"
-          disabled={mutation.isPending || !username || !password}
-          className="mt-5 w-full cursor-pointer bg-pink px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-blue disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {mutation.isPending ? "Signing In…" : "Sign In"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={mutation.isPending || !username || !password}
+            className="mt-5 w-full cursor-pointer bg-pink px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-blue disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {mutation.isPending ? "Signing In…" : "Sign In"}
+          </button>
+        </form>
+      </div>
+
+      <footer className="absolute inset-x-0 bottom-0 py-3 text-center text-xs text-white/60">
+        Copyright &copy; 2026 - Mega Celebrations. All Rights Reserved.
+      </footer>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { Package, Sparkles, ShoppingBag, Star } from "lucide-react"
+import { Package, Sparkles, ShoppingBag } from "lucide-react"
 import { fetchAdminAddonCategories, fetchAdminCatalogItems, fetchAdminPackages } from "@/lib/adminApi"
 import { PageLoadingState } from "@/components/ui/PageLoadingState"
 
@@ -40,17 +40,14 @@ export function AdminHomePage() {
     return <PageLoadingState />
   }
 
-  const featuredCount = packages?.filter((pkg) => pkg.featured).length ?? 0
-
   return (
     <div className="flex flex-col gap-8">
       <h1 className="text-2xl font-bold">Dashboard</h1>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatTile to="/admin/packages" label="Packages" value={packages?.length ?? 0} icon={Package} />
         <StatTile to="/admin/addon-categories" label="Add-On Categories" value={addonCategories?.length ?? 0} icon={Sparkles} />
         <StatTile to="/admin/a-la-carte" label="A La Carte Items" value={aLaCarteItems?.length ?? 0} icon={ShoppingBag} />
-        <StatTile to="/admin/packages" label="Featured Packages" value={featuredCount} icon={Star} />
       </div>
     </div>
   )
