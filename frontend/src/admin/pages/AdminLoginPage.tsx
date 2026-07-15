@@ -85,12 +85,6 @@ export function AdminLoginPage() {
           </button>
         </form>
       </div>
-
-      <div className="border-t border-border bg-white py-5">
-        <p className="text-center text-sm leading-relaxed text-ui-gray">
-          Copyright &copy; 2026 - Mega Celebrations. All Rights Reserved.
-        </p>
-      </div>
     </div>
   )
 }

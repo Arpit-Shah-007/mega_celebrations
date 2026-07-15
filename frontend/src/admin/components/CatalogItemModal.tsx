@@ -149,14 +149,15 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
           <Field label="Media" required>
             <div className="flex flex-wrap gap-3 bg-graytint p-3">
               {images.map((url, index) => (
-                <div key={url} className="flex shrink-0 flex-col items-center gap-1">
+                <div key={url} className="relative h-16 w-16 shrink-0">
                   <img src={url} alt="" className="h-16 w-16 object-cover" />
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(index)}
-                    className="cursor-pointer text-[11px] font-semibold text-red-600 transition-colors hover:text-red-700 hover:underline"
+                    aria-label="Remove photo"
+                    className="absolute -top-1.5 -right-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-navy text-white transition-colors hover:bg-red-600"
                   >
-                    Remove
+                    <X className="h-3 w-3" />
                   </button>
                 </div>
               ))}
@@ -189,7 +190,7 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
 
           <div className="flex items-end gap-4">
             <div className="flex-1">
-              <Field label="Price ($)">
+              <Field label="Price ($)" required={!isPriceOnRequest}>
                 <Input
                   type="number"
                   disabled={isPriceOnRequest}
