@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { useMutation } from "@tanstack/react-query"
-import { X } from "lucide-react"
-import { createCatalogItem, updateCatalogItem, type AdminCatalogItemRow, type CatalogItemInput } from "@/lib/adminApi"
+import { Plus, X } from "lucide-react"
+import { createCatalogItem, updateCatalogItem, uploadImage, type AdminCatalogItemRow, type CatalogItemInput } from "@/lib/adminApi"
 import { slugify } from "@/lib/catalogItem"
 import { AdminButton, Field, Input, TextArea } from "@/admin/components/AdminForm"
-import { ImageUploadField } from "@/admin/components/ImageUploadField"
+
+const MAX_IMAGES = 10
 
 interface CreateContext {
   placement: "a_la_carte" | "add_on_category"
@@ -21,12 +22,19 @@ interface CatalogItemModalProps {
   onSaved: () => void
 }
 
-/** Single form for both creating and editing a catalog item (A La Carte or an add-on category's items) — name, photo, description, and price up front, matching how packages are created/edited. */
+function initialImages(item: AdminCatalogItemRow | undefined): string[] {
+  if (!item) return []
+  return [item.imageUrl, ...(item.additionalImageUrls ?? [])].filter((url): url is string => Boolean(url))
+}
+
+/** Single form for both creating and editing a catalog item (A La Carte or an add-on category's items) — name, media, description, and price up front, matching how packages are created/edited. */
 export function CatalogItemModal({ item, createContext, onClose, onSaved }: CatalogItemModalProps) {
   const [name, setName] = useState(item?.name ?? "")
   const [priceDollars, setPriceDollars] = useState(item?.priceCents != null ? String(item.priceCents / 100) : "")
   const [isPriceOnRequest, setIsPriceOnRequest] = useState(item?.isPriceOnRequest ?? false)
-  const [imageUrl, setImageUrl] = useState(item?.imageUrl ?? "")
+  const [images, setImages] = useState<string[]>(() => initialImages(item))
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const [description, setDescription] = useState((item?.description ?? []).join("\n"))
 
   useEffect(() => {
@@ -42,6 +50,23 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
     }
   }, [onClose])
 
+  async function handleAddImage(file: File) {
+    setIsUploading(true)
+    setUploadError(null)
+    try {
+      const { url } = await uploadImage(file)
+      setImages((current) => [...current, url])
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Upload failed.")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  function handleRemoveImage(index: number) {
+    setImages((current) => current.filter((_, i) => i !== index))
+  }
+
   const mutation = useMutation({
     mutationFn: () => {
       const priceCents = isPriceOnRequest || priceDollars.trim() === "" ? null : Math.round(Number(priceDollars) * 100)
@@ -49,13 +74,15 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
         .split("\n")
         .map((line) => line.trim())
         .filter(Boolean)
+      const [primaryImage, ...restImages] = images
 
       if (item) {
         return updateCatalogItem(item.id, {
           name,
           priceCents,
           isPriceOnRequest,
-          imageUrl: imageUrl || null,
+          imageUrl: primaryImage ?? null,
+          additionalImageUrls: restImages.length > 0 ? restImages : null,
           description: descriptionLines,
         })
       }
@@ -69,8 +96,8 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
         priceCents,
         isPriceOnRequest,
         categoryBreadcrumb: createContext.categoryBreadcrumb,
-        imageUrl: imageUrl || null,
-        additionalImageUrls: null,
+        imageUrl: primaryImage ?? null,
+        additionalImageUrls: restImages.length > 0 ? restImages : null,
         description: descriptionLines,
         details: null,
         pricing: [],
@@ -116,9 +143,45 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
             <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
 
-          <ImageUploadField label="Photo" currentUrl={imageUrl} onUploaded={setImageUrl} />
+          <Field label="Media">
+            <div className="flex flex-wrap gap-3 bg-graytint p-3">
+              {images.map((url, index) => (
+                <div key={url} className="group relative h-16 w-16 shrink-0">
+                  <img src={url} alt="" className="h-16 w-16 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    aria-label="Remove photo"
+                    className="absolute -top-1.5 -right-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-navy text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              {images.length < MAX_IMAGES ? (
+                <label className="flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center border-2 border-dashed border-border bg-white text-ui-gray transition-colors hover:border-blue hover:text-blue">
+                  <Plus className="h-5 w-5" />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    disabled={isUploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleAddImage(file)
+                      e.target.value = ""
+                    }}
+                  />
+                </label>
+              ) : null}
+            </div>
+            <p className="mt-1 text-xs text-ui-gray">
+              {isUploading ? "Uploading…" : `${images.length}/${MAX_IMAGES} photos`}
+            </p>
+            {uploadError ? <p className="text-xs text-red-600">{uploadError}</p> : null}
+          </Field>
 
-          <Field label="Description (one bullet per line)">
+          <Field label="Description (each line shows as a bullet point)">
             <TextArea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
           </Field>
 
@@ -134,10 +197,21 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
               </Field>
             </div>
             <label className="mb-2.5 flex items-center gap-1.5 text-sm">
-              <input type="checkbox" checked={isPriceOnRequest} onChange={(e) => setIsPriceOnRequest(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={isPriceOnRequest}
+                onChange={(e) => {
+                  const checked = e.target.checked
+                  setIsPriceOnRequest(checked)
+                  if (checked) setPriceDollars("")
+                }}
+              />
               Call for price
             </label>
           </div>
+          {isPriceOnRequest ? (
+            <p className="-mt-2 text-xs text-ui-gray">Shows as "Contact us for price." on the site instead of a dollar amount.</p>
+          ) : null}
 
           {mutation.isError ? <p className="text-sm font-semibold text-red-600">{mutation.error.message}</p> : null}
 

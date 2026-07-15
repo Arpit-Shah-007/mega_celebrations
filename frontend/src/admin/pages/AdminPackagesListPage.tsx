@@ -1,11 +1,13 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ImageOff } from "lucide-react"
-import { deleteAdminPackage, fetchAdminPackages } from "@/lib/adminApi"
+import { ArrowLeft, ImageOff } from "lucide-react"
+import { deleteAdminPackage, fetchAdminPackages, type AdminPackageListRow } from "@/lib/adminApi"
 import { AdminButton, Badge } from "@/admin/components/AdminForm"
 import { PageLoadingState } from "@/components/ui/PageLoadingState"
 import { AddPackageModal } from "@/admin/components/AddPackageModal"
 import { PackageEditModal } from "@/admin/components/PackageEditModal"
+import { ConfirmDeleteModal } from "@/admin/components/ConfirmDeleteModal"
 
 function currency(cents: number) {
   return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
@@ -16,6 +18,7 @@ export function AdminPackagesListPage() {
   const { data: packages, isPending } = useQuery({ queryKey: ["admin", "packages"], queryFn: fetchAdminPackages })
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [editingPackageId, setEditingPackageId] = useState<number | null>(null)
+  const [deletingPackage, setDeletingPackage] = useState<AdminPackageListRow | null>(null)
 
   const invalidateList = () => queryClient.invalidateQueries({ queryKey: ["admin", "packages"] })
 
@@ -26,6 +29,10 @@ export function AdminPackagesListPage() {
 
   return (
     <div>
+      <Link to="/admin" className="mb-3 inline-flex items-center gap-1.5 text-sm font-semibold text-ui-gray transition-colors hover:text-blue">
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </Link>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Packages</h1>
         <AdminButton variant="primary" onClick={() => setIsAddOpen(true)}>
@@ -83,9 +90,7 @@ export function AdminPackagesListPage() {
                       variant="danger"
                       onClick={(e) => {
                         e.stopPropagation()
-                        if (window.confirm(`Delete "${pkg.name}"? This cannot be undone.`)) {
-                          deleteMutation.mutate(pkg.id)
-                        }
+                        setDeletingPackage(pkg)
                       }}
                     >
                       Delete
@@ -115,6 +120,18 @@ export function AdminPackagesListPage() {
           packageId={editingPackageId}
           onClose={() => setEditingPackageId(null)}
           onSaved={invalidateList}
+        />
+      ) : null}
+
+      {deletingPackage ? (
+        <ConfirmDeleteModal
+          title="Delete package?"
+          message={`Delete "${deletingPackage.name}"? This cannot be undone.`}
+          onCancel={() => setDeletingPackage(null)}
+          onConfirm={async () => {
+            await deleteMutation.mutateAsync(deletingPackage.id)
+            setDeletingPackage(null)
+          }}
         />
       ) : null}
     </div>

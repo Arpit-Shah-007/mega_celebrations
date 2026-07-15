@@ -21,18 +21,18 @@ export function AdminLoginPage() {
   })
 
   return (
-    <div className="relative flex h-screen flex-col overflow-hidden bg-ui-gray px-5">
-      <video
-        className="absolute inset-0 h-full w-full object-cover opacity-10 grayscale"
-        src={`${MEDIA_BASE_URL}/media/Home_Banner_Video.mp4`}
-        autoPlay
-        loop
-        muted
-        playsInline
-        aria-hidden="true"
-      />
+    <div className="fixed inset-0 flex flex-col overflow-hidden bg-ui-gray">
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden px-5">
+        <video
+          className="absolute inset-0 h-full w-full object-cover opacity-10 grayscale"
+          src={`${MEDIA_BASE_URL}/media/Home_Banner_Video.mp4`}
+          autoPlay
+          loop
+          muted
+          playsInline
+          aria-hidden="true"
+        />
 
-      <div className="relative flex flex-1 items-center justify-center">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -86,9 +86,11 @@ export function AdminLoginPage() {
         </form>
       </div>
 
-      <footer className="absolute inset-x-0 bottom-0 py-3 text-center text-xs text-white/60">
-        Copyright &copy; 2026 - Mega Celebrations. All Rights Reserved.
-      </footer>
+      <div className="border-t border-border bg-white py-5">
+        <p className="text-center text-sm leading-relaxed text-ui-gray">
+          Copyright &copy; 2026 - Mega Celebrations. All Rights Reserved.
+        </p>
+      </div>
     </div>
   )
 }

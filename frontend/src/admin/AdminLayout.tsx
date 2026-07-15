@@ -1,6 +1,6 @@
 import { Link, NavLink, Navigate, Outlet, useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Home, LogOut, User } from "lucide-react"
+import { LogOut, User } from "lucide-react"
 import { fetchAdminAuthStatus, logoutAdmin } from "@/lib/adminApi"
 import { PageLoadingState } from "@/components/ui/PageLoadingState"
 import logo from "@/assets/brand/mega-celebrations-logo.png"
@@ -28,19 +28,11 @@ export function AdminLayout() {
     <div className="min-h-screen bg-offwhite text-body">
       <header className="sticky top-0 z-50 bg-white shadow-[0_4px_16px_-4px_rgba(2,40,67,0.18)]">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
-          <Link to="/" className="shrink-0">
+          <Link to="/admin" className="shrink-0">
             <img src={logo} alt="Mega Celebrations" className="h-12 w-auto sm:h-14" width={261} height={98} />
           </Link>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <NavLink
-              to="/admin"
-              end
-              aria-label="Dashboard"
-              className={({ isActive }) => `${ICON_LINK_BASE} ${isActive ? ICON_LINK_ACTIVE : ""}`}
-            >
-              <Home className="h-5 w-5" />
-            </NavLink>
             <NavLink
               to="/admin/account"
               aria-label="Account"
