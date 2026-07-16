@@ -20,6 +20,11 @@ import { ConfirmDeleteModal } from "@/admin/components/ConfirmDeleteModal"
 /** Sentinel for a brand-new category's not-yet-uploaded hero/card photo — the DB column is NOT NULL, but ImageUploadField should still show its empty state rather than a broken <img>. */
 const PENDING_IMAGE = "pending-upload"
 
+/** Sentinel text for a brand-new category's not-yet-edited name/tagline/description — the DB columns are NOT NULL, but the admin should see a blank field to type into rather than placeholder-style text they have to select and delete first. */
+const PENDING_NAME = "New Category"
+const PENDING_TAGLINE = "New tagline — edit me"
+const PENDING_DESCRIPTION = "New category description — edit me."
+
 export function AdminAddonCategoriesPage() {
   const queryClient = useQueryClient()
   const [deletingCategory, setDeletingCategory] = useState<AdminAddonCategoryRow | null>(null)
@@ -67,9 +72,9 @@ export function AdminAddonCategoriesPage() {
             try {
               await createAddonCategory({
                 slug: `new-category-${Date.now()}`,
-                name: "New Category",
-                tagline: "New tagline — edit me",
-                description: "New category description — edit me.",
+                name: PENDING_NAME,
+                tagline: PENDING_TAGLINE,
+                description: PENDING_DESCRIPTION,
                 heroImageUrl: PENDING_IMAGE,
                 heroImageAlt: "New category hero image",
                 cardImageUrl: PENDING_IMAGE,
@@ -167,7 +172,8 @@ function CategoryCard({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Name" required>
               <Input
-                defaultValue={category.name}
+                defaultValue={category.name === PENDING_NAME ? "" : category.name}
+                placeholder="e.g. Decor"
                 onBlur={async (e) => {
                   const value = e.target.value.trim()
                   if (value.length > 0 && value !== category.name) {
@@ -179,7 +185,8 @@ function CategoryCard({
             </Field>
             <Field label="Tagline" required>
               <Input
-                defaultValue={category.tagline}
+                defaultValue={category.tagline === PENDING_TAGLINE ? "" : category.tagline}
+                placeholder="Short tagline shown on the category card"
                 onBlur={async (e) => {
                   const value = e.target.value.trim()
                   if (value.length > 0 && value !== category.tagline) {
@@ -195,7 +202,8 @@ function CategoryCard({
             <Field label="Description" required>
               <TextArea
                 rows={2}
-                defaultValue={category.description}
+                defaultValue={category.description === PENDING_DESCRIPTION ? "" : category.description}
+                placeholder="Category description"
                 onBlur={async (e) => {
                   const value = e.target.value.trim()
                   if (value.length > 0 && value !== category.description) {
