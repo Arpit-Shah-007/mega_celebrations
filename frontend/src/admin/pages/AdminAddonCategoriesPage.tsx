@@ -3,7 +3,6 @@ import { Link } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 import {
-  createAddonCategory,
   deleteAddonCategory,
   fetchAdminAddonCategories,
   fetchAdminCatalogItems,
@@ -15,19 +14,13 @@ import { AdminButton, Card, Field, Input, TextArea } from "@/admin/components/Ad
 import { ImageUploadField } from "@/admin/components/ImageUploadField"
 import { CatalogItemsTable } from "@/admin/components/CatalogItemsTable"
 import { CatalogItemModal } from "@/admin/components/CatalogItemModal"
+import { AddonCategoryModal } from "@/admin/components/AddonCategoryModal"
 import { ConfirmDeleteModal } from "@/admin/components/ConfirmDeleteModal"
-
-/** Sentinel for a brand-new category's not-yet-uploaded hero/card photo — the DB column is NOT NULL, but ImageUploadField should still show its empty state rather than a broken <img>. */
-const PENDING_IMAGE = "pending-upload"
-
-/** Sentinel text for a brand-new category's not-yet-edited name/tagline/description — the DB columns are NOT NULL, but the admin should see a blank field to type into rather than placeholder-style text they have to select and delete first. */
-const PENDING_NAME = "New Category"
-const PENDING_TAGLINE = "New tagline — edit me"
-const PENDING_DESCRIPTION = "New category description — edit me."
 
 export function AdminAddonCategoriesPage() {
   const queryClient = useQueryClient()
   const [deletingCategory, setDeletingCategory] = useState<AdminAddonCategoryRow | null>(null)
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false)
   const [pendingScrollId, setPendingScrollId] = useState<number | null>(null)
   const categoryRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const { data: categories, isPending: categoriesPending } = useQuery({
@@ -78,32 +71,21 @@ export function AdminAddonCategoriesPage() {
       </Link>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Add-On Categories</h1>
-        <AdminButton
-          variant="primary"
-          aria-label="New Category"
-          onClick={async () => {
-            try {
-              const created = await createAddonCategory({
-                slug: `new-category-${Date.now()}`,
-                name: PENDING_NAME,
-                tagline: PENDING_TAGLINE,
-                description: PENDING_DESCRIPTION,
-                heroImageUrl: PENDING_IMAGE,
-                heroImageAlt: "New category hero image",
-                cardImageUrl: PENDING_IMAGE,
-                cardImageAlt: "New category card image",
-                sortOrder: sorted.length,
-              })
-              invalidate()
-              setPendingScrollId(created.id)
-            } catch (error) {
-              window.alert(error instanceof Error ? error.message : "Failed to create category.")
-            }
-          }}
-        >
+        <AdminButton variant="primary" aria-label="New Category" onClick={() => setIsAddCategoryOpen(true)}>
           <Plus className="h-4 w-4" />
         </AdminButton>
       </div>
+
+      {isAddCategoryOpen ? (
+        <AddonCategoryModal
+          sortOrder={sorted.length}
+          onClose={() => setIsAddCategoryOpen(false)}
+          onSaved={(createdId) => {
+            invalidate()
+            setPendingScrollId(createdId)
+          }}
+        />
+      ) : null}
       {sorted.map((category, index) => (
         <div key={category.id} ref={(element) => { categoryRefs.current[category.id] = element }}>
           <CategoryCard
@@ -187,8 +169,7 @@ function CategoryCard({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Name" required>
               <Input
-                defaultValue={category.name === PENDING_NAME ? "" : category.name}
-                placeholder="e.g. Decor"
+                defaultValue={category.name}
                 onBlur={async (e) => {
                   const value = e.target.value.trim()
                   if (value.length > 0 && value !== category.name) {
@@ -200,8 +181,7 @@ function CategoryCard({
             </Field>
             <Field label="Tagline" required>
               <Input
-                defaultValue={category.tagline === PENDING_TAGLINE ? "" : category.tagline}
-                placeholder="Short tagline shown on the category card"
+                defaultValue={category.tagline}
                 onBlur={async (e) => {
                   const value = e.target.value.trim()
                   if (value.length > 0 && value !== category.tagline) {
@@ -217,8 +197,7 @@ function CategoryCard({
             <Field label="Description" required>
               <TextArea
                 rows={2}
-                defaultValue={category.description === PENDING_DESCRIPTION ? "" : category.description}
-                placeholder="Category description"
+                defaultValue={category.description}
                 onBlur={async (e) => {
                   const value = e.target.value.trim()
                   if (value.length > 0 && value !== category.description) {
@@ -234,7 +213,7 @@ function CategoryCard({
             <ImageUploadField
               label="Hero (category page banner)"
               required
-              currentUrl={category.heroImageUrl === PENDING_IMAGE ? "" : category.heroImageUrl}
+              currentUrl={category.heroImageUrl}
               onUploaded={async (url) => {
                 await updateAddonCategory(category.id, { heroImageUrl: url })
                 onChanged()
@@ -243,7 +222,7 @@ function CategoryCard({
             <ImageUploadField
               label="Card (Add-Ons hub thumbnail)"
               required
-              currentUrl={category.cardImageUrl === PENDING_IMAGE ? "" : category.cardImageUrl}
+              currentUrl={category.cardImageUrl}
               onUploaded={async (url) => {
                 await updateAddonCategory(category.id, { cardImageUrl: url })
                 onChanged()
