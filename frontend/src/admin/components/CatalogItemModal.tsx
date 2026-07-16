@@ -3,7 +3,7 @@ import { createPortal } from "react-dom"
 import { useMutation } from "@tanstack/react-query"
 import { Plus, X } from "lucide-react"
 import { createCatalogItem, updateCatalogItem, uploadImage, type AdminCatalogItemRow, type CatalogItemInput } from "@/lib/adminApi"
-import { slugify } from "@/lib/catalogItem"
+import { buildFlatFeePricingRows, slugify } from "@/lib/catalogItem"
 import { AdminButton, Field, Input, TextArea } from "@/admin/components/AdminForm"
 
 const MAX_IMAGES = 10
@@ -70,6 +70,7 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
   const mutation = useMutation({
     mutationFn: () => {
       const priceCents = isPriceOnRequest || priceDollars.trim() === "" ? null : Math.round(Number(priceDollars) * 100)
+      const pricing = buildFlatFeePricingRows(priceCents, isPriceOnRequest)
       const descriptionLines = description
         .split("\n")
         .map((line) => line.trim())
@@ -81,6 +82,7 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
           name,
           priceCents,
           isPriceOnRequest,
+          pricing,
           imageUrl: primaryImage ?? null,
           additionalImageUrls: restImages.length > 0 ? restImages : null,
           description: descriptionLines,
@@ -100,7 +102,7 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
         additionalImageUrls: restImages.length > 0 ? restImages : null,
         description: descriptionLines,
         details: null,
-        pricing: [],
+        pricing,
         sortOrder: createContext.sortOrder,
       }
       return createCatalogItem(input)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { parsePriceValue, slugify } from "./catalogItem"
+import { buildFlatFeePricingRows, parsePriceValue, slugify } from "./catalogItem"
 
 describe("parsePriceValue", () => {
   it("returns 0 when price is undefined", () => {
@@ -59,5 +59,23 @@ describe("slugify", () => {
 
   it("returns an empty string when input has no alphanumeric characters", () => {
     expect(slugify("!!!---???")).toBe("")
+  })
+})
+
+describe("buildFlatFeePricingRows", () => {
+  it("returns a single Flat fee row formatted as currency when a price is set", () => {
+    expect(buildFlatFeePricingRows(7500, false)).toEqual([{ label: "Flat fee", value: "$75.00" }])
+  })
+
+  it("formats thousands with a comma separator", () => {
+    expect(buildFlatFeePricingRows(160000, false)).toEqual([{ label: "Flat fee", value: "$1,600.00" }])
+  })
+
+  it("returns an empty array when price is on request", () => {
+    expect(buildFlatFeePricingRows(7500, true)).toEqual([])
+  })
+
+  it("returns an empty array when priceCents is null", () => {
+    expect(buildFlatFeePricingRows(null, false)).toEqual([])
   })
 })
