@@ -25,16 +25,21 @@ describe("GalleryLightbox", () => {
   })
 
   it("calls onClose when the close button is clicked", async () => {
-    // Note: the close button does not stopPropagation, so the click also bubbles to the
-    // backdrop's own onClick={onClose} handler — onClose fires twice per click. Asserting
-    // "called" rather than an exact count here since that's a pre-existing quirk, not
-    // something this test should lock in as correct behavior.
     const user = userEvent.setup()
     const onClose = vi.fn()
     render(<GalleryLightbox images={images} index={0} onClose={onClose} onNext={vi.fn()} onPrev={vi.fn()} />)
 
     await user.click(screen.getByRole("button", { name: "Close gallery" }))
-    expect(onClose).toHaveBeenCalled()
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it("does not call onClose when the backdrop is clicked", async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(<GalleryLightbox images={images} index={0} onClose={onClose} onNext={vi.fn()} onPrev={vi.fn()} />)
+
+    await user.click(screen.getByRole("dialog"))
+    expect(onClose).not.toHaveBeenCalled()
   })
 
   it("calls onNext and onPrev from the arrow buttons", async () => {

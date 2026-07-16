@@ -71,6 +71,14 @@ describe("CatalogItemModal", () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
+  it("does not call onClose when the backdrop is clicked", async () => {
+    const user = userEvent.setup()
+    const { onClose } = renderModal()
+
+    await user.click(screen.getByRole("dialog"))
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   it("increments and decrements the quantity, never going below 1", async () => {
     const user = userEvent.setup()
     renderModal()
