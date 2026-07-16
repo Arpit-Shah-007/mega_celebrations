@@ -1,9 +1,8 @@
 import { centsToDollars, formatPriceDisplay } from "@/lib/money"
-import type { addonCategories, catalogItems, packageImages, packagePriceTiers, packages, packageVariants } from "@/db/schema"
+import type { addonCategories, catalogItems, packageImages, packages, packageVariants } from "@/db/schema"
 
 type PackageRow = typeof packages.$inferSelect
 type PackageImageRow = typeof packageImages.$inferSelect
-type PackagePriceTierRow = typeof packagePriceTiers.$inferSelect
 type PackageVariantRow = typeof packageVariants.$inferSelect
 type AddonCategoryRow = typeof addonCategories.$inferSelect
 type CatalogItemRow = typeof catalogItems.$inferSelect
@@ -28,12 +27,7 @@ export function serializeVariant(row: PackageVariantRow) {
  * Matches frontend/src/types/index.ts's Package interface exactly, so pages
  * consuming this need only swap their data source, not their rendering code.
  */
-export function serializePackage(
-  pkg: PackageRow,
-  images: PackageImageRow[],
-  priceTiers: PackagePriceTierRow[],
-  variants: PackageVariantRow[],
-) {
+export function serializePackage(pkg: PackageRow, images: PackageImageRow[], variants: PackageVariantRow[]) {
   const hero = images.find((image) => image.kind === "hero")
   const card = images.find((image) => image.kind === "card")
   const gallery = byId(images.filter((image) => image.kind === "gallery"))
@@ -50,11 +44,6 @@ export function serializePackage(
     heroImage: hero ? { url: hero.url, alt: hero.alt } : { url: "", alt: pkg.name },
     cardImage: card ? { url: card.url, alt: card.alt } : { url: "", alt: pkg.name },
     gallery: gallery.map((image) => ({ url: image.url, alt: image.alt })),
-    priceTiers: byId(priceTiers).map((tier) => ({
-      label: tier.label,
-      price: centsToDollars(tier.priceCents),
-      note: tier.note ?? undefined,
-    })),
     startingPrice: centsToDollars(pkg.startingPriceCents),
     priceIsPlaceholder: pkg.priceIsPlaceholder,
     capacity: pkg.capacity,

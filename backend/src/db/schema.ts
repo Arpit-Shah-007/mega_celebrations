@@ -43,17 +43,6 @@ export const packageImages = sqliteTable("package_images", {
   sortOrder: integer("sort_order", { mode: "number" }).notNull().default(0),
 })
 
-export const packagePriceTiers = sqliteTable("package_price_tiers", {
-  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-  packageId: integer("package_id", { mode: "number" })
-    .notNull()
-    .references(() => packages.id, { onDelete: "cascade" }),
-  label: text("label").notNull(),
-  priceCents: integer("price_cents", { mode: "number" }).notNull(),
-  note: text("note"),
-  sortOrder: integer("sort_order", { mode: "number" }).notNull().default(0),
-})
-
 /** Covers both the "Choose Your Theme" and "Popular Add-Ons" grids on a package page. */
 export const packageVariants = sqliteTable("package_variants", {
   id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),

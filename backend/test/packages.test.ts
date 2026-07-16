@@ -1,7 +1,7 @@
 import { env, exports } from "cloudflare:workers"
 import { it, expect } from "vitest"
 import { createDb } from "@/db/client"
-import { packages, packageImages, packagePriceTiers, packageVariants } from "@/db/schema"
+import { packages, packageImages, packageVariants } from "@/db/schema"
 import { readJson } from "./helpers"
 
 // Each `it()` in this file shares the same D1 storage (isolation is per test
@@ -36,7 +36,6 @@ async function seedTentSleepover(slug: string) {
     { packageId: pkg.id, kind: "hero", url: "/media/hero.jpg", alt: "Hero", sortOrder: 0 },
     { packageId: pkg.id, kind: "card", url: "/media/card.jpg", alt: "Card", sortOrder: 0 },
   ])
-  await db.insert(packagePriceTiers).values({ packageId: pkg.id, label: "Per tent", priceCents: 8000, note: null, sortOrder: 0 })
   await db.insert(packageVariants).values([
     { packageId: pkg.id, kind: "theme", name: "Magical Unicorn", priceCents: 8000, isPriceOnRequest: false, imageUrl: null, description: ["A unicorn theme."], sortOrder: 0 },
     { packageId: pkg.id, kind: "theme", name: "Contact Theme", priceCents: null, isPriceOnRequest: true, imageUrl: null, description: null, sortOrder: 1 },
@@ -59,7 +58,6 @@ it("GET /api/packages includes the seeded package in the public shape", async ()
     startingPrice: 80,
     heroImage: { url: "/media/hero.jpg", alt: "Hero" },
     cardImage: { url: "/media/card.jpg", alt: "Card" },
-    priceTiers: [{ label: "Per tent", price: 80 }],
   })
 })
 

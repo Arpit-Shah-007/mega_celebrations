@@ -33,15 +33,6 @@ export interface AdminPackageImageRow {
   sortOrder: number
 }
 
-export interface AdminPackagePriceTierRow {
-  id: number
-  packageId: number
-  label: string
-  priceCents: number
-  note: string | null
-  sortOrder: number
-}
-
 export interface AdminPackageVariantRow {
   id: number
   packageId: number
@@ -58,7 +49,6 @@ export interface AdminPackageVariantRow {
 export interface AdminFullPackage {
   package: AdminPackageRow
   images: AdminPackageImageRow[]
-  priceTiers: AdminPackagePriceTierRow[]
   variants: AdminPackageVariantRow[]
 }
 
@@ -99,7 +89,6 @@ export interface AdminCatalogItemRow {
 
 export type PackageInput = Omit<AdminPackageRow, "id" | "startingPriceCents" | "createdAt" | "updatedAt">
 export type PackageImageInput = Omit<AdminPackageImageRow, "id" | "packageId">
-export type PackagePriceTierInput = Omit<AdminPackagePriceTierRow, "id" | "packageId">
 export type PackageVariantInput = Omit<AdminPackageVariantRow, "id" | "packageId">
 export type AddonCategoryInput = Omit<AdminAddonCategoryRow, "id">
 export type CatalogItemInput = Omit<AdminCatalogItemRow, "id">
@@ -186,18 +175,6 @@ export function deletePackageImage(imageId: number): Promise<{ id: number }> {
 
 export function reorderPackageImages(packageId: number, orderedIds: number[]): Promise<{ reordered: number }> {
   return request(`/api/admin/packages/${packageId}/images/reorder`, { method: "PATCH", body: JSON.stringify({ orderedIds }) })
-}
-
-export function createPriceTier(packageId: number, input: PackagePriceTierInput): Promise<AdminPackagePriceTierRow> {
-  return request(`/api/admin/packages/${packageId}/price-tiers`, { method: "POST", body: JSON.stringify(input) })
-}
-
-export function updatePriceTier(tierId: number, input: Partial<PackagePriceTierInput>): Promise<AdminPackagePriceTierRow> {
-  return request(`/api/admin/packages/price-tiers/${tierId}`, { method: "PATCH", body: JSON.stringify(input) })
-}
-
-export function deletePriceTier(tierId: number): Promise<{ id: number }> {
-  return request(`/api/admin/packages/price-tiers/${tierId}`, { method: "DELETE" })
 }
 
 export function createVariant(packageId: number, input: PackageVariantInput): Promise<AdminPackageVariantRow> {

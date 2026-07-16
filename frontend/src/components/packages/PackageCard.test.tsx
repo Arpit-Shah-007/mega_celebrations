@@ -14,7 +14,6 @@ const pkg: Package = {
   heroImage: { url: "/media/hero.jpg", alt: "Row of decorated teepee tents" },
   cardImage: { url: "/media/card.jpg", alt: "Row of decorated teepee tents" },
   gallery: [],
-  priceTiers: [{ label: "Per tent", price: 80 }],
   startingPrice: 80,
   capacity: "4-10 guests",
   spaceRequirement: "Indoor space",

@@ -3,12 +3,6 @@ export type PackageTag = "Dining" | "Indoor" | "Lounge" | "Outdoor" | "Sleepover
 
 export const ALL_PACKAGE_TAGS: PackageTag[] = ["Dining", "Indoor", "Lounge", "Outdoor", "Sleepover"]
 
-export interface PriceTier {
-  label: string
-  price: number
-  note?: string
-}
-
 export interface ImageRef {
   url: string
   alt: string
@@ -35,7 +29,6 @@ export interface Package {
   heroImage: ImageRef
   cardImage: ImageRef
   gallery: ImageRef[]
-  priceTiers: PriceTier[]
   startingPrice: number
   priceIsPlaceholder?: boolean
   capacity: string

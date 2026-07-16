@@ -167,16 +167,6 @@ export function PackageDetailPage() {
 
               <h3 className="mt-6 text-sm font-bold uppercase tracking-wide text-navy">Pricing</h3>
               <ul className="mt-4 space-y-1.5">
-                {pkg.priceTiers.map((tier) => (
-                  <li key={tier.label} className="flex items-start gap-3">
-                    <CheckBadge />
-                    <span className="leading-snug text-body">
-                      {tier.label}
-                      {tier.price > 0 ? `: $${tier.price}` : ""}
-                      {tier.note ? ` (${tier.note})` : ""}
-                    </span>
-                  </li>
-                ))}
                 {!pkg.priceIsPlaceholder ? (
                   <li className="flex items-start gap-3">
                     <CheckBadge />

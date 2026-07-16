@@ -1,40 +1,38 @@
 import { Hono } from "hono"
 import { and, eq, getTableColumns } from "drizzle-orm"
 import { createDb, type Database } from "@/db/client"
-import { packageImages, packagePriceTiers, packages, packageVariants } from "@/db/schema"
-import {
-  packageImageInputSchema,
-  packageInputSchema,
-  packagePriceTierInputSchema,
-  packageVariantInputSchema,
-  reorderInputSchema,
-} from "@/lib/validation"
+import { packageImages, packages, packageVariants } from "@/db/schema"
+import { packageImageInputSchema, packageInputSchema, packageVariantInputSchema, reorderInputSchema } from "@/lib/validation"
 import { ok, fail } from "@/lib/response"
 import type { Env } from "@/types"
 
 export const adminPackagesRoute = new Hono<{ Bindings: Env }>()
 
+// Starting price is derived from the cheapest priced "theme" variant — themes are
+// the only per-option pricing packages have now that price tiers are gone.
 async function recomputeStartingPrice(db: Database, packageId: number) {
-  const tiers = await db.select().from(packagePriceTiers).where(eq(packagePriceTiers.packageId, packageId))
-  const startingPriceCents = tiers.length > 0 ? Math.min(...tiers.map((tier) => tier.priceCents)) : 0
+  const themes = await db
+    .select()
+    .from(packageVariants)
+    .where(and(eq(packageVariants.packageId, packageId), eq(packageVariants.kind, "theme")))
+  const pricedThemes = themes.filter((theme) => theme.priceCents != null && !theme.isPriceOnRequest)
+  const startingPriceCents = pricedThemes.length > 0 ? Math.min(...pricedThemes.map((theme) => theme.priceCents as number)) : 0
   await db.update(packages).set({ startingPriceCents, updatedAt: Date.now() }).where(eq(packages.id, packageId))
 }
 
 async function loadFullPackage(db: Database, packageId: number) {
   const [row] = await db.select().from(packages).where(eq(packages.id, packageId)).limit(1)
   if (!row) return null
-  const [imageRows, tierRows, variantRows] = await Promise.all([
+  const [imageRows, variantRows] = await Promise.all([
     db.select().from(packageImages).where(eq(packageImages.packageId, packageId)),
-    db.select().from(packagePriceTiers).where(eq(packagePriceTiers.packageId, packageId)),
     db.select().from(packageVariants).where(eq(packageVariants.packageId, packageId)),
   ])
-  return { row, imageRows, tierRows, variantRows }
+  return { row, imageRows, variantRows }
 }
 
 async function deletePackageCascade(db: Database, packageId: number) {
   await db.batch([
     db.delete(packageImages).where(eq(packageImages.packageId, packageId)),
-    db.delete(packagePriceTiers).where(eq(packagePriceTiers.packageId, packageId)),
     db.delete(packageVariants).where(eq(packageVariants.packageId, packageId)),
     db.delete(packages).where(eq(packages.id, packageId)),
   ])
@@ -75,7 +73,7 @@ adminPackagesRoute.get("/:id", async (c) => {
   const db = createDb(c.env.DB)
   const full = await loadFullPackage(db, packageId)
   if (!full) return fail(c, "Package not found.", 404)
-  return ok(c, { package: full.row, images: full.imageRows, priceTiers: full.tierRows, variants: full.variantRows })
+  return ok(c, { package: full.row, images: full.imageRows, variants: full.variantRows })
 })
 
 adminPackagesRoute.patch("/:id", async (c) => {
@@ -157,46 +155,6 @@ adminPackagesRoute.patch("/:id/images/reorder", async (c) => {
   return ok(c, { reordered: parsed.data.orderedIds.length })
 })
 
-// --- Price tiers ---
-
-adminPackagesRoute.post("/:id/price-tiers", async (c) => {
-  const packageId = Number(c.req.param("id"))
-  const parsed = packagePriceTierInputSchema.safeParse(await c.req.json().catch(() => null))
-  if (!parsed.success) {
-    return fail(c, parsed.error.issues.map((issue) => issue.message).join(" "), 400)
-  }
-
-  const db = createDb(c.env.DB)
-  const [inserted] = await db
-    .insert(packagePriceTiers)
-    .values({ ...parsed.data, note: parsed.data.note ?? null, packageId })
-    .returning()
-  await recomputeStartingPrice(db, packageId)
-  return ok(c, inserted, 201)
-})
-
-adminPackagesRoute.patch("/price-tiers/:tierId", async (c) => {
-  const tierId = Number(c.req.param("tierId"))
-  const parsed = packagePriceTierInputSchema.partial().safeParse(await c.req.json().catch(() => null))
-  if (!parsed.success) {
-    return fail(c, parsed.error.issues.map((issue) => issue.message).join(" "), 400)
-  }
-
-  const db = createDb(c.env.DB)
-  const [updated] = await db.update(packagePriceTiers).set(parsed.data).where(eq(packagePriceTiers.id, tierId)).returning()
-  if (!updated) return fail(c, "Price tier not found.", 404)
-  await recomputeStartingPrice(db, updated.packageId)
-  return ok(c, updated)
-})
-
-adminPackagesRoute.delete("/price-tiers/:tierId", async (c) => {
-  const tierId = Number(c.req.param("tierId"))
-  const db = createDb(c.env.DB)
-  const [deleted] = await db.delete(packagePriceTiers).where(eq(packagePriceTiers.id, tierId)).returning()
-  if (deleted) await recomputeStartingPrice(db, deleted.packageId)
-  return ok(c, { id: tierId })
-})
-
 // --- Variants (themes + popular add-ons) ---
 
 adminPackagesRoute.post("/:id/variants", async (c) => {
@@ -217,6 +175,7 @@ adminPackagesRoute.post("/:id/variants", async (c) => {
       description: parsed.data.description ?? null,
     })
     .returning()
+  await recomputeStartingPrice(db, packageId)
 
   return ok(c, inserted, 201)
 })
@@ -231,12 +190,15 @@ adminPackagesRoute.patch("/variants/:variantId", async (c) => {
   const db = createDb(c.env.DB)
   const [updated] = await db.update(packageVariants).set(parsed.data).where(eq(packageVariants.id, variantId)).returning()
   if (!updated) return fail(c, "Variant not found.", 404)
+  await recomputeStartingPrice(db, updated.packageId)
   return ok(c, updated)
 })
 
 adminPackagesRoute.delete("/variants/:variantId", async (c) => {
   const variantId = Number(c.req.param("variantId"))
-  await createDb(c.env.DB).delete(packageVariants).where(eq(packageVariants.id, variantId))
+  const db = createDb(c.env.DB)
+  const [deleted] = await db.delete(packageVariants).where(eq(packageVariants.id, variantId)).returning()
+  if (deleted) await recomputeStartingPrice(db, deleted.packageId)
   return ok(c, { id: variantId })
 })
 

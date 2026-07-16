@@ -17,7 +17,6 @@ const pkg: Package = {
   heroImage: { url: "/media/hero.jpg", alt: "Mega Lounge photo" },
   cardImage: { url: "/media/card.jpg", alt: "Mega Lounge photo" },
   gallery: [],
-  priceTiers: [],
   startingPrice: 500,
   capacity: "10-20 guests",
   spaceRequirement: "200 sq ft",

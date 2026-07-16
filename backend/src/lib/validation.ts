@@ -31,13 +31,6 @@ export const packageImageInputSchema = z.object({
   sortOrder: z.number().int().optional().default(0),
 })
 
-export const packagePriceTierInputSchema = z.object({
-  label: z.string().min(1),
-  priceCents: z.number().int().nonnegative(),
-  note: z.string().nullable().optional(),
-  sortOrder: z.number().int().optional().default(0),
-})
-
 export const packageVariantInputSchema = z.object({
   kind: z.enum(["theme", "addon"]),
   name: z.string().min(1),

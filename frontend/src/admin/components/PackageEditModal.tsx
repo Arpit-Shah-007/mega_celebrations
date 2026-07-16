@@ -4,26 +4,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { X } from "lucide-react"
 import {
   createPackageImage,
-  createPriceTier,
   createVariant,
   deletePackageImage,
-  deletePriceTier,
   deleteVariant,
   fetchAdminPackage,
-  reorderPackageImages,
-  reorderVariants,
   updateAdminPackage,
   updatePackageImage,
-  updatePriceTier,
   updateVariant,
+  uploadImage,
+  reorderVariants,
   type AdminPackageImageRow,
-  type AdminPackagePriceTierRow,
   type AdminPackageVariantRow,
   type AdminPackageRow,
 } from "@/lib/adminApi"
 import { ALL_PACKAGE_TAGS } from "@/types"
 import { AdminButton, Card, Field, Input, TextArea } from "@/admin/components/AdminForm"
 import { ImageUploadField } from "@/admin/components/ImageUploadField"
+import { MediaStripField } from "@/admin/components/MediaStripField"
 
 interface PackageEditModalProps {
   packageId: number
@@ -31,10 +28,20 @@ interface PackageEditModalProps {
   onSaved: () => void
 }
 
-/** Full package editor (details, images, pricing, themes, add-ons) as a modal — replaces the old dedicated /admin/packages/:id page so managing a package no longer means leaving the table. */
+type PackageEditTab = "details" | "images" | "themes" | "addons"
+
+const TABS: { id: PackageEditTab; label: string }[] = [
+  { id: "details", label: "Details" },
+  { id: "images", label: "Images" },
+  { id: "themes", label: "Themes" },
+  { id: "addons", label: "Popular Add-Ons" },
+]
+
+/** Full package editor (details, images, themes, add-ons) as a modal — replaces the old dedicated /admin/packages/:id page so managing a package no longer means leaving the table. Tabbed instead of one long stacked scroll so each section is its own bounded view. */
 export function PackageEditModal({ packageId, onClose, onSaved }: PackageEditModalProps) {
   const { data, isPending } = useQuery({ queryKey: ["admin", "package", packageId], queryFn: () => fetchAdminPackage(packageId) })
   const queryClient = useQueryClient()
+  const [activeTab, setActiveTab] = useState<PackageEditTab>("details")
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["admin", "package", packageId] })
@@ -72,16 +79,35 @@ export function PackageEditModal({ packageId, onClose, onSaved }: PackageEditMod
           </button>
         </div>
 
+        <div className="flex shrink-0 border-b border-border">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              aria-current={activeTab === tab.id}
+              className={`cursor-pointer px-4 py-2.5 text-sm font-bold transition-colors ${
+                activeTab === tab.id ? "border-b-2 border-pink text-navy" : "text-ui-gray hover:text-navy"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-col gap-6 overflow-y-auto p-5 sm:p-6">
           {isPending || !data ? (
             <p className="text-sm text-ui-gray">Loading…</p>
           ) : (
             <>
-              <PackageBaseForm packageId={packageId} initial={data.package} onSaved={invalidate} />
-              <PackageImagesCard packageId={packageId} images={data.images} onChanged={invalidate} />
-              <PriceTiersCard packageId={packageId} tiers={data.priceTiers} onChanged={invalidate} />
-              <VariantsCard packageId={packageId} variants={data.variants} kind="theme" title="Themes" onChanged={invalidate} />
-              <VariantsCard packageId={packageId} variants={data.variants} kind="addon" title="Popular Add-Ons" onChanged={invalidate} />
+              {activeTab === "details" ? <PackageBaseForm packageId={packageId} initial={data.package} onSaved={invalidate} /> : null}
+              {activeTab === "images" ? <PackageImagesCard packageId={packageId} images={data.images} onChanged={invalidate} /> : null}
+              {activeTab === "themes" ? (
+                <VariantsCard packageId={packageId} variants={data.variants} kind="theme" title="Themes" onChanged={invalidate} />
+              ) : null}
+              {activeTab === "addons" ? (
+                <VariantsCard packageId={packageId} variants={data.variants} kind="addon" title="Popular Add-Ons" onChanged={invalidate} />
+              ) : null}
             </>
           )}
         </div>
@@ -215,7 +241,8 @@ function PackageImagesCard({
   const card = images.find((image) => image.kind === "card")
   const gallery = [...images.filter((image) => image.kind === "gallery")].sort((a, b) => a.sortOrder - b.sortOrder)
 
-  const upsertSingleton = async (kind: "hero" | "card", existing: AdminPackageImageRow | undefined, url: string) => {
+  const upsertSingleton = async (kind: "hero" | "card", existing: AdminPackageImageRow | undefined, file: File) => {
+    const { url } = await uploadImage(file)
     if (existing) {
       await updatePackageImage(existing.id, { url })
     } else {
@@ -224,141 +251,54 @@ function PackageImagesCard({
     onChanged()
   }
 
-  const addGalleryImage = async (url: string) => {
+  const removeSingleton = async (existing: AdminPackageImageRow | undefined) => {
+    if (!existing) return
+    await deletePackageImage(existing.id)
+    onChanged()
+  }
+
+  const addGalleryImage = async (file: File) => {
+    const { url } = await uploadImage(file)
     await createPackageImage(packageId, { kind: "gallery", url, alt: "", sortOrder: gallery.length })
     onChanged()
   }
 
-  const moveGalleryImage = async (index: number, direction: -1 | 1) => {
-    const targetIndex = index + direction
-    if (targetIndex < 0 || targetIndex >= gallery.length) return
-    const reordered = [...gallery]
-    ;[reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]]
-    await reorderPackageImages(packageId, reordered.map((image) => image.id))
+  const removeGalleryImage = async (index: number) => {
+    const image = gallery[index]
+    if (!image) return
+    await deletePackageImage(image.id)
     onChanged()
   }
 
   return (
     <Card title="Images">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <ImageUploadField label="Hero (detail-page banner)" currentUrl={hero?.url ?? ""} onUploaded={(url) => upsertSingleton("hero", hero, url)} />
-        <ImageUploadField label="Card (listing thumbnail)" currentUrl={card?.url ?? ""} onUploaded={(url) => upsertSingleton("card", card, url)} />
+        <MediaStripField
+          label="Hero (detail-page banner)"
+          required
+          maxImages={1}
+          images={hero ? [hero.url] : []}
+          onAdd={(file) => upsertSingleton("hero", hero, file)}
+          onRemove={() => removeSingleton(hero)}
+        />
+        <MediaStripField
+          label="Card (listing thumbnail)"
+          required
+          maxImages={1}
+          images={card ? [card.url] : []}
+          onAdd={(file) => upsertSingleton("card", card, file)}
+          onRemove={() => removeSingleton(card)}
+        />
       </div>
 
       <div className="mt-5">
-        <p className="mb-2 text-sm font-semibold text-navy">Gallery ({gallery.length})</p>
-        <div className="flex flex-wrap gap-3">
-          {gallery.map((image, index) => (
-            <div key={image.id} className="relative w-24">
-              <img src={image.url} alt="" className="h-24 w-24 object-cover" />
-              <div className="mt-1 flex justify-between text-xs">
-                <button type="button" onClick={() => moveGalleryImage(index, -1)} disabled={index === 0} className="disabled:opacity-30">
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  onClick={() => moveGalleryImage(index, 1)}
-                  disabled={index === gallery.length - 1}
-                  className="disabled:opacity-30"
-                >
-                  ↓
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await deletePackageImage(image.id)
-                    onChanged()
-                  }}
-                  className="text-red-600"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-3 max-w-xs">
-          <ImageUploadField label="Add gallery photo" currentUrl="" onUploaded={addGalleryImage} />
-        </div>
-      </div>
-    </Card>
-  )
-}
-
-function PriceTiersCard({
-  packageId,
-  tiers,
-  onChanged,
-}: {
-  packageId: number
-  tiers: AdminPackagePriceTierRow[]
-  onChanged: () => void
-}) {
-  const sorted = [...tiers].sort((a, b) => a.sortOrder - b.sortOrder)
-
-  return (
-    <Card
-      title="Price Tiers"
-      action={
-        <AdminButton
-          onClick={async () => {
-            await createPriceTier(packageId, { label: "New tier", priceCents: 0, note: null, sortOrder: tiers.length })
-            onChanged()
-          }}
-        >
-          + Add Tier
-        </AdminButton>
-      }
-    >
-      <div className="flex flex-col gap-2">
-        {sorted.map((tier) => (
-          <div key={tier.id} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_120px_1fr_auto] sm:items-end">
-            <Field label="Label">
-              <Input
-                defaultValue={tier.label}
-                onBlur={async (e) => {
-                  if (e.target.value !== tier.label) {
-                    await updatePriceTier(tier.id, { label: e.target.value })
-                    onChanged()
-                  }
-                }}
-              />
-            </Field>
-            <Field label="Price ($)">
-              <Input
-                type="number"
-                defaultValue={tier.priceCents / 100}
-                onBlur={async (e) => {
-                  const cents = Math.round(Number(e.target.value) * 100)
-                  if (cents !== tier.priceCents) {
-                    await updatePriceTier(tier.id, { priceCents: cents })
-                    onChanged()
-                  }
-                }}
-              />
-            </Field>
-            <Field label="Note">
-              <Input
-                defaultValue={tier.note ?? ""}
-                onBlur={async (e) => {
-                  if (e.target.value !== (tier.note ?? "")) {
-                    await updatePriceTier(tier.id, { note: e.target.value || null })
-                    onChanged()
-                  }
-                }}
-              />
-            </Field>
-            <AdminButton
-              variant="danger"
-              onClick={async () => {
-                await deletePriceTier(tier.id)
-                onChanged()
-              }}
-            >
-              Delete
-            </AdminButton>
-          </div>
-        ))}
+        <MediaStripField
+          label={`Gallery (${gallery.length})`}
+          maxImages={50}
+          images={gallery.map((image) => image.url)}
+          onAdd={addGalleryImage}
+          onRemove={removeGalleryImage}
+        />
       </div>
     </Card>
   )

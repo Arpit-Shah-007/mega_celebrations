@@ -24,7 +24,6 @@ function buildPackage(slug: string, tags: Package["tags"]): Package {
     heroImage: { url: "/media/hero.jpg", alt: "Hero" },
     cardImage: { url: "/media/card.jpg", alt: "Card" },
     gallery: [],
-    priceTiers: [{ label: "Flat rate", price: 100 }],
     startingPrice: 100,
     capacity: "Up to 10 guests",
     spaceRequirement: "10x10ft",

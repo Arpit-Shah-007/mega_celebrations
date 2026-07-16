@@ -23,7 +23,6 @@ const samplePackage: Package = {
   heroImage: { url: "/media/hero.jpg", alt: "Hero" },
   cardImage: { url: "/media/card.jpg", alt: "Card" },
   gallery: [],
-  priceTiers: [{ label: "Per tent", price: 80 }],
   startingPrice: 80,
   capacity: "4-10 guests",
   spaceRequirement: "Indoor space",
