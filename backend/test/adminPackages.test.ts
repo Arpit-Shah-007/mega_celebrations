@@ -34,36 +34,36 @@ it("admin routes are reachable with a valid admin session", async () => {
   expect(response.status).toBe(200)
 })
 
-it("creating a package defaults startingPriceCents to 0 with no price tiers", async () => {
+it("creating a package defaults startingPriceCents to 0 with no themes", async () => {
   const created = await createPackage("test-package-defaults")
   expect(created.startingPriceCents).toBe(0)
 })
 
-it("adding price tiers recomputes startingPriceCents to the minimum tier price", async () => {
-  const pkg = await createPackage("test-package-tiers")
+it("adding theme variants recomputes startingPriceCents to the cheapest theme's price", async () => {
+  const pkg = await createPackage("test-package-themes")
 
-  await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/price-tiers`, {
+  await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/variants`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ label: "8 guests", priceCents: 50000 }),
+    body: JSON.stringify({ kind: "theme", name: "8 guests", priceCents: 50000 }),
   })
-  const secondTierResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/price-tiers`, {
+  const secondThemeResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/variants`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ label: "16 guests", priceCents: 80000 }),
+    body: JSON.stringify({ kind: "theme", name: "16 guests", priceCents: 80000 }),
   })
-  const secondTier = (await readJson<{ data: { id: number } }>(secondTierResponse)).data
+  const secondTheme = (await readJson<{ data: { id: number } }>(secondThemeResponse)).data
 
   const afterAdd = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
   const afterAddBody = await readJson<{ data: { package: AdminPackage } }>(afterAdd)
   expect(afterAddBody.data.package.startingPriceCents).toBe(50000)
 
-  await adminFetch(`https://example.com/api/admin/packages/price-tiers/${secondTier.id}`, { method: "DELETE" })
+  await adminFetch(`https://example.com/api/admin/packages/variants/${secondTheme.id}`, { method: "DELETE" })
 
   const afterDelete = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
-  const afterDeleteBody = await readJson<{ data: { package: AdminPackage; priceTiers: unknown[] } }>(afterDelete)
+  const afterDeleteBody = await readJson<{ data: { package: AdminPackage; variants: unknown[] } }>(afterDelete)
   expect(afterDeleteBody.data.package.startingPriceCents).toBe(50000)
-  expect(afterDeleteBody.data.priceTiers).toHaveLength(1)
+  expect(afterDeleteBody.data.variants).toHaveLength(1)
 })
 
 it("rejects a package payload missing required fields", async () => {
@@ -75,7 +75,7 @@ it("rejects a package payload missing required fields", async () => {
   expect(response.status).toBe(400)
 })
 
-it("deleting a package cascades to its images, tiers, and variants", async () => {
+it("deleting a package cascades to its images and variants", async () => {
   const pkg = await createPackage("test-package-delete")
   await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/images`, {
     method: "POST",

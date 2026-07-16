@@ -1,7 +1,7 @@
 import { Hono } from "hono"
 import { eq, inArray } from "drizzle-orm"
 import { createDb } from "@/db/client"
-import { packageImages, packagePriceTiers, packages, packageVariants } from "@/db/schema"
+import { packageImages, packages, packageVariants } from "@/db/schema"
 import { serializePackage } from "@/lib/serialize"
 import { ok, fail } from "@/lib/response"
 import type { Env } from "@/types"
@@ -16,9 +16,8 @@ publicPackagesRoute.get("/", async (c) => {
   }
 
   const packageIds = packageRows.map((row) => row.id)
-  const [imageRows, tierRows, variantRows] = await Promise.all([
+  const [imageRows, variantRows] = await Promise.all([
     db.select().from(packageImages).where(inArray(packageImages.packageId, packageIds)),
-    db.select().from(packagePriceTiers).where(inArray(packagePriceTiers.packageId, packageIds)),
     db.select().from(packageVariants).where(inArray(packageVariants.packageId, packageIds)),
   ])
 
@@ -26,7 +25,6 @@ publicPackagesRoute.get("/", async (c) => {
     serializePackage(
       row,
       imageRows.filter((image) => image.packageId === row.id),
-      tierRows.filter((tier) => tier.packageId === row.id),
       variantRows.filter((variant) => variant.packageId === row.id),
     ),
   )
@@ -41,11 +39,10 @@ publicPackagesRoute.get("/:slug", async (c) => {
     return fail(c, "Package not found.", 404)
   }
 
-  const [imageRows, tierRows, variantRows] = await Promise.all([
+  const [imageRows, variantRows] = await Promise.all([
     db.select().from(packageImages).where(eq(packageImages.packageId, row.id)),
-    db.select().from(packagePriceTiers).where(eq(packagePriceTiers.packageId, row.id)),
     db.select().from(packageVariants).where(eq(packageVariants.packageId, row.id)),
   ])
 
-  return ok(c, serializePackage(row, imageRows, tierRows, variantRows))
+  return ok(c, serializePackage(row, imageRows, variantRows))
 })
