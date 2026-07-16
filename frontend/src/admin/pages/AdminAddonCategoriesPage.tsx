@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
@@ -28,6 +28,8 @@ const PENDING_DESCRIPTION = "New category description — edit me."
 export function AdminAddonCategoriesPage() {
   const queryClient = useQueryClient()
   const [deletingCategory, setDeletingCategory] = useState<AdminAddonCategoryRow | null>(null)
+  const [pendingScrollId, setPendingScrollId] = useState<number | null>(null)
+  const categoryRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const { data: categories, isPending: categoriesPending } = useQuery({
     queryKey: ["admin", "addon-categories"],
     queryFn: fetchAdminAddonCategories,
@@ -41,6 +43,17 @@ export function AdminAddonCategoriesPage() {
     queryClient.invalidateQueries({ queryKey: ["admin", "addon-categories"] })
     queryClient.invalidateQueries({ queryKey: ["admin", "catalog-items", "add_on_category"] })
   }
+
+  // Scrolls to a just-created category once its card has rendered — createAddonCategory
+  // always appends to the bottom of the list, so without this the admin lands on a page
+  // that looks unchanged and has to scroll down themselves to find and fill it in.
+  useEffect(() => {
+    if (pendingScrollId == null) return
+    const element = categoryRefs.current[pendingScrollId]
+    if (!element) return
+    element.scrollIntoView({ behavior: "smooth", block: "start" })
+    setPendingScrollId(null)
+  }, [pendingScrollId, categories])
 
   if (categoriesPending || itemsPending || !categories || !items) {
     return <p className="text-sm text-ui-gray">Loading…</p>
@@ -70,7 +83,7 @@ export function AdminAddonCategoriesPage() {
           aria-label="New Category"
           onClick={async () => {
             try {
-              await createAddonCategory({
+              const created = await createAddonCategory({
                 slug: `new-category-${Date.now()}`,
                 name: PENDING_NAME,
                 tagline: PENDING_TAGLINE,
@@ -82,6 +95,7 @@ export function AdminAddonCategoriesPage() {
                 sortOrder: sorted.length,
               })
               invalidate()
+              setPendingScrollId(created.id)
             } catch (error) {
               window.alert(error instanceof Error ? error.message : "Failed to create category.")
             }
@@ -91,16 +105,17 @@ export function AdminAddonCategoriesPage() {
         </AdminButton>
       </div>
       {sorted.map((category, index) => (
-        <CategoryCard
-          key={category.id}
-          category={category}
-          items={items.filter((item) => item.addonCategoryId === category.id)}
-          onChanged={invalidate}
-          onMove={(direction) => moveCategory(index, direction)}
-          onDelete={() => setDeletingCategory(category)}
-          canMoveUp={index > 0}
-          canMoveDown={index < sorted.length - 1}
-        />
+        <div key={category.id} ref={(element) => { categoryRefs.current[category.id] = element }}>
+          <CategoryCard
+            category={category}
+            items={items.filter((item) => item.addonCategoryId === category.id)}
+            onChanged={invalidate}
+            onMove={(direction) => moveCategory(index, direction)}
+            onDelete={() => setDeletingCategory(category)}
+            canMoveUp={index > 0}
+            canMoveDown={index < sorted.length - 1}
+          />
+        </div>
       ))}
 
       {deletingCategory ? (
