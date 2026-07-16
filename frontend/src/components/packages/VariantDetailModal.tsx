@@ -70,7 +70,6 @@ export function VariantDetailModal({ variant, namespace, headingLabel, onClose }
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          onClick={onClose}
           role="dialog"
           aria-modal="true"
           aria-label={variant.name}
