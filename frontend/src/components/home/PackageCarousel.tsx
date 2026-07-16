@@ -24,10 +24,15 @@ export function PackageCarousel() {
   if (isPending) return <PageLoadingState />
   if (isError || !packages) return <PageErrorState />
 
-  const pageCount = Math.ceil(packages.length / VISIBLE)
+  // Only show full pages of 4 — a trailing partial page (e.g. 1 leftover card out of
+  // 13) is dropped entirely rather than shown as a short last page. Packages below the
+  // page size are shown as-is so the carousel never ends up empty.
+  const pageCount = Math.max(1, Math.floor(packages.length / VISIBLE))
+  const visibleCount = packages.length >= VISIBLE ? pageCount * VISIBLE : packages.length
+  const visiblePackages = packages.slice(0, visibleCount)
   const maxStart = (pageCount - 1) * VISIBLE
 
-  const visible = packages.slice(start, start + VISIBLE)
+  const visible = visiblePackages.slice(start, start + VISIBLE)
 
   const goToPrevious = () => {
     setDirection(-1)

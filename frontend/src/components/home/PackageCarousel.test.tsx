@@ -70,19 +70,40 @@ describe("PackageCarousel", () => {
     })
   })
 
-  it("goes to the last page when Previous is clicked from the first page (round scroll)", async () => {
+  it("goes to the last full page when Previous is clicked from the first page (round scroll)", async () => {
     const user = userEvent.setup()
     renderCarousel()
 
     await user.click(await screen.findByRole("button", { name: "Previous packages" }))
 
-    const pageCount = Math.ceil(packages.length / VISIBLE)
+    // 10 packages only make 2 full pages of 4 — the trailing 2 (indices 8-9) are dropped,
+    // so the last page starts at index 4, not 8.
+    const pageCount = Math.floor(packages.length / VISIBLE)
     const lastPageStart = (pageCount - 1) * VISIBLE
     const lastPagePackage = packages[lastPageStart]
 
     await waitFor(() => {
       expect(screen.getAllByText(lastPagePackage.name).length).toBeGreaterThan(0)
     })
+  })
+
+  it("never renders a trailing partial page of packages", async () => {
+    const user = userEvent.setup()
+    renderCarousel()
+
+    await user.click(await screen.findByRole("button", { name: "Next packages" }))
+    await waitFor(() => {
+      expect(screen.getAllByText(packages[4].name).length).toBeGreaterThan(0)
+    })
+
+    // Advancing past the last full page loops back to the first page — packages[8] and
+    // packages[9] (the leftover partial group of 2) should never appear.
+    await user.click(screen.getByRole("button", { name: "Next packages" }))
+    await waitFor(() => {
+      expect(screen.getAllByText(packages[0].name).length).toBeGreaterThan(0)
+    })
+    expect(screen.queryByText(packages[8].name)).not.toBeInTheDocument()
+    expect(screen.queryByText(packages[9].name)).not.toBeInTheDocument()
   })
 
   it("scopes each rendered package card behind a link to its detail page", async () => {

@@ -86,20 +86,20 @@ export function AddPackageModal({ nextSortOrder, onClose, onCreated }: AddPackag
           }}
           className="flex flex-col gap-4 overflow-y-auto p-5 sm:p-6"
         >
-          <Field label="Name">
+          <Field label="Name" required>
             <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
-          <Field label="Tagline">
+          <Field label="Tagline" required>
             <Input value={tagline} onChange={(e) => setTagline(e.target.value)} />
           </Field>
-          <Field label="Description">
+          <Field label="Description" required>
             <TextArea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
           </Field>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Capacity">
+            <Field label="Capacity" required>
               <Input value={capacity} onChange={(e) => setCapacity(e.target.value)} placeholder="Up to 10 guests" />
             </Field>
-            <Field label="Space Requirement">
+            <Field label="Space Requirement" required>
               <Input value={spaceRequirement} onChange={(e) => setSpaceRequirement(e.target.value)} placeholder="10ft x 10ft" />
             </Field>
           </div>
@@ -115,7 +115,7 @@ export function AddPackageModal({ nextSortOrder, onClose, onCreated }: AddPackag
 
           {mutation.isError ? <p className="text-sm font-semibold text-red-600">{mutation.error.message}</p> : null}
 
-          <p className="text-xs text-ui-gray">Photos, pricing, and themes can be added next, right after this is created.</p>
+          <p className="text-xs text-ui-gray">Media, pricing, and themes can be added next, right after this is created.</p>
 
           <AdminButton type="submit" variant="primary" disabled={!canSubmit || mutation.isPending}>
             {mutation.isPending ? "Creating…" : "Create & Continue"}

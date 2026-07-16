@@ -32,7 +32,7 @@ type PackageEditTab = "details" | "images" | "themes" | "addons"
 
 const TABS: { id: PackageEditTab; label: string }[] = [
   { id: "details", label: "Details" },
-  { id: "images", label: "Images" },
+  { id: "images", label: "Media" },
   { id: "themes", label: "Themes" },
   { id: "addons", label: "Popular Add-Ons" },
 ]
@@ -149,19 +149,19 @@ function PackageBaseForm({ packageId, initial, onSaved }: { packageId: number; i
   return (
     <Card title="Details">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Name">
+        <Field label="Name" required>
           <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </Field>
-        <Field label="Slug">
+        <Field label="Slug" required>
           <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
         </Field>
-        <Field label="Tagline">
+        <Field label="Tagline" required>
           <Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} />
         </Field>
-        <Field label="Capacity">
+        <Field label="Capacity" required>
           <Input value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} />
         </Field>
-        <Field label="Space Requirement">
+        <Field label="Space Requirement" required>
           <Input value={form.spaceRequirement} onChange={(e) => setForm({ ...form, spaceRequirement: e.target.value })} />
         </Field>
         <Field label="Sort Order">
@@ -180,7 +180,7 @@ function PackageBaseForm({ packageId, initial, onSaved }: { packageId: number; i
       </div>
 
       <div className="mt-4">
-        <Field label="Description">
+        <Field label="Description" required>
           <TextArea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
         </Field>
       </div>
@@ -271,7 +271,7 @@ function PackageImagesCard({
   }
 
   return (
-    <Card title="Images">
+    <Card title="Media">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <MediaStripField
           label="Hero (detail-page banner)"
@@ -355,7 +355,7 @@ function VariantsCard({
         {filtered.map((variant, index) => (
           <div key={variant.id} className="border border-border/60 p-3">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_auto_auto_auto_auto]">
-              <Field label="Name">
+              <Field label="Name" required>
                 <Input
                   defaultValue={variant.name}
                   onBlur={async (e) => {
@@ -366,7 +366,7 @@ function VariantsCard({
                   }}
                 />
               </Field>
-              <Field label="Price ($)">
+              <Field label="Price ($)" required={!variant.isPriceOnRequest}>
                 <Input
                   type="number"
                   disabled={variant.isPriceOnRequest}
@@ -409,7 +409,7 @@ function VariantsCard({
             </div>
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <ImageUploadField
-                label="Photo"
+                label="Media"
                 currentUrl={variant.imageUrl ?? ""}
                 onUploaded={async (url) => {
                   await updateVariant(variant.id, { imageUrl: url })
@@ -430,7 +430,7 @@ function VariantsCard({
             </div>
 
             <div className="mt-2">
-              <span className="text-sm font-semibold text-navy">Additional photos (shown as switchable thumbnails on the variant's detail popup)</span>
+              <span className="text-sm font-semibold text-navy">Additional media (shown as switchable thumbnails on the variant's detail popup)</span>
               <div className="mt-1 flex flex-wrap items-end gap-3">
                 {(variant.additionalImageUrls ?? []).map((url, index) => (
                   <div key={url} className="flex flex-col items-center gap-1">
@@ -448,7 +448,7 @@ function VariantsCard({
                   </div>
                 ))}
                 <ImageUploadField
-                  label="Add photo"
+                  label="Add media"
                   currentUrl=""
                   onUploaded={async (url) => {
                     const next = [...(variant.additionalImageUrls ?? []), url]

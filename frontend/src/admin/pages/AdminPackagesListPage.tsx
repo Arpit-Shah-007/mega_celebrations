@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, ImageOff } from "lucide-react"
+import { ArrowLeft, ImageOff, Pencil, Trash2 } from "lucide-react"
 import { deleteAdminPackage, fetchAdminPackages, type AdminPackageListRow } from "@/lib/adminApi"
 import { AdminButton, Badge } from "@/admin/components/AdminForm"
 import { PageLoadingState } from "@/components/ui/PageLoadingState"
@@ -47,7 +47,7 @@ export function AdminPackagesListPage() {
           <table className="w-full text-sm">
             <thead className="bg-graytint text-left">
               <tr>
-                <th className="p-3 font-bold uppercase tracking-wide text-navy">Photo</th>
+                <th className="p-3 font-bold uppercase tracking-wide text-navy">Media</th>
                 <th className="p-3 font-bold uppercase tracking-wide text-navy">Name</th>
                 <th className="p-3 font-bold uppercase tracking-wide text-navy">Description</th>
                 <th className="p-3 font-bold uppercase tracking-wide text-navy">Starting Price</th>
@@ -83,18 +83,28 @@ export function AdminPackagesListPage() {
                   </td>
                   <td className="p-3">{pkg.featured ? <Badge tone="blue">Featured</Badge> : null}</td>
                   <td className="p-3 text-right whitespace-nowrap">
-                    <AdminButton onClick={() => setEditingPackageId(pkg.id)} className="mr-2">
-                      Edit
-                    </AdminButton>
-                    <AdminButton
-                      variant="danger"
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditingPackageId(pkg.id)
+                      }}
+                      aria-label={`Edit ${pkg.name}`}
+                      className="mr-3 cursor-pointer text-ui-gray transition-colors hover:text-blue"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation()
                         setDeletingPackage(pkg)
                       }}
+                      aria-label={`Delete ${pkg.name}`}
+                      className="cursor-pointer text-ui-gray transition-colors hover:text-red-600"
                     >
-                      Delete
-                    </AdminButton>
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
