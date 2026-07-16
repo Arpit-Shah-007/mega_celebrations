@@ -2,7 +2,14 @@ import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { useMutation } from "@tanstack/react-query"
 import { Plus, X } from "lucide-react"
-import { createCatalogItem, updateCatalogItem, uploadImage, type AdminCatalogItemRow, type CatalogItemInput } from "@/lib/adminApi"
+import {
+  createCatalogItem,
+  updateCatalogItem,
+  uploadImage,
+  type AdminCatalogItemRow,
+  type CatalogItemInput,
+  type LabelValueRow,
+} from "@/lib/adminApi"
 import { buildFlatFeePricingRows, slugify } from "@/lib/catalogItem"
 import { AdminButton, Field, Input, TextArea } from "@/admin/components/AdminForm"
 
@@ -36,6 +43,7 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [description, setDescription] = useState((item?.description ?? []).join("\n"))
+  const [detailRows, setDetailRows] = useState<LabelValueRow[]>(item?.details ?? [])
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -67,6 +75,18 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
     setImages((current) => current.filter((_, i) => i !== index))
   }
 
+  function handleAddDetailRow() {
+    setDetailRows((current) => [...current, { label: "", value: "" }])
+  }
+
+  function handleDetailRowChange(index: number, field: "label" | "value", newValue: string) {
+    setDetailRows((current) => current.map((row, i) => (i === index ? { ...row, [field]: newValue } : row)))
+  }
+
+  function handleRemoveDetailRow(index: number) {
+    setDetailRows((current) => current.filter((_, i) => i !== index))
+  }
+
   const mutation = useMutation({
     mutationFn: () => {
       const priceCents = isPriceOnRequest || priceDollars.trim() === "" ? null : Math.round(Number(priceDollars) * 100)
@@ -75,6 +95,9 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
         .split("\n")
         .map((line) => line.trim())
         .filter(Boolean)
+      const details = detailRows
+        .map((row) => ({ label: row.label.trim(), value: row.value.trim() }))
+        .filter((row) => row.label.length > 0 && row.value.length > 0)
       const [primaryImage, ...restImages] = images
 
       if (item) {
@@ -86,6 +109,7 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
           imageUrl: primaryImage ?? null,
           additionalImageUrls: restImages.length > 0 ? restImages : null,
           description: descriptionLines,
+          details: details.length > 0 ? details : null,
         })
       }
 
@@ -101,7 +125,7 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
         imageUrl: primaryImage ?? null,
         additionalImageUrls: restImages.length > 0 ? restImages : null,
         description: descriptionLines,
-        details: null,
+        details: details.length > 0 ? details : null,
         pricing,
         sortOrder: createContext.sortOrder,
       }
@@ -188,6 +212,39 @@ export function CatalogItemModal({ item, createContext, onClose, onSaved }: Cata
 
           <Field label="Description (each line shows as a bullet point)" required>
             <TextArea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+          </Field>
+
+          <Field label="Details (optional — e.g. Height, Width)">
+            <div className="flex flex-col gap-2">
+              {detailRows.map((row, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    placeholder="Label (e.g. Height)"
+                    value={row.label}
+                    onChange={(e) => handleDetailRowChange(index, "label", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Input
+                    placeholder="Value (e.g. 6 ft)"
+                    value={row.value}
+                    onChange={(e) => handleDetailRowChange(index, "value", e.target.value)}
+                    className="flex-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveDetailRow(index)}
+                    aria-label="Remove detail row"
+                    className="shrink-0 cursor-pointer text-ui-gray transition-colors hover:text-red-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              <AdminButton type="button" onClick={handleAddDetailRow} className="self-start">
+                <Plus className="mr-1 inline h-3.5 w-3.5" />
+                Add Detail
+              </AdminButton>
+            </div>
           </Field>
 
           <div className="flex flex-wrap items-end gap-4">
