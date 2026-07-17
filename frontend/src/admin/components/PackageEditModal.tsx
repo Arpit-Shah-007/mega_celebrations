@@ -21,6 +21,7 @@ import {
   type AdminPackageImageRow,
   type AdminPackageVariantRow,
   type AdminPackageRow,
+  type PackageInput,
 } from "@/lib/adminApi"
 import { ALL_PACKAGE_TAGS } from "@/types"
 import { AdminButton, Card, Field, Input, TextArea } from "@/admin/components/AdminForm"
