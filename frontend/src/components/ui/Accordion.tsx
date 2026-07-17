@@ -8,6 +8,28 @@ interface AccordionItemProps {
   defaultOpen?: boolean
 }
 
+const URL_PATTERN = /https?:\/\/\S+/g
+
+/** Some FAQ answers (e.g. a package's space-requirements PDF) embed a bare URL — render it as a real link instead of inert text. */
+function renderAnswer(answer: string) {
+  const parts = answer.split(URL_PATTERN)
+  const urls = answer.match(URL_PATTERN) ?? []
+  return parts.flatMap((part, index) => [
+    part,
+    urls[index] ? (
+      <a
+        key={index}
+        href={urls[index]}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-semibold text-blue underline hover:no-underline"
+      >
+        {urls[index]}
+      </a>
+    ) : null,
+  ])
+}
+
 export function AccordionItem({ question, answer, defaultOpen = false }: AccordionItemProps) {
   const [open, setOpen] = useState(defaultOpen)
   const panelId = useId()
@@ -43,7 +65,7 @@ export function AccordionItem({ question, answer, defaultOpen = false }: Accordi
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden bg-white"
           >
-            <p className="whitespace-pre-line px-5 pb-4 pt-4 leading-relaxed text-body">{answer}</p>
+            <p className="whitespace-pre-line px-5 pb-4 pt-4 leading-relaxed text-body">{renderAnswer(answer)}</p>
           </motion.div>
         ) : null}
       </AnimatePresence>
