@@ -1,9 +1,10 @@
 import { centsToDollars, formatPriceDisplay } from "@/lib/money"
-import type { addonCategories, catalogItems, packageImages, packages, packageVariants } from "@/db/schema"
+import type { addonCategories, catalogItems, packageFaqs, packageImages, packages, packageVariants } from "@/db/schema"
 
 type PackageRow = typeof packages.$inferSelect
 type PackageImageRow = typeof packageImages.$inferSelect
 type PackageVariantRow = typeof packageVariants.$inferSelect
+type PackageFaqRow = typeof packageFaqs.$inferSelect
 type AddonCategoryRow = typeof addonCategories.$inferSelect
 type CatalogItemRow = typeof catalogItems.$inferSelect
 
@@ -27,12 +28,13 @@ export function serializeVariant(row: PackageVariantRow) {
  * Matches frontend/src/types/index.ts's Package interface exactly, so pages
  * consuming this need only swap their data source, not their rendering code.
  */
-export function serializePackage(pkg: PackageRow, images: PackageImageRow[], variants: PackageVariantRow[]) {
+export function serializePackage(pkg: PackageRow, images: PackageImageRow[], variants: PackageVariantRow[], faqs: PackageFaqRow[] = []) {
   const hero = images.find((image) => image.kind === "hero")
   const card = images.find((image) => image.kind === "card")
   const gallery = byId(images.filter((image) => image.kind === "gallery"))
   const themes = byId(variants.filter((variant) => variant.kind === "theme")).map(serializeVariant)
   const popularAddOns = byId(variants.filter((variant) => variant.kind === "addon")).map(serializeVariant)
+  const orderedFaqs = byId(faqs).map((faq) => ({ question: faq.question, answer: faq.answer }))
 
   return {
     slug: pkg.slug,
@@ -53,6 +55,7 @@ export function serializePackage(pkg: PackageRow, images: PackageImageRow[], var
     featured: pkg.featured,
     themes: themes.length > 0 ? themes : undefined,
     popularAddOns: popularAddOns.length > 0 ? popularAddOns : undefined,
+    faqs: orderedFaqs.length > 0 ? orderedFaqs : undefined,
   }
 }
 

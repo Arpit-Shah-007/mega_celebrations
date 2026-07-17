@@ -1,8 +1,8 @@
 import { Hono } from "hono"
 import { and, eq, getTableColumns } from "drizzle-orm"
 import { createDb, type Database } from "@/db/client"
-import { packageImages, packages, packageVariants } from "@/db/schema"
-import { packageImageInputSchema, packageInputSchema, packageVariantInputSchema, reorderInputSchema } from "@/lib/validation"
+import { packageFaqs, packageImages, packages, packageVariants } from "@/db/schema"
+import { packageFaqInputSchema, packageImageInputSchema, packageInputSchema, packageVariantInputSchema, reorderInputSchema } from "@/lib/validation"
 import { ok, fail } from "@/lib/response"
 import type { Env } from "@/types"
 
@@ -23,17 +23,19 @@ async function recomputeStartingPrice(db: Database, packageId: number) {
 async function loadFullPackage(db: Database, packageId: number) {
   const [row] = await db.select().from(packages).where(eq(packages.id, packageId)).limit(1)
   if (!row) return null
-  const [imageRows, variantRows] = await Promise.all([
+  const [imageRows, variantRows, faqRows] = await Promise.all([
     db.select().from(packageImages).where(eq(packageImages.packageId, packageId)),
     db.select().from(packageVariants).where(eq(packageVariants.packageId, packageId)),
+    db.select().from(packageFaqs).where(eq(packageFaqs.packageId, packageId)),
   ])
-  return { row, imageRows, variantRows }
+  return { row, imageRows, variantRows, faqRows }
 }
 
 async function deletePackageCascade(db: Database, packageId: number) {
   await db.batch([
     db.delete(packageImages).where(eq(packageImages.packageId, packageId)),
     db.delete(packageVariants).where(eq(packageVariants.packageId, packageId)),
+    db.delete(packageFaqs).where(eq(packageFaqs.packageId, packageId)),
     db.delete(packages).where(eq(packages.id, packageId)),
   ])
 }
@@ -73,7 +75,7 @@ adminPackagesRoute.get("/:id", async (c) => {
   const db = createDb(c.env.DB)
   const full = await loadFullPackage(db, packageId)
   if (!full) return fail(c, "Package not found.", 404)
-  return ok(c, { package: full.row, images: full.imageRows, variants: full.variantRows })
+  return ok(c, { package: full.row, images: full.imageRows, variants: full.variantRows, faqs: full.faqRows })
 })
 
 adminPackagesRoute.patch("/:id", async (c) => {
@@ -212,6 +214,55 @@ adminPackagesRoute.patch("/:id/variants/reorder", async (c) => {
   const updates = parsed.data.orderedIds.map((variantId, index) =>
     db.update(packageVariants).set({ sortOrder: index }).where(eq(packageVariants.id, variantId)),
   )
+  await db.batch(updates as [(typeof updates)[number], ...(typeof updates)[number][]])
+  return ok(c, { reordered: parsed.data.orderedIds.length })
+})
+
+// --- FAQs (admin-managed per package, replaces the old static per-package FAQ selection) ---
+
+adminPackagesRoute.post("/:id/faqs", async (c) => {
+  const packageId = Number(c.req.param("id"))
+  const parsed = packageFaqInputSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) {
+    return fail(c, parsed.error.issues.map((issue) => issue.message).join(" "), 400)
+  }
+
+  const db = createDb(c.env.DB)
+  const [inserted] = await db
+    .insert(packageFaqs)
+    .values({ ...parsed.data, packageId })
+    .returning()
+
+  return ok(c, inserted, 201)
+})
+
+adminPackagesRoute.patch("/faqs/:faqId", async (c) => {
+  const faqId = Number(c.req.param("faqId"))
+  const parsed = packageFaqInputSchema.partial().safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) {
+    return fail(c, parsed.error.issues.map((issue) => issue.message).join(" "), 400)
+  }
+
+  const db = createDb(c.env.DB)
+  const [updated] = await db.update(packageFaqs).set(parsed.data).where(eq(packageFaqs.id, faqId)).returning()
+  if (!updated) return fail(c, "FAQ not found.", 404)
+  return ok(c, updated)
+})
+
+adminPackagesRoute.delete("/faqs/:faqId", async (c) => {
+  const faqId = Number(c.req.param("faqId"))
+  await createDb(c.env.DB).delete(packageFaqs).where(eq(packageFaqs.id, faqId))
+  return ok(c, { id: faqId })
+})
+
+adminPackagesRoute.patch("/:id/faqs/reorder", async (c) => {
+  const parsed = reorderInputSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) {
+    return fail(c, parsed.error.issues.map((issue) => issue.message).join(" "), 400)
+  }
+
+  const db = createDb(c.env.DB)
+  const updates = parsed.data.orderedIds.map((faqId, index) => db.update(packageFaqs).set({ sortOrder: index }).where(eq(packageFaqs.id, faqId)))
   await db.batch(updates as [(typeof updates)[number], ...(typeof updates)[number][]])
   return ok(c, { reordered: parsed.data.orderedIds.length })
 })

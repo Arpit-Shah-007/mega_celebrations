@@ -18,7 +18,6 @@ import { fetchPackageBySlug, fetchPackages } from "@/lib/api"
 import { getRelatedPackages } from "@/lib/relatedPackages"
 import { TestimonialsSection } from "@/components/home/TestimonialsSection"
 import { MEDIA_BASE_URL } from "@/lib/media"
-import { getPackageFaqs } from "@/data/packageFaqs"
 import type { PackageVariant } from "@/types"
 
 /** Matches the live site's "What's Included"/"Pricing" bullet marker: a filled blue circle badge with a white check, not a plain checkmark glyph. */
@@ -95,7 +94,7 @@ export function PackageDetailPage() {
   const relatedPackages = allPackages ? getRelatedPackages(pkg, allPackages, 3) : []
   const Icon = getTagIcon(pkg.tags[0])
   const galleryImages = pkg.gallery.length > 0 ? pkg.gallery.map((image) => image.url) : [pkg.cardImage.url].filter(Boolean)
-  const packageFaqs = getPackageFaqs(pkg.slug)
+  const packageFaqs = pkg.faqs ?? []
 
   return (
     <>
@@ -205,19 +204,21 @@ export function PackageDetailPage() {
         </section>
       ) : null}
 
-      <section
-        className="bg-white bg-top bg-repeat-y py-14 sm:py-20"
-        style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)`, backgroundSize: "100% auto" }}
-      >
-        <Container>
-          <SectionHeading title="Frequently Asked" scriptSuffix="Questions" />
-          <div className="mx-auto mt-10 max-w-5xl">
-            {packageFaqs.map((faq) => (
-              <AccordionItem key={faq.question} question={faq.question} answer={faq.answer} />
-            ))}
-          </div>
-        </Container>
-      </section>
+      {packageFaqs.length > 0 ? (
+        <section
+          className="bg-white bg-top bg-repeat-y py-14 sm:py-20"
+          style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Gray_Background_Shapes.png)`, backgroundSize: "100% auto" }}
+        >
+          <Container>
+            <SectionHeading title="Frequently Asked" scriptSuffix="Questions" />
+            <div className="mx-auto mt-10 max-w-5xl">
+              {packageFaqs.map((faq) => (
+                <AccordionItem key={faq.question} question={faq.question} answer={faq.answer} />
+              ))}
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       <TestimonialsSection />
 

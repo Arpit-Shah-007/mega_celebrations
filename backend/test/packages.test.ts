@@ -1,7 +1,7 @@
 import { env, exports } from "cloudflare:workers"
 import { it, expect } from "vitest"
 import { createDb } from "@/db/client"
-import { packages, packageImages, packageVariants } from "@/db/schema"
+import { packages, packageImages, packageVariants, packageFaqs } from "@/db/schema"
 import { readJson } from "./helpers"
 
 // Each `it()` in this file shares the same D1 storage (isolation is per test
@@ -40,6 +40,10 @@ async function seedTentSleepover(slug: string) {
     { packageId: pkg.id, kind: "theme", name: "Magical Unicorn", priceCents: 8000, isPriceOnRequest: false, imageUrl: null, description: ["A unicorn theme."], sortOrder: 0 },
     { packageId: pkg.id, kind: "theme", name: "Contact Theme", priceCents: null, isPriceOnRequest: true, imageUrl: null, description: null, sortOrder: 1 },
   ])
+  await db.insert(packageFaqs).values([
+    { packageId: pkg.id, question: "How much space is needed?", answer: "It varies by package.", sortOrder: 0 },
+    { packageId: pkg.id, question: "What if I need to cancel?", answer: "See our cancellation policy.", sortOrder: 1 },
+  ])
 
   return pkg
 }
@@ -71,6 +75,19 @@ it("GET /api/packages/:slug formats fixed and on-request variant prices correctl
   expect(body.data.themes).toEqual([
     { name: "Magical Unicorn", price: "$80.00", image: undefined, description: ["A unicorn theme."] },
     { name: "Contact Theme", price: "Contact us for price.", image: undefined, description: undefined },
+  ])
+})
+
+it("GET /api/packages/:slug includes the package's own FAQs in sortOrder", async () => {
+  await seedTentSleepover("tent-sleepover-faqs")
+
+  const response = await exports.default.fetch("https://example.com/api/packages/tent-sleepover-faqs")
+  expect(response.status).toBe(200)
+
+  const body = await readJson<{ data: { faqs: { question: string; answer: string }[] } }>(response)
+  expect(body.data.faqs).toEqual([
+    { question: "How much space is needed?", answer: "It varies by package." },
+    { question: "What if I need to cancel?", answer: "See our cancellation policy." },
   ])
 })
 

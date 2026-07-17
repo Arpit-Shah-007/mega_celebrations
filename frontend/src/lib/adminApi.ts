@@ -46,10 +46,19 @@ export interface AdminPackageVariantRow {
   sortOrder: number
 }
 
+export interface AdminPackageFaqRow {
+  id: number
+  packageId: number
+  question: string
+  answer: string
+  sortOrder: number
+}
+
 export interface AdminFullPackage {
   package: AdminPackageRow
   images: AdminPackageImageRow[]
   variants: AdminPackageVariantRow[]
+  faqs: AdminPackageFaqRow[]
 }
 
 export interface LabelValueRow {
@@ -90,6 +99,7 @@ export interface AdminCatalogItemRow {
 export type PackageInput = Omit<AdminPackageRow, "id" | "startingPriceCents" | "createdAt" | "updatedAt">
 export type PackageImageInput = Omit<AdminPackageImageRow, "id" | "packageId">
 export type PackageVariantInput = Omit<AdminPackageVariantRow, "id" | "packageId">
+export type PackageFaqInput = Omit<AdminPackageFaqRow, "id" | "packageId">
 export type AddonCategoryInput = Omit<AdminAddonCategoryRow, "id">
 export type CatalogItemInput = Omit<AdminCatalogItemRow, "id">
 
@@ -191,6 +201,22 @@ export function deleteVariant(variantId: number): Promise<{ id: number }> {
 
 export function reorderVariants(packageId: number, orderedIds: number[]): Promise<{ reordered: number }> {
   return request(`/api/admin/packages/${packageId}/variants/reorder`, { method: "PATCH", body: JSON.stringify({ orderedIds }) })
+}
+
+export function createPackageFaq(packageId: number, input: PackageFaqInput): Promise<AdminPackageFaqRow> {
+  return request(`/api/admin/packages/${packageId}/faqs`, { method: "POST", body: JSON.stringify(input) })
+}
+
+export function updatePackageFaq(faqId: number, input: Partial<PackageFaqInput>): Promise<AdminPackageFaqRow> {
+  return request(`/api/admin/packages/faqs/${faqId}`, { method: "PATCH", body: JSON.stringify(input) })
+}
+
+export function deletePackageFaq(faqId: number): Promise<{ id: number }> {
+  return request(`/api/admin/packages/faqs/${faqId}`, { method: "DELETE" })
+}
+
+export function reorderPackageFaqs(packageId: number, orderedIds: number[]): Promise<{ reordered: number }> {
+  return request(`/api/admin/packages/${packageId}/faqs/reorder`, { method: "PATCH", body: JSON.stringify({ orderedIds }) })
 }
 
 // --- Add-on categories ---

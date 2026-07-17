@@ -8,6 +8,11 @@ export interface ImageRef {
   alt: string
 }
 
+export interface PackageFaqItem {
+  question: string
+  answer: string
+}
+
 export interface PackageVariant {
   name: string
   price: string
@@ -40,6 +45,8 @@ export interface Package {
   themes?: PackageVariant[]
   /** The live site's "Popular Add-ons" grid on this package's own page — a small, package-specific subset of the full add-on catalog, distinct per package. */
   popularAddOns?: PackageVariant[]
+  /** This package's own "Frequently Asked Questions" accordion — admin-managed per package, distinct from the site-wide FaqItem list. */
+  faqs?: PackageFaqItem[]
 }
 
 export interface AddOnCategory {
