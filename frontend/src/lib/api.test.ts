@@ -1,15 +1,8 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest"
 import { setupServer } from "msw/node"
 import { http, HttpResponse } from "msw"
-import {
-  fetchAddOnCategories,
-  fetchAddOnCategoryBySlug,
-  fetchALaCarteItems,
-  fetchPackageBySlug,
-  fetchPackages,
-  submitQuoteInquiry,
-} from "./api"
-import type { AddOnCategory, CatalogItem, Package, QuoteFormValues, WishlistItem } from "@/types"
+import { fetchAddOnCategories, fetchAddOnCategoryBySlug, fetchALaCarteItems, fetchPackageBySlug, fetchPackages } from "./api"
+import type { AddOnCategory, CatalogItem, Package } from "@/types"
 
 const API_BASE_URL = "http://localhost:8787"
 
@@ -113,31 +106,5 @@ describe("api client", () => {
     )
 
     await expect(fetchALaCarteItems()).resolves.toEqual([sampleCatalogItem])
-  })
-
-  it("submitQuoteInquiry posts the form values with items converted to price cents", async () => {
-    const values: QuoteFormValues = {
-      name: "Jane Doe",
-      email: "jane@example.com",
-      phone: "9085550123",
-      eventDate: "2026-08-01",
-      venue: "Backyard",
-      guestCount: "8 kids",
-      notes: "Unicorn theme",
-    }
-    const items: WishlistItem[] = [{ slug: "theme-tent-sleepover-unicorn", name: "Magical Unicorn", imageSeed: "x", startingPrice: 80 }]
-
-    server.use(
-      http.post(`${API_BASE_URL}/api/quote-inquiries`, async ({ request }) => {
-        const body = await request.json()
-        expect(body).toEqual({
-          ...values,
-          items: [{ slug: "theme-tent-sleepover-unicorn", name: "Magical Unicorn", priceCents: 8000 }],
-        })
-        return HttpResponse.json({ success: true, data: { id: 1 } }, { status: 201 })
-      }),
-    )
-
-    await expect(submitQuoteInquiry(values, items)).resolves.toEqual({ id: 1 })
   })
 })

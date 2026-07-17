@@ -50,6 +50,13 @@
       "when": 1784238126067,
       "tag": "0006_icy_stone_men",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1784319974358,
+      "tag": "0007_late_sunfire",
+      "breakpoints": true
     }
   ]
 }
