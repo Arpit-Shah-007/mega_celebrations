@@ -102,13 +102,3 @@ export interface WishlistItem {
   imageSeed: string
   startingPrice: number
 }
-
-export interface QuoteFormValues {
-  name: string
-  email: string
-  phone: string
-  eventDate: string
-  venue: string
-  guestCount: string
-  notes: string
-}

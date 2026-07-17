@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { useWishlist } from "@/context/useWishlist"
 
 export function FloatingWishlistWidget() {
@@ -12,8 +12,12 @@ export function FloatingWishlistWidget() {
   if (pathname === "/wishlist") return null
 
   return (
-    <Link
-      to="/wishlist"
+    // A plain anchor (not React Router's Link) forces a full page load on
+    // the wishlist page, which the embedded HoneyBook widget script requires —
+    // it only initializes once per page load and can't remount via client-side
+    // navigation alone.
+    <a
+      href="/wishlist"
       aria-label={`View wishlist, ${items.length} item${items.length === 1 ? "" : "s"}`}
       className="fixed bottom-6 right-4 z-40 flex h-12 w-11 flex-col items-center justify-center rounded-sm bg-pink text-white shadow-lift transition hover:bg-pink-dark"
     >
@@ -21,6 +25,6 @@ export function FloatingWishlistWidget() {
         {items.length}
       </span>
       <Heart className="h-5 w-5" fill="currentColor" />
-    </Link>
+    </a>
   )
 }

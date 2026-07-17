@@ -1,35 +1,25 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
-import { render, screen, waitFor } from "@testing-library/react"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
-import { setupServer } from "msw/node"
-import { http, HttpResponse } from "msw"
-import { ToastProvider } from "@/context/ToastContext"
 import { WishlistProvider } from "@/context/WishlistContext"
 import { WishlistPage } from "./WishlistPage"
 import type { WishlistItem } from "@/types"
 
-vi.setConfig({ testTimeout: 15000 })
-
-const API_BASE_URL = "http://localhost:8787"
 const STORAGE_KEY = "mega-celebrations:wishlist"
+const HONEYBOOK_SCRIPT_SRC =
+  "https://widget.honeybook.com/assets_users_production/websiteplacements/placement-controller.min.js"
 
-const server = setupServer(
-  http.post(`${API_BASE_URL}/api/quote-inquiries`, () => HttpResponse.json({ success: true, data: { id: 1 } })),
-)
-
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
+afterEach(() => {
+  document.querySelectorAll(`script[src="${HONEYBOOK_SCRIPT_SRC}"]`).forEach((tag) => tag.remove())
+})
 
 function renderWishlistPage() {
   return render(
     <MemoryRouter>
-      <ToastProvider>
-        <WishlistProvider>
-          <WishlistPage />
-        </WishlistProvider>
-      </ToastProvider>
+      <WishlistProvider>
+        <WishlistPage />
+      </WishlistProvider>
     </MemoryRouter>,
   )
 }
@@ -51,38 +41,26 @@ describe("WishlistPage", () => {
     expect(screen.getByRole("link", { name: "Browse Packages" })).toHaveAttribute("href", "/packages")
   })
 
-  it("shows the wishlist summary and quote form when items are saved", () => {
+  it("shows the wishlist summary and HoneyBook widget when items are saved", () => {
     seedWishlist([{ slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80 }])
 
-    renderWishlistPage()
+    const { container } = renderWishlistPage()
 
     expect(screen.queryByText("Your wishlist is empty")).not.toBeInTheDocument()
     expect(screen.getByText("Tent Sleepover")).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "Request Your Custom Quote" })).toBeInTheDocument()
+    expect(container.querySelector(".hb-p-5de351586567280cf9f3b1e7-1")).toBeInTheDocument()
   })
 
-  it("submits the quote, clears the wishlist, and shows the success panel", async () => {
+  it("lets the visitor remove an item from the cart", async () => {
     const user = userEvent.setup()
     seedWishlist([{ slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80 }])
 
     renderWishlistPage()
 
-    await user.type(screen.getByLabelText("Full name"), "Jane Doe")
-    await user.type(screen.getByLabelText("Email"), "jane@example.com")
-    await user.type(screen.getByLabelText("Phone"), "9085550123")
-    await user.type(screen.getByLabelText("Event date"), "2026-08-01")
-    await user.type(screen.getByLabelText("Venue / address"), "Backyard")
-    await user.type(screen.getByLabelText("Guest count"), "10 kids")
-    await user.click(screen.getByRole("button", { name: "Request My Custom Quote" }))
+    expect(screen.getByText("Tent Sleepover")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Remove Tent Sleepover from wishlist" }))
 
-    expect(
-      await screen.findByRole("heading", { name: "Your quote request is on its way to us" }, { timeout: 3000 }),
-    ).toBeInTheDocument()
-    expect(screen.queryByRole("heading", { name: "Request Your Custom Quote" })).not.toBeInTheDocument()
-
-    await waitFor(() => {
-      const stored = window.localStorage.getItem(STORAGE_KEY)
-      expect(stored ? JSON.parse(stored) : []).toEqual([])
-    })
+    expect(await screen.findByText("Your wishlist is empty")).toBeInTheDocument()
   })
 })

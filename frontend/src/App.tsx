@@ -25,6 +25,9 @@ const FaqsPage = lazy(() => import("@/pages/FaqsPage").then((m) => ({ default: m
 const AboutPage = lazy(() => import("@/pages/AboutPage").then((m) => ({ default: m.AboutPage })))
 const PlanAPartyPage = lazy(() => import("@/pages/PlanAPartyPage").then((m) => ({ default: m.PlanAPartyPage })))
 const WishlistPage = lazy(() => import("@/pages/WishlistPage").then((m) => ({ default: m.WishlistPage })))
+const ContactThankYouPage = lazy(() =>
+  import("@/pages/ContactThankYouPage").then((m) => ({ default: m.ContactThankYouPage })),
+)
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })))
 
 const AdminLayout = lazy(() => import("@/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })))
@@ -63,6 +66,7 @@ function App() {
                 <Route path="about" element={<AboutPage />} />
                 <Route path="plan-a-party" element={<PlanAPartyPage />} />
                 <Route path="wishlist" element={<WishlistPage />} />
+                <Route path="contact-thank-you" element={<ContactThankYouPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Route>
 

@@ -109,34 +109,6 @@ export const catalogItems = sqliteTable("catalog_items", {
   sortOrder: integer("sort_order", { mode: "number" }).notNull().default(0),
 })
 
-/** The /wishlist page's "Request My Custom Quote" form, persisted. */
-export const quoteInquiries = sqliteTable("quote_inquiries", {
-  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
-  phone: text("phone").notNull(),
-  eventDate: text("event_date").notNull(),
-  venue: text("venue").notNull(),
-  guestCount: text("guest_count").notNull(),
-  notes: text("notes"),
-  status: text("status", { enum: ["new", "contacted", "quoted", "won", "lost"] })
-    .notNull()
-    .default("new"),
-  createdAt: integer("created_at", { mode: "number" }).notNull(),
-})
-
-/** Snapshot of the customer's wishlist at submission time — not FK-linked to the catalog (see BACKEND_SPEC.md §5). */
-export const quoteInquiryItems = sqliteTable("quote_inquiry_items", {
-  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-  quoteInquiryId: integer("quote_inquiry_id", { mode: "number" })
-    .notNull()
-    .references(() => quoteInquiries.id, { onDelete: "cascade" }),
-  itemSlug: text("item_slug").notNull(),
-  itemName: text("item_name").notNull(),
-  itemPriceCents: integer("item_price_cents", { mode: "number" }),
-  sortOrder: integer("sort_order", { mode: "number" }).notNull().default(0),
-})
-
 /** One row per failed /api/admin/auth/login attempt, keyed by client IP — throttles brute-force guessing of the single admin credential pair. Rows older than the throttle window are pruned opportunistically on each check rather than via a cron. */
 export const adminLoginAttempts = sqliteTable("admin_login_attempts", {
   id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),

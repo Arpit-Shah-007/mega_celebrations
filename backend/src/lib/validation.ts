@@ -85,24 +85,3 @@ export const catalogItemCreateSchema = catalogItemInputSchema.refine(
 export const reorderInputSchema = z.object({
   orderedIds: z.array(z.number().int()).min(1),
 })
-
-export const quoteInquiryInputSchema = z.object({
-  name: z.string().min(1),
-  email: z.email(),
-  phone: z.string().min(1),
-  eventDate: z.string().min(1),
-  venue: z.string().min(1),
-  guestCount: z.string().min(1),
-  notes: z.string().nullable().optional(),
-  items: z.array(
-    z.object({
-      slug: z.string().min(1),
-      name: z.string().min(1),
-      priceCents: z.number().int().nullable().optional(),
-    }),
-  ),
-})
-
-export const quoteInquiryStatusInputSchema = z.object({
-  status: z.enum(["new", "contacted", "quoted", "won", "lost"]),
-})
