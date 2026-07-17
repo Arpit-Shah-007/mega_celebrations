@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { X } from "lucide-react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { Plus, Trash2, X } from "lucide-react"
 import {
   createPackageFaq,
   createPackageImage,
@@ -125,70 +125,84 @@ export function PackageEditModal({ packageId, onClose, onSaved }: PackageEditMod
 }
 
 function PackageBaseForm({ packageId, initial, onSaved }: { packageId: number; initial: AdminPackageRow; onSaved: () => void }) {
-  const [form, setForm] = useState(initial)
-  const mutation = useMutation({
-    mutationFn: () =>
-      updateAdminPackage(packageId, {
-        slug: form.slug,
-        name: form.name,
-        tagline: form.tagline,
-        description: form.description,
-        tags: form.tags,
-        inclusions: form.inclusions,
-        capacity: form.capacity,
-        spaceRequirement: form.spaceRequirement,
-        priceIsPlaceholder: form.priceIsPlaceholder,
-        damageDepositCents: form.damageDepositCents,
-        bundleDiscount: form.bundleDiscount,
-        featured: form.featured,
-        sortOrder: form.sortOrder,
-      }),
-    onSuccess: onSaved,
-  })
+  const patch = async (fields: Partial<PackageInput>) => {
+    await updateAdminPackage(packageId, fields)
+    onSaved()
+  }
 
   const toggleTag = (tag: string) => {
-    setForm((current) => ({
-      ...current,
-      tags: current.tags.includes(tag) ? current.tags.filter((t) => t !== tag) : [...current.tags, tag],
-    }))
+    const tags = initial.tags.includes(tag) ? initial.tags.filter((t) => t !== tag) : [...initial.tags, tag]
+    patch({ tags })
   }
 
   return (
     <Card title="Details">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Name" required>
-          <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <Input
+            defaultValue={initial.name}
+            onBlur={(e) => e.target.value !== initial.name && patch({ name: e.target.value })}
+          />
         </Field>
         <Field label="Slug" required>
-          <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+          <Input
+            defaultValue={initial.slug}
+            onBlur={(e) => e.target.value !== initial.slug && patch({ slug: e.target.value })}
+          />
         </Field>
         <Field label="Tagline" required>
-          <Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} />
+          <Input
+            defaultValue={initial.tagline}
+            onBlur={(e) => e.target.value !== initial.tagline && patch({ tagline: e.target.value })}
+          />
         </Field>
         <Field label="Capacity" required>
-          <Input value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} />
+          <Input
+            defaultValue={initial.capacity}
+            onBlur={(e) => e.target.value !== initial.capacity && patch({ capacity: e.target.value })}
+          />
         </Field>
         <Field label="Space Requirement" required>
-          <Input value={form.spaceRequirement} onChange={(e) => setForm({ ...form, spaceRequirement: e.target.value })} />
+          <Input
+            defaultValue={initial.spaceRequirement}
+            onBlur={(e) => e.target.value !== initial.spaceRequirement && patch({ spaceRequirement: e.target.value })}
+          />
         </Field>
         <Field label="Sort Order">
-          <Input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} />
+          <Input
+            type="number"
+            defaultValue={initial.sortOrder}
+            onBlur={(e) => Number(e.target.value) !== initial.sortOrder && patch({ sortOrder: Number(e.target.value) })}
+          />
         </Field>
         <Field label="Damage Deposit ($, optional)">
           <Input
             type="number"
-            value={form.damageDepositCents != null ? form.damageDepositCents / 100 : ""}
-            onChange={(e) => setForm({ ...form, damageDepositCents: e.target.value === "" ? null : Math.round(Number(e.target.value) * 100) })}
+            defaultValue={initial.damageDepositCents != null ? initial.damageDepositCents / 100 : ""}
+            onBlur={(e) => {
+              const cents = e.target.value === "" ? null : Math.round(Number(e.target.value) * 100)
+              if (cents !== initial.damageDepositCents) patch({ damageDepositCents: cents })
+            }}
           />
         </Field>
         <Field label="Bundle Discount note (optional)">
-          <Input value={form.bundleDiscount ?? ""} onChange={(e) => setForm({ ...form, bundleDiscount: e.target.value || null })} />
+          <Input
+            defaultValue={initial.bundleDiscount ?? ""}
+            onBlur={(e) => {
+              const value = e.target.value || null
+              if (value !== initial.bundleDiscount) patch({ bundleDiscount: value })
+            }}
+          />
         </Field>
       </div>
 
       <div className="mt-4">
         <Field label="Description" required>
-          <TextArea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <TextArea
+            rows={3}
+            defaultValue={initial.description}
+            onBlur={(e) => e.target.value !== initial.description && patch({ description: e.target.value })}
+          />
         </Field>
       </div>
 
@@ -196,8 +210,11 @@ function PackageBaseForm({ packageId, initial, onSaved }: { packageId: number; i
         <Field label="Inclusions (one per line)">
           <TextArea
             rows={4}
-            value={form.inclusions.join("\n")}
-            onChange={(e) => setForm({ ...form, inclusions: e.target.value.split("\n").filter(Boolean) })}
+            defaultValue={initial.inclusions.join("\n")}
+            onBlur={(e) => {
+              const lines = e.target.value.split("\n").filter(Boolean)
+              if (lines.join("\n") !== initial.inclusions.join("\n")) patch({ inclusions: lines })
+            }}
           />
         </Field>
       </div>
@@ -205,7 +222,7 @@ function PackageBaseForm({ packageId, initial, onSaved }: { packageId: number; i
       <div className="mt-4 flex flex-wrap gap-3">
         {ALL_PACKAGE_TAGS.map((tag) => (
           <label key={tag} className="flex items-center gap-1.5 text-sm">
-            <input type="checkbox" checked={form.tags.includes(tag)} onChange={() => toggleTag(tag)} />
+            <input type="checkbox" checked={initial.tags.includes(tag)} onChange={() => toggleTag(tag)} />
             {tag}
           </label>
         ))}
@@ -213,23 +230,17 @@ function PackageBaseForm({ packageId, initial, onSaved }: { packageId: number; i
 
       <div className="mt-4 flex gap-4">
         <label className="flex items-center gap-1.5 text-sm">
-          <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
+          <input type="checkbox" checked={initial.featured} onChange={(e) => patch({ featured: e.target.checked })} />
           Featured
         </label>
         <label className="flex items-center gap-1.5 text-sm">
           <input
             type="checkbox"
-            checked={form.priceIsPlaceholder}
-            onChange={(e) => setForm({ ...form, priceIsPlaceholder: e.target.checked })}
+            checked={initial.priceIsPlaceholder}
+            onChange={(e) => patch({ priceIsPlaceholder: e.target.checked })}
           />
           Price is a placeholder ("coming soon")
         </label>
-      </div>
-
-      <div className="mt-4">
-        <AdminButton variant="primary" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-          {mutation.isPending ? "Saving…" : "Save Details"}
-        </AdminButton>
       </div>
     </Card>
   )
@@ -474,6 +485,9 @@ function VariantsCard({
 
 function FaqsCard({ packageId, faqs, onChanged }: { packageId: number; faqs: AdminPackageFaqRow[]; onChanged: () => void }) {
   const ordered = [...faqs].sort((a, b) => a.sortOrder - b.sortOrder)
+  const [isAdding, setIsAdding] = useState(false)
+  const [newQuestion, setNewQuestion] = useState("")
+  const [newAnswer, setNewAnswer] = useState("")
 
   const move = async (index: number, direction: -1 | 1) => {
     const targetIndex = index + direction
@@ -484,21 +498,52 @@ function FaqsCard({ packageId, faqs, onChanged }: { packageId: number; faqs: Adm
     onChanged()
   }
 
+  const cancelAdd = () => {
+    setIsAdding(false)
+    setNewQuestion("")
+    setNewAnswer("")
+  }
+
+  const submitAdd = async () => {
+    if (!newQuestion.trim() || !newAnswer.trim()) return
+    await createPackageFaq(packageId, { question: newQuestion.trim(), answer: newAnswer.trim(), sortOrder: ordered.length })
+    cancelAdd()
+    onChanged()
+  }
+
   return (
     <Card
       title="FAQs"
       action={
-        <AdminButton
-          onClick={async () => {
-            await createPackageFaq(packageId, { question: "New question?", answer: "New answer.", sortOrder: ordered.length })
-            onChanged()
-          }}
+        <button
+          type="button"
+          onClick={() => setIsAdding(true)}
+          aria-label="Add FAQ"
+          className="cursor-pointer text-ui-gray transition-colors hover:text-blue"
         >
-          + Add
-        </AdminButton>
+          <Plus className="h-5 w-5" />
+        </button>
       }
     >
       <div className="flex flex-col gap-3">
+        {isAdding ? (
+          <div className="border border-border/60 p-3">
+            <div className="grid grid-cols-1 gap-2">
+              <Field label="Question" required>
+                <Input autoFocus value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} />
+              </Field>
+              <Field label="Answer" required>
+                <TextArea rows={3} value={newAnswer} onChange={(e) => setNewAnswer(e.target.value)} />
+              </Field>
+            </div>
+            <div className="mt-2 flex justify-end gap-2">
+              <AdminButton onClick={cancelAdd}>Cancel</AdminButton>
+              <AdminButton variant="primary" onClick={submitAdd} disabled={!newQuestion.trim() || !newAnswer.trim()}>
+                Save
+              </AdminButton>
+            </div>
+          </div>
+        ) : null}
         {ordered.map((faq, index) => (
           <div key={faq.id} className="border border-border/60 p-3">
             <div className="grid grid-cols-1 gap-2">
@@ -526,22 +571,24 @@ function FaqsCard({ packageId, faqs, onChanged }: { packageId: number; faqs: Adm
                 />
               </Field>
             </div>
-            <div className="mt-2 flex justify-end gap-2">
+            <div className="mt-2 flex items-center justify-end gap-3">
               <AdminButton onClick={() => move(index, -1)} disabled={index === 0}>
                 ↑
               </AdminButton>
               <AdminButton onClick={() => move(index, 1)} disabled={index === ordered.length - 1}>
                 ↓
               </AdminButton>
-              <AdminButton
-                variant="danger"
+              <button
+                type="button"
                 onClick={async () => {
                   await deletePackageFaq(faq.id)
                   onChanged()
                 }}
+                aria-label={`Delete FAQ: ${faq.question}`}
+                className="cursor-pointer text-ui-gray transition-colors hover:text-red-600"
               >
-                Delete
-              </AdminButton>
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
           </div>
         ))}

@@ -39,6 +39,29 @@ describe("AccordionItem", () => {
     expect(screen.getByRole("button", { name: "How do I book?" })).toHaveAttribute("aria-expanded", "false")
   })
 
+  it("renders a bare URL inside the answer as a clickable link", () => {
+    render(
+      <AccordionItem
+        question="How much space is needed?"
+        answer={"Please see the layout here: https://pub-example.r2.dev/media/Layout.pdf\nMore text after."}
+        defaultOpen
+      />,
+    )
+
+    const link = screen.getByRole("link", { name: "https://pub-example.r2.dev/media/Layout.pdf" })
+    expect(link).toHaveAttribute("href", "https://pub-example.r2.dev/media/Layout.pdf")
+    expect(link).toHaveAttribute("target", "_blank")
+    expect(link).toHaveAttribute("rel", "noopener noreferrer")
+    expect(screen.getByText(/More text after\./)).toBeInTheDocument()
+  })
+
+  it("renders plain answers with no links unchanged", () => {
+    render(<AccordionItem question="Plain?" answer="No links here." defaultOpen />)
+
+    expect(screen.getByText("No links here.")).toBeInTheDocument()
+    expect(screen.queryByRole("link")).not.toBeInTheDocument()
+  })
+
   it("associates the trigger with the panel via aria-controls", () => {
     render(<AccordionItem question="Panel link?" answer="Answer text" defaultOpen />)
 
