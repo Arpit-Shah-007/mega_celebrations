@@ -55,6 +55,24 @@ describe("AccordionItem", () => {
     expect(screen.getByText(/More text after\./)).toBeInTheDocument()
   })
 
+  it("renders a markdown-style [text](url) link with the given text, not the raw URL", () => {
+    render(
+      <AccordionItem
+        question="How much space is needed?"
+        answer={"Please see the layout options and dimensions needed [here](https://pub-example.r2.dev/media/Layout.pdf). More text after."}
+        defaultOpen
+      />,
+    )
+
+    const link = screen.getByRole("link", { name: "here" })
+    expect(link).toHaveAttribute("href", "https://pub-example.r2.dev/media/Layout.pdf")
+    expect(link).toHaveAttribute("target", "_blank")
+    expect(link).toHaveAttribute("rel", "noopener noreferrer")
+    expect(screen.getByText(/^Please see the layout options and dimensions needed/)).toBeInTheDocument()
+    expect(screen.getByText(/More text after\./)).toBeInTheDocument()
+    expect(screen.queryByText(/https:\/\/pub-example\.r2\.dev/)).not.toBeInTheDocument()
+  })
+
   it("renders plain answers with no links unchanged", () => {
     render(<AccordionItem question="Plain?" answer="No links here." defaultOpen />)
 
