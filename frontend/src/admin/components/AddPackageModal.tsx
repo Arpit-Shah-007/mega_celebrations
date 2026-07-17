@@ -115,7 +115,7 @@ export function AddPackageModal({ nextSortOrder, onClose, onCreated }: AddPackag
 
           {mutation.isError ? <p className="text-sm font-semibold text-red-600">{mutation.error.message}</p> : null}
 
-          <p className="text-xs text-ui-gray">Media, pricing, and themes can be added next, right after this is created.</p>
+          <p className="text-xs text-ui-gray">Media, pricing, themes, and FAQs can be added next, right after this is created.</p>
 
           <AdminButton type="submit" variant="primary" disabled={!canSubmit || mutation.isPending}>
             {mutation.isPending ? "Creating…" : "Create & Continue"}

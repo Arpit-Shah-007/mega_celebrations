@@ -60,6 +60,17 @@ export const packageVariants = sqliteTable("package_variants", {
   sortOrder: integer("sort_order", { mode: "number" }).notNull().default(0),
 })
 
+/** A package's own "Frequently Asked Questions" accordion — admin-managed per package instead of static frontend data, so new packages can pick their own subset. */
+export const packageFaqs = sqliteTable("package_faqs", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  packageId: integer("package_id", { mode: "number" })
+    .notNull()
+    .references(() => packages.id, { onDelete: "cascade" }),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  sortOrder: integer("sort_order", { mode: "number" }).notNull().default(0),
+})
+
 /**
  * The 3 add-on category landing pages: Decor, Activities & Crafts, Favors.
  * heroImage is the category detail page's banner; cardImage is the /packages/add-ons

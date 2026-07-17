@@ -90,6 +90,90 @@ it("deleting a package cascades to its images and variants", async () => {
   expect(getResponse.status).toBe(404)
 })
 
+it("creating a FAQ attaches it to the package and appears in the admin GET", async () => {
+  const pkg = await createPackage("test-package-faqs")
+
+  const createResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/faqs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "How much space is needed?", answer: "Plenty." }),
+  })
+  expect(createResponse.status).toBe(201)
+  const created = (await readJson<{ data: { id: number; packageId: number } }>(createResponse)).data
+  expect(created.packageId).toBe(pkg.id)
+
+  const getResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
+  const getBody = await readJson<{ data: { faqs: { id: number; question: string; answer: string }[] } }>(getResponse)
+  expect(getBody.data.faqs).toEqual([{ id: created.id, packageId: pkg.id, question: "How much space is needed?", answer: "Plenty.", sortOrder: 0 }])
+})
+
+it("updating and deleting a FAQ persists correctly", async () => {
+  const pkg = await createPackage("test-package-faqs-update-delete")
+  const createResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/faqs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "Original question?", answer: "Original answer." }),
+  })
+  const created = (await readJson<{ data: { id: number } }>(createResponse)).data
+
+  const updateResponse = await adminFetch(`https://example.com/api/admin/packages/faqs/${created.id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ answer: "Updated answer." }),
+  })
+  expect(updateResponse.status).toBe(200)
+  const updated = (await readJson<{ data: { answer: string } }>(updateResponse)).data
+  expect(updated.answer).toBe("Updated answer.")
+
+  const deleteResponse = await adminFetch(`https://example.com/api/admin/packages/faqs/${created.id}`, { method: "DELETE" })
+  expect(deleteResponse.status).toBe(200)
+
+  const getResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
+  const getBody = await readJson<{ data: { faqs: unknown[] } }>(getResponse)
+  expect(getBody.data.faqs).toHaveLength(0)
+})
+
+it("reordering FAQs persists the new sort order via a single batch", async () => {
+  const pkg = await createPackage("test-package-faqs-reorder")
+  const faqIds: number[] = []
+  for (const question of ["Question one?", "Question two?", "Question three?"]) {
+    const response = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/faqs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, answer: "An answer." }),
+    })
+    const body = await readJson<{ data: { id: number } }>(response)
+    faqIds.push(body.data.id)
+  }
+
+  const reversedIds = [...faqIds].reverse()
+  const reorderResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/faqs/reorder`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderedIds: reversedIds }),
+  })
+  expect(reorderResponse.status).toBe(200)
+
+  const getResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
+  const getBody = await readJson<{ data: { faqs: { id: number; sortOrder: number }[] } }>(getResponse)
+  expect(getBody.data.faqs.sort((a, b) => a.sortOrder - b.sortOrder).map((faq) => faq.id)).toEqual(reversedIds)
+})
+
+it("deleting a package cascades to its FAQs", async () => {
+  const pkg = await createPackage("test-package-faqs-cascade")
+  await adminFetch(`https://example.com/api/admin/packages/${pkg.id}/faqs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "A question?", answer: "An answer." }),
+  })
+
+  const deleteResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`, { method: "DELETE" })
+  expect(deleteResponse.status).toBe(200)
+
+  const getResponse = await adminFetch(`https://example.com/api/admin/packages/${pkg.id}`)
+  expect(getResponse.status).toBe(404)
+})
+
 it("reordering gallery images persists the new sort order via a single batch", async () => {
   const pkg = await createPackage("test-package-reorder-images")
   const imageIds: number[] = []

@@ -42,6 +42,12 @@ export const packageVariantInputSchema = z.object({
   sortOrder: z.number().int().optional().default(0),
 })
 
+export const packageFaqInputSchema = z.object({
+  question: z.string().min(1),
+  answer: z.string().min(1),
+  sortOrder: z.number().int().optional().default(0),
+})
+
 export const addonCategoryInputSchema = z.object({
   slug: z.string().min(1),
   name: z.string().min(1),

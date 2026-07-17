@@ -3,16 +3,21 @@ import { createPortal } from "react-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { X } from "lucide-react"
 import {
+  createPackageFaq,
   createPackageImage,
   createVariant,
+  deletePackageFaq,
   deletePackageImage,
   deleteVariant,
   fetchAdminPackage,
+  reorderPackageFaqs,
   updateAdminPackage,
+  updatePackageFaq,
   updatePackageImage,
   updateVariant,
   uploadImage,
   reorderVariants,
+  type AdminPackageFaqRow,
   type AdminPackageImageRow,
   type AdminPackageVariantRow,
   type AdminPackageRow,
@@ -28,13 +33,14 @@ interface PackageEditModalProps {
   onSaved: () => void
 }
 
-type PackageEditTab = "details" | "images" | "themes" | "addons"
+type PackageEditTab = "details" | "images" | "themes" | "addons" | "faqs"
 
 const TABS: { id: PackageEditTab; label: string }[] = [
   { id: "details", label: "Details" },
   { id: "images", label: "Media" },
   { id: "themes", label: "Themes" },
   { id: "addons", label: "Popular Add-Ons" },
+  { id: "faqs", label: "FAQs" },
 ]
 
 /** Full package editor (details, images, themes, add-ons) as a modal — replaces the old dedicated /admin/packages/:id page so managing a package no longer means leaving the table. Tabbed instead of one long stacked scroll so each section is its own bounded view. */
@@ -108,6 +114,7 @@ export function PackageEditModal({ packageId, onClose, onSaved }: PackageEditMod
               {activeTab === "addons" ? (
                 <VariantsCard packageId={packageId} variants={data.variants} kind="addon" title="Popular Add-Ons" onChanged={invalidate} />
               ) : null}
+              {activeTab === "faqs" ? <FaqsCard packageId={packageId} faqs={data.faqs} onChanged={invalidate} /> : null}
             </>
           )}
         </div>
@@ -457,6 +464,84 @@ function VariantsCard({
                   }}
                 />
               </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+}
+
+function FaqsCard({ packageId, faqs, onChanged }: { packageId: number; faqs: AdminPackageFaqRow[]; onChanged: () => void }) {
+  const ordered = [...faqs].sort((a, b) => a.sortOrder - b.sortOrder)
+
+  const move = async (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= ordered.length) return
+    const reordered = [...ordered]
+    ;[reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]]
+    await reorderPackageFaqs(packageId, reordered.map((faq) => faq.id))
+    onChanged()
+  }
+
+  return (
+    <Card
+      title="FAQs"
+      action={
+        <AdminButton
+          onClick={async () => {
+            await createPackageFaq(packageId, { question: "New question?", answer: "New answer.", sortOrder: ordered.length })
+            onChanged()
+          }}
+        >
+          + Add
+        </AdminButton>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        {ordered.map((faq, index) => (
+          <div key={faq.id} className="border border-border/60 p-3">
+            <div className="grid grid-cols-1 gap-2">
+              <Field label="Question" required>
+                <Input
+                  defaultValue={faq.question}
+                  onBlur={async (e) => {
+                    if (e.target.value !== faq.question) {
+                      await updatePackageFaq(faq.id, { question: e.target.value })
+                      onChanged()
+                    }
+                  }}
+                />
+              </Field>
+              <Field label="Answer" required>
+                <TextArea
+                  rows={3}
+                  defaultValue={faq.answer}
+                  onBlur={async (e) => {
+                    if (e.target.value !== faq.answer) {
+                      await updatePackageFaq(faq.id, { answer: e.target.value })
+                      onChanged()
+                    }
+                  }}
+                />
+              </Field>
+            </div>
+            <div className="mt-2 flex justify-end gap-2">
+              <AdminButton onClick={() => move(index, -1)} disabled={index === 0}>
+                ↑
+              </AdminButton>
+              <AdminButton onClick={() => move(index, 1)} disabled={index === ordered.length - 1}>
+                ↓
+              </AdminButton>
+              <AdminButton
+                variant="danger"
+                onClick={async () => {
+                  await deletePackageFaq(faq.id)
+                  onChanged()
+                }}
+              >
+                Delete
+              </AdminButton>
             </div>
           </div>
         ))}
