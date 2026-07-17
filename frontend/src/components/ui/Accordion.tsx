@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { Plus, Minus } from "lucide-react"
-import { useId, useState } from "react"
+import { useId, useState, type ReactNode } from "react"
 
 interface AccordionItemProps {
   question: string
@@ -8,26 +8,36 @@ interface AccordionItemProps {
   defaultOpen?: boolean
 }
 
-const URL_PATTERN = /https?:\/\/\S+/g
+/** Matches either a markdown-style `[link text](url)` or a bare `https://...` URL. */
+const LINK_PATTERN = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/\S+)/g
 
-/** Some FAQ answers (e.g. a package's space-requirements PDF) embed a bare URL — render it as a real link instead of inert text. */
+/** Some FAQ answers (e.g. a package's space-requirements PDF) embed a link — render it as a real, readable link instead of inert text or a raw URL. */
 function renderAnswer(answer: string) {
-  const parts = answer.split(URL_PATTERN)
-  const urls = answer.match(URL_PATTERN) ?? []
-  return parts.flatMap((part, index) => [
-    part,
-    urls[index] ? (
+  const segments: ReactNode[] = []
+  let lastIndex = 0
+  let key = 0
+  let match: RegExpExecArray | null
+  LINK_PATTERN.lastIndex = 0
+  while ((match = LINK_PATTERN.exec(answer))) {
+    if (match.index > lastIndex) segments.push(answer.slice(lastIndex, match.index))
+    const [, linkText, linkUrl, bareUrl] = match
+    const text = linkText ?? bareUrl
+    const href = linkUrl ?? bareUrl
+    segments.push(
       <a
-        key={index}
-        href={urls[index]}
+        key={key++}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         className="font-semibold text-blue underline hover:no-underline"
       >
-        {urls[index]}
-      </a>
-    ) : null,
-  ])
+        {text}
+      </a>,
+    )
+    lastIndex = LINK_PATTERN.lastIndex
+  }
+  if (lastIndex < answer.length) segments.push(answer.slice(lastIndex))
+  return segments
 }
 
 export function AccordionItem({ question, answer, defaultOpen = false }: AccordionItemProps) {
