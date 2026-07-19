@@ -5,12 +5,15 @@ import { PlaceholderPhoto } from "@/components/ui/PlaceholderPhoto"
 import { useWishlist } from "@/context/useWishlist"
 import { useToast } from "@/context/useToast"
 import { parsePriceValue, slugify } from "@/lib/catalogItem"
+import type { WishlistItemCategory } from "@/types"
 
 interface CatalogItemCardProps {
   name: string
   price?: string
   /** Category slug or other namespace, combined with the item name into a stable wishlist key so items with the same name in different categories don't collide. */
   namespace: string
+  /** Which wishlist panel section this item belongs to when saved. */
+  category: WishlistItemCategory
   icon?: LucideIcon
   /** Real product photo. Falls back to the live site's own "No image available." placeholder box when absent — the catalog genuinely has no photo for every item, so a decorative gradient here would misrepresent it. */
   image?: string | null
@@ -26,14 +29,14 @@ interface CatalogItemCardProps {
  * detail page of their own, so they're added to the shared wishlist by a
  * locally-built slug rather than a package slug.
  */
-export function CatalogItemCard({ name, price, namespace, icon, image, delay = 0, onOpenDetails }: CatalogItemCardProps) {
+export function CatalogItemCard({ name, price, namespace, category, icon, image, delay = 0, onOpenDetails }: CatalogItemCardProps) {
   const { toggleItem, isSaved } = useWishlist()
   const { showToast } = useToast()
   const slug = `${namespace}-${slugify(name)}`
   const saved = isSaved(slug)
 
   const handleClick = () => {
-    toggleItem({ slug, name, imageSeed: slug, startingPrice: parsePriceValue(price) })
+    toggleItem({ slug, name, imageSeed: slug, startingPrice: parsePriceValue(price), category })
     showToast(saved ? `Removed ${name} from your wishlist` : `Added ${name} to your wishlist`)
   }
 

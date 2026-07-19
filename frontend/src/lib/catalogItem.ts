@@ -1,8 +1,8 @@
 /**
  * Extracts a numeric dollar amount from a display price string, e.g. "$75.00"
  * or "Purchase price: $15.00" -> 75 / 15. Returns 0 when no amount is present
- * (e.g. "Contact us for price."), which WishlistItemRow already renders as
- * "Pricing coming soon" rather than "$0".
+ * (e.g. "Contact us for price."), so the wishlist's estimated total treats an
+ * unpriced item as $0 rather than throwing on a non-numeric string.
  */
 export function parsePriceValue(price?: string): number {
   if (!price) return 0

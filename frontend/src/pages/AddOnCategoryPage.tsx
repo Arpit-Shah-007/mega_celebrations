@@ -71,6 +71,7 @@ export function AddOnCategoryPage() {
                 price={item.price}
                 image={item.image}
                 namespace={category.slug}
+                category="add-on"
                 delay={Math.min(index * 0.05, 0.3)}
                 onOpenDetails={() => setActiveItem(item)}
               />
@@ -79,7 +80,7 @@ export function AddOnCategoryPage() {
         </Container>
       </section>
 
-      <CatalogItemModal item={activeItem} namespace={category.slug} onClose={() => setActiveItem(null)} />
+      <CatalogItemModal item={activeItem} namespace={category.slug} category="add-on" onClose={() => setActiveItem(null)} />
     </>
   )
 }

@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
-import type { WishlistItem } from "@/types"
+import type { WishlistItem, WishlistItemCategory } from "@/types"
 import { WishlistContext } from "@/context/wishlist-context-value"
 
 const STORAGE_KEY = "mega-celebrations:wishlist"
+const VALID_CATEGORIES: WishlistItemCategory[] = ["package", "add-on", "theme", "a-la-carte"]
+
+/** Items saved before `category` existed (or with a value that's since been renamed/removed) fall back to "package" rather than disappearing from the wishlist. */
+function normalizeItem(item: WishlistItem): WishlistItem {
+  return VALID_CATEGORIES.includes(item.category) ? item : { ...item, category: "package" }
+}
 
 function readStoredWishlist(): WishlistItem[] {
   if (typeof window === "undefined") return []
@@ -10,7 +16,7 @@ function readStoredWishlist(): WishlistItem[] {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
     const parsed: unknown = JSON.parse(raw)
-    return Array.isArray(parsed) ? (parsed as WishlistItem[]) : []
+    return Array.isArray(parsed) ? (parsed as WishlistItem[]).map(normalizeItem) : []
   } catch {
     return []
   }

@@ -20,6 +20,7 @@ export function WishlistButton({ pkg, className = "" }: WishlistButtonProps) {
       name: pkg.name,
       imageSeed: pkg.slug,
       startingPrice: pkg.startingPrice,
+      category: "package",
     })
     showToast(saved ? `Removed ${pkg.name} from your wishlist` : `Added ${pkg.name} to your wishlist`)
   }

@@ -18,7 +18,7 @@ import { fetchPackageBySlug, fetchPackages } from "@/lib/api"
 import { getRelatedPackages } from "@/lib/relatedPackages"
 import { TestimonialsSection } from "@/components/home/TestimonialsSection"
 import { MEDIA_BASE_URL } from "@/lib/media"
-import type { PackageVariant } from "@/types"
+import type { PackageVariant, WishlistItemCategory } from "@/types"
 
 /** Matches the live site's "What's Included"/"Pricing" bullet marker: a filled blue circle badge with a white check, not a plain checkmark glyph. */
 function CheckBadge() {
@@ -32,10 +32,12 @@ function CheckBadge() {
 function VariantGrid({
   variants,
   namespace,
+  category,
   onOpenDetails,
 }: {
   variants: PackageVariant[]
   namespace: string
+  category: WishlistItemCategory
   onOpenDetails: (variant: PackageVariant) => void
 }) {
   return (
@@ -47,6 +49,7 @@ function VariantGrid({
           price={variant.price}
           image={variant.image}
           namespace={namespace}
+          category={category}
           onOpenDetails={() => onOpenDetails(variant)}
         />
       ))}
@@ -58,6 +61,7 @@ interface ActiveVariant {
   variant: PackageVariant
   namespace: string
   label: string
+  category: WishlistItemCategory
 }
 
 export function PackageDetailPage() {
@@ -180,7 +184,10 @@ export function PackageDetailPage() {
             <VariantGrid
               variants={pkg.themes}
               namespace={`theme-${pkg.slug}`}
-              onOpenDetails={(variant) => setActiveVariant({ variant, namespace: `theme-${pkg.slug}`, label: "Theme" })}
+              category="theme"
+              onOpenDetails={(variant) =>
+                setActiveVariant({ variant, namespace: `theme-${pkg.slug}`, label: "Theme", category: "theme" })
+              }
             />
           </Container>
         </section>
@@ -193,7 +200,10 @@ export function PackageDetailPage() {
             <VariantGrid
               variants={pkg.popularAddOns}
               namespace={`addon-${pkg.slug}`}
-              onOpenDetails={(variant) => setActiveVariant({ variant, namespace: `addon-${pkg.slug}`, label: "Add-On" })}
+              category="add-on"
+              onOpenDetails={(variant) =>
+                setActiveVariant({ variant, namespace: `addon-${pkg.slug}`, label: "Add-On", category: "add-on" })
+              }
             />
             <div className="mt-8 flex justify-center">
               <Button kind="link" to="/packages/add-ons" variant="primary">
@@ -241,6 +251,7 @@ export function PackageDetailPage() {
         variant={activeVariant?.variant ?? null}
         namespace={activeVariant?.namespace ?? ""}
         headingLabel={activeVariant?.label ?? ""}
+        category={activeVariant?.category ?? "theme"}
         onClose={() => setActiveVariant(null)}
       />
     </>

@@ -6,12 +6,14 @@ import { useWishlist } from "@/context/useWishlist"
 import { useToast } from "@/context/useToast"
 import { parsePriceValue, slugify } from "@/lib/catalogItem"
 import { ModalAccordionSection } from "@/components/packages/ModalAccordionSection"
-import type { CatalogItem } from "@/types"
+import type { CatalogItem, WishlistItemCategory } from "@/types"
 
 interface CatalogItemModalProps {
   item: CatalogItem | null
   /** Same namespace passed to the triggering CatalogItemCard, so the wishlist key matches. */
   namespace: string
+  /** Same category passed to the triggering CatalogItemCard. */
+  category: WishlistItemCategory
   onClose: () => void
 }
 
@@ -21,7 +23,7 @@ interface CatalogItemModalProps {
  * placeholder — the catalog genuinely lacks photos for some items), quantity
  * stepper, rate readout, wishlist CTA, and Description/Pricing accordions.
  */
-export function CatalogItemModal({ item, namespace, onClose }: CatalogItemModalProps) {
+export function CatalogItemModal({ item, namespace, category, onClose }: CatalogItemModalProps) {
   const { toggleItem, isSaved } = useWishlist()
   const { showToast } = useToast()
   const [quantity, setQuantity] = useState(1)
@@ -54,7 +56,7 @@ export function CatalogItemModal({ item, namespace, onClose }: CatalogItemModalP
   const images = [item.image, ...(item.additionalImages ?? [])].filter((src): src is string => Boolean(src))
 
   const handleWishlistClick = () => {
-    toggleItem({ slug, name: item.name, imageSeed: slug, startingPrice: parsePriceValue(item.price) })
+    toggleItem({ slug, name: item.name, imageSeed: slug, startingPrice: parsePriceValue(item.price), category })
     showToast(saved ? `Removed ${item.name} from your wishlist` : `Added ${item.name} to your wishlist`)
   }
 

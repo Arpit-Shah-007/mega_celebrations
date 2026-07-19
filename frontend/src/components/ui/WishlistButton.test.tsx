@@ -82,6 +82,17 @@ describe("WishlistButton", () => {
     )
   })
 
+  it("tags the saved item with the package category", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<WishlistButton pkg={pkg} />)
+
+    await user.click(screen.getByRole("button", { name: "Add Mega Lounge to wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed[0].category).toBe("package")
+  })
+
   it("shows a toast message after toggling", async () => {
     const user = userEvent.setup()
     renderWithProviders(<WishlistButton pkg={pkg} />)

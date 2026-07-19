@@ -6,7 +6,7 @@ import { useWishlist } from "@/context/useWishlist"
 import { useToast } from "@/context/useToast"
 import { parsePriceValue, slugify } from "@/lib/catalogItem"
 import { ModalAccordionSection } from "@/components/packages/ModalAccordionSection"
-import type { PackageVariant } from "@/types"
+import type { PackageVariant, WishlistItemCategory } from "@/types"
 
 interface VariantDetailModalProps {
   variant: PackageVariant | null
@@ -14,6 +14,8 @@ interface VariantDetailModalProps {
   namespace: string
   /** "Theme" or "Add-On" — shown in the blue header bar in place of a catalog category. */
   headingLabel: string
+  /** Which wishlist panel section this item belongs to when saved — "theme" for the "Choose Your Theme" grid, "add-on" for "Popular Add-Ons". */
+  category: WishlistItemCategory
   onClose: () => void
 }
 
@@ -24,7 +26,7 @@ interface VariantDetailModalProps {
  * row, price badge, wishlist CTA, Description accordion) — PackageVariant has
  * no category/pricing-breakdown fields, so only those two sections are omitted.
  */
-export function VariantDetailModal({ variant, namespace, headingLabel, onClose }: VariantDetailModalProps) {
+export function VariantDetailModal({ variant, namespace, headingLabel, category, onClose }: VariantDetailModalProps) {
   const { toggleItem, isSaved } = useWishlist()
   const { showToast } = useToast()
   const [quantity, setQuantity] = useState(1)
@@ -57,7 +59,7 @@ export function VariantDetailModal({ variant, namespace, headingLabel, onClose }
   const images = [variant.image, ...(variant.additionalImages ?? [])].filter((src): src is string => Boolean(src))
 
   const handleWishlistClick = () => {
-    toggleItem({ slug, name: variant.name, imageSeed: slug, startingPrice: parsePriceValue(variant.price) })
+    toggleItem({ slug, name: variant.name, imageSeed: slug, startingPrice: parsePriceValue(variant.price), category })
     showToast(saved ? `Removed ${variant.name} from your wishlist` : `Added ${variant.name} to your wishlist`)
   }
 

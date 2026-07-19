@@ -90,6 +90,7 @@ export function ALaCartePage() {
                 price={item.price}
                 image={item.image}
                 namespace={A_LA_CARTE_NAMESPACE}
+                category="a-la-carte"
                 delay={Math.min(index * 0.05, 0.3)}
                 onOpenDetails={() => setActiveItem(item)}
               />
@@ -115,7 +116,7 @@ export function ALaCartePage() {
 
       <TestimonialsSection />
 
-      <CatalogItemModal item={activeItem} namespace={A_LA_CARTE_NAMESPACE} onClose={() => setActiveItem(null)} />
+      <CatalogItemModal item={activeItem} namespace={A_LA_CARTE_NAMESPACE} category="a-la-carte" onClose={() => setActiveItem(null)} />
     </>
   )
 }
