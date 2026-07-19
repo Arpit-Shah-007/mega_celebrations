@@ -103,6 +103,8 @@ export interface WishlistItem {
   slug: string
   name: string
   imageSeed: string
+  /** Real product photo, when the source catalog entry has one. Falls back to the deterministic gradient placeholder when absent. */
+  image?: string | null
   startingPrice: number
   category: WishlistItemCategory
 }

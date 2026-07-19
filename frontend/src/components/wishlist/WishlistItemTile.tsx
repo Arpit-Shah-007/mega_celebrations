@@ -8,29 +8,27 @@ interface WishlistItemTileProps {
   onRemove: (slug: string) => void
 }
 
-/** A single saved-item tile in the wishlist panel: thumbnail + name, remove control revealed on hover — a mood-board tile, not a priced cart line. */
+/** A single saved-item row in the wishlist panel: thumbnail + full name side by side, remove control revealed on hover — a wishlist row, not a priced cart line. */
 export function WishlistItemTile({ item, onRemove }: WishlistItemTileProps) {
   return (
     <motion.li
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -16, transition: { duration: 0.2 } }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative w-20 shrink-0"
+      className="group relative flex items-center gap-3 bg-white/70 py-2 pl-2 pr-9"
     >
-      <PlaceholderPhoto seed={item.imageSeed} alt={item.name} className="h-20 w-20" />
+      <PlaceholderPhoto seed={item.imageSeed} alt={item.name} src={item.image ?? undefined} className="h-14 w-14 shrink-0" />
+      <p className="text-sm font-semibold leading-snug text-navy">{item.name}</p>
       <button
         type="button"
         onClick={() => onRemove(item.slug)}
         aria-label={`Remove ${item.name} from wishlist`}
-        className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-navy text-white opacity-0 shadow-soft transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+        className="absolute right-2 top-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-navy text-white opacity-0 shadow-soft transition group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-red-600"
       >
-        <X className="h-3 w-3" />
+        <X className="h-3.5 w-3.5" />
       </button>
-      <p className="mt-1.5 truncate text-center text-xs font-semibold text-navy" title={item.name}>
-        {item.name}
-      </p>
     </motion.li>
   )
 }

@@ -94,6 +94,17 @@ describe("VariantDetailModal", () => {
     expect(parsed[0].category).toBe("add-on")
   })
 
+  it("saves the variant's real photo url to the wishlist", async () => {
+    const user = userEvent.setup()
+    renderModal()
+
+    await user.click(screen.getByRole("button", { name: "Add To Wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed[0].image).toBe("/media/unicorn.jpg")
+  })
+
   it("switches the main photo when a thumbnail is clicked", async () => {
     const user = userEvent.setup()
     renderModal()

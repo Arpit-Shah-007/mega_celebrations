@@ -59,7 +59,7 @@ export function VariantDetailModal({ variant, namespace, headingLabel, category,
   const images = [variant.image, ...(variant.additionalImages ?? [])].filter((src): src is string => Boolean(src))
 
   const handleWishlistClick = () => {
-    toggleItem({ slug, name: variant.name, imageSeed: slug, startingPrice: parsePriceValue(variant.price), category })
+    toggleItem({ slug, name: variant.name, imageSeed: slug, image: variant.image, startingPrice: parsePriceValue(variant.price), category })
     showToast(saved ? `Removed ${variant.name} from your wishlist` : `Added ${variant.name} to your wishlist`)
   }
 

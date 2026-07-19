@@ -36,7 +36,7 @@ export function CatalogItemCard({ name, price, namespace, category, icon, image,
   const saved = isSaved(slug)
 
   const handleClick = () => {
-    toggleItem({ slug, name, imageSeed: slug, startingPrice: parsePriceValue(price), category })
+    toggleItem({ slug, name, imageSeed: slug, image, startingPrice: parsePriceValue(price), category })
     showToast(saved ? `Removed ${name} from your wishlist` : `Added ${name} to your wishlist`)
   }
 
