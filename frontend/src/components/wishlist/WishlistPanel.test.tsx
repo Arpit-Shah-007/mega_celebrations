@@ -52,9 +52,37 @@ describe("WishlistPanel", () => {
     expect(screen.getByRole("link", { name: "Explore Add-Ons" })).toHaveAttribute("href", "/packages/add-ons")
   })
 
-  it("points the Themes empty state at the packages page, since themes have no standalone browse page", () => {
+  it("points the Themes empty state at choosing a package when no package is wishlisted yet", () => {
     renderPanel({ items: [] })
 
-    expect(screen.getByRole("link", { name: "Browse Packages to find themes" })).toHaveAttribute("href", "/packages")
+    expect(screen.getByRole("link", { name: "Choose a Package to Find Themes" })).toHaveAttribute(
+      "href",
+      "/packages/full-services-packages",
+    )
+  })
+
+  it("points the Themes empty state at that specific package when one is already wishlisted", () => {
+    const packageOnly: WishlistItem[] = [
+      { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
+    ]
+    renderPanel({ items: packageOnly })
+
+    expect(screen.getByRole("link", { name: "Browse Themes for Tent Sleepover" })).toHaveAttribute(
+      "href",
+      "/packages/tent-sleepover",
+    )
+  })
+
+  it("uses the first wishlisted package when more than one is saved", () => {
+    const twoPackages: WishlistItem[] = [
+      { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
+      { slug: "mega-lounge", name: "MEGALounge", imageSeed: "mega-lounge", startingPrice: 695, category: "package" },
+    ]
+    renderPanel({ items: twoPackages })
+
+    expect(screen.getByRole("link", { name: "Browse Themes for Tent Sleepover" })).toHaveAttribute(
+      "href",
+      "/packages/tent-sleepover",
+    )
   })
 })

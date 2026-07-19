@@ -18,12 +18,11 @@ export function WishlistPage() {
           {items.length === 0 ? (
             <EmptyWishlist />
           ) : (
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[420px_minmax(0,1fr)]">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="lg:order-2 lg:self-start lg:sticky lg:top-24"
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
                 <WishlistPanel items={items} onRemove={removeItem} />
               </motion.div>
@@ -31,8 +30,7 @@ export function WishlistPage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="lg:order-1"
+                transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
                 <h2 className="text-xl sm:text-2xl">Request Your Custom Quote</h2>
                 <p className="mt-2 text-sm text-body">
