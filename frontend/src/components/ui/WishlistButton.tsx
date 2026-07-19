@@ -19,6 +19,7 @@ export function WishlistButton({ pkg, className = "" }: WishlistButtonProps) {
       slug: pkg.slug,
       name: pkg.name,
       imageSeed: pkg.slug,
+      image: pkg.cardImage.url || undefined,
       startingPrice: pkg.startingPrice,
       category: "package",
     })

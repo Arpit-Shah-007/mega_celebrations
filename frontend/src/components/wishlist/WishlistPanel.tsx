@@ -57,7 +57,7 @@ export function WishlistPanel({ items, onRemove }: WishlistPanelProps) {
   const total = items.reduce((sum, item) => sum + item.startingPrice, 0)
 
   return (
-    <div className="bg-graytint p-5 shadow-soft sm:p-8">
+    <div className="bg-graytint p-5 shadow-soft sm:p-8 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
       <div className="flex items-center justify-between gap-4 border-b border-navy/15 pb-5">
         <div>
           <p className="text-sm font-bold uppercase tracking-wide text-navy">Estimated Total</p>

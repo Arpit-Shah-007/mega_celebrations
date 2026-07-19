@@ -13,10 +13,25 @@ const item: WishlistItem = {
 }
 
 describe("WishlistItemTile", () => {
-  it("renders the item's name", () => {
+  it("renders the item's full name", () => {
     render(<WishlistItemTile item={item} onRemove={vi.fn()} />)
 
     expect(screen.getByText("Tent Sleepover")).toBeInTheDocument()
+  })
+
+  it("renders the item's real photo when one is provided", () => {
+    render(<WishlistItemTile item={{ ...item, image: "/media/tent.jpg" }} onRemove={vi.fn()} />)
+
+    const photo = screen.getByRole("img", { name: "Tent Sleepover" })
+    expect(photo.tagName).toBe("IMG")
+    expect(photo).toHaveAttribute("src", "/media/tent.jpg")
+  })
+
+  it("falls back to the placeholder graphic when no photo is provided", () => {
+    render(<WishlistItemTile item={item} onRemove={vi.fn()} />)
+
+    const photo = screen.getByRole("img", { name: "Tent Sleepover" })
+    expect(photo.tagName).toBe("DIV")
   })
 
   it("calls onRemove with the item's slug when the remove control is clicked", async () => {

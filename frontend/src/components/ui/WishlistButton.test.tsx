@@ -93,6 +93,17 @@ describe("WishlistButton", () => {
     expect(parsed[0].category).toBe("package")
   })
 
+  it("saves the package's card photo url to the wishlist", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<WishlistButton pkg={pkg} />)
+
+    await user.click(screen.getByRole("button", { name: "Add Mega Lounge to wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed[0].image).toBe("/media/card.jpg")
+  })
+
   it("shows a toast message after toggling", async () => {
     const user = userEvent.setup()
     renderWithProviders(<WishlistButton pkg={pkg} />)

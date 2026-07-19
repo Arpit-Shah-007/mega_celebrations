@@ -56,7 +56,7 @@ export function CatalogItemModal({ item, namespace, category, onClose }: Catalog
   const images = [item.image, ...(item.additionalImages ?? [])].filter((src): src is string => Boolean(src))
 
   const handleWishlistClick = () => {
-    toggleItem({ slug, name: item.name, imageSeed: slug, startingPrice: parsePriceValue(item.price), category })
+    toggleItem({ slug, name: item.name, imageSeed: slug, image: item.image, startingPrice: parsePriceValue(item.price), category })
     showToast(saved ? `Removed ${item.name} from your wishlist` : `Added ${item.name} to your wishlist`)
   }
 

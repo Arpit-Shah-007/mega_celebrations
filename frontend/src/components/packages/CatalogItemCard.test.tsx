@@ -57,6 +57,17 @@ describe("CatalogItemCard", () => {
     expect(parsed[0].category).toBe("add-on")
   })
 
+  it("saves the item's real photo url to the wishlist", async () => {
+    const user = userEvent.setup()
+    renderCard({ image: "/media/popcorn.jpg" })
+
+    await user.click(screen.getByRole("button", { name: "Add Popcorn Machine to wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed[0].image).toBe("/media/popcorn.jpg")
+  })
+
   it("removes the item from the wishlist on a second click", async () => {
     const user = userEvent.setup()
     renderCard()
