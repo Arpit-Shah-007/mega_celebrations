@@ -9,7 +9,7 @@ function renderCard(props: Partial<React.ComponentProps<typeof CatalogItemCard>>
   return render(
     <ToastProvider>
       <WishlistProvider>
-        <CatalogItemCard name="Popcorn Machine" price="$45.00" namespace="a-la-carte" {...props} />
+        <CatalogItemCard name="Popcorn Machine" price="$45.00" namespace="a-la-carte" category="a-la-carte" {...props} />
       </WishlistProvider>
     </ToastProvider>,
   )
@@ -44,6 +44,17 @@ describe("CatalogItemCard", () => {
       "aria-pressed",
       "true",
     )
+  })
+
+  it("tags the saved item with the given category", async () => {
+    const user = userEvent.setup()
+    renderCard({ category: "add-on" })
+
+    await user.click(screen.getByRole("button", { name: "Add Popcorn Machine to wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed[0].category).toBe("add-on")
   })
 
   it("removes the item from the wishlist on a second click", async () => {

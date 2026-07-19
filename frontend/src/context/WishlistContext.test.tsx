@@ -12,6 +12,7 @@ const itemA: WishlistItem = {
   name: "Canopy Lounge",
   imageSeed: "canopy-lounge-1",
   startingPrice: 675,
+  category: "package",
 }
 
 const itemB: WishlistItem = {
@@ -19,6 +20,7 @@ const itemB: WishlistItem = {
   name: "MEGALounge",
   imageSeed: "megalounge-1",
   startingPrice: 695,
+  category: "add-on",
 }
 
 function WishlistHarness({ item }: { item: WishlistItem }) {
@@ -156,6 +158,39 @@ describe("WishlistProvider / useWishlist", () => {
 
     expect(screen.getByTestId("count")).toHaveTextContent("1")
     expect(screen.getByTestId("saved")).toHaveTextContent("saved")
+  })
+
+  it("defaults a stored item's missing category to package on load", () => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify([{ slug: "legacy-item", name: "Legacy Item", imageSeed: "legacy-item", startingPrice: 100 }]),
+    )
+
+    render(
+      <WishlistProvider>
+        <WishlistHarness item={{ ...itemA, slug: "legacy-item" }} />
+      </WishlistProvider>,
+    )
+
+    expect(screen.getByTestId("count")).toHaveTextContent("1")
+    expect(screen.getByTestId("saved")).toHaveTextContent("saved")
+  })
+
+  it("defaults a stored item's unrecognized category to package on load", () => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify([{ ...itemA, slug: "legacy-item", category: "not-a-real-category" }]),
+    )
+
+    render(
+      <WishlistProvider>
+        <WishlistHarness item={{ ...itemA, slug: "legacy-item" }} />
+      </WishlistProvider>,
+    )
+
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    const parsed = JSON.parse(raw as string)
+    expect(parsed[0].category).toBe("package")
   })
 
   it("throws when useWishlist is called outside a WishlistProvider", () => {

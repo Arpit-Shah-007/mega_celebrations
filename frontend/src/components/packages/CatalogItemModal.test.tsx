@@ -22,7 +22,7 @@ function renderModal(props: Partial<React.ComponentProps<typeof CatalogItemModal
   const utils = render(
     <ToastProvider>
       <WishlistProvider>
-        <CatalogItemModal item={item} namespace="a-la-carte" onClose={onClose} {...props} />
+        <CatalogItemModal item={item} namespace="a-la-carte" category="a-la-carte" onClose={onClose} {...props} />
       </WishlistProvider>
     </ToastProvider>,
   )
@@ -38,7 +38,7 @@ describe("CatalogItemModal", () => {
     render(
       <ToastProvider>
         <WishlistProvider>
-          <CatalogItemModal item={null} namespace="a-la-carte" onClose={vi.fn()} />
+          <CatalogItemModal item={null} namespace="a-la-carte" category="a-la-carte" onClose={vi.fn()} />
         </WishlistProvider>
       </ToastProvider>,
     )
@@ -99,6 +99,17 @@ describe("CatalogItemModal", () => {
 
     await user.click(screen.getByRole("button", { name: "Add To Wishlist" }))
     expect(screen.getByRole("button", { name: "Remove From Wishlist" })).toBeInTheDocument()
+  })
+
+  it("tags the saved item with the given category", async () => {
+    const user = userEvent.setup()
+    renderModal({ category: "add-on" })
+
+    await user.click(screen.getByRole("button", { name: "Add To Wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed[0].category).toBe("add-on")
   })
 
   it("switches the main photo when a thumbnail is clicked", async () => {

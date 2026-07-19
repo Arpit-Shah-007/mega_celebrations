@@ -96,9 +96,13 @@ export interface CatalogItem {
   pricing: CatalogPricingRow[]
 }
 
+/** Which of the site's four catalog areas a wishlist item was added from — drives which section of the wishlist panel it's grouped into. */
+export type WishlistItemCategory = "package" | "add-on" | "theme" | "a-la-carte"
+
 export interface WishlistItem {
   slug: string
   name: string
   imageSeed: string
   startingPrice: number
+  category: WishlistItemCategory
 }

@@ -41,24 +41,54 @@ describe("WishlistPage", () => {
     expect(screen.getByRole("link", { name: "Browse Packages" })).toHaveAttribute("href", "/packages")
   })
 
-  it("shows the wishlist summary and HoneyBook widget when items are saved", () => {
-    seedWishlist([{ slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80 }])
+  it("shows the wishlist panel and HoneyBook widget when items are saved", () => {
+    seedWishlist([
+      { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
+    ])
 
     const { container } = renderWishlistPage()
 
     expect(screen.queryByText("Your wishlist is empty")).not.toBeInTheDocument()
-    expect(screen.getByRole("heading", { name: "Tent Sleepover" })).toBeInTheDocument()
+    expect(screen.getByText("Tent Sleepover")).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "Request Your Custom Quote" })).toBeInTheDocument()
     expect(container.querySelector(".hb-p-5de351586567280cf9f3b1e7-7")).toBeInTheDocument()
   })
 
-  it("lets the visitor remove an item from the cart", async () => {
-    const user = userEvent.setup()
-    seedWishlist([{ slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80 }])
+  it("renders all four wishlist categories and the estimated total", () => {
+    seedWishlist([
+      { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
+    ])
 
     renderWishlistPage()
 
-    expect(screen.getByRole("heading", { name: "Tent Sleepover" })).toBeInTheDocument()
+    expect(screen.getByText("Packages")).toBeInTheDocument()
+    expect(screen.getByText("A La Carte")).toBeInTheDocument()
+    expect(screen.getByText("Themes")).toBeInTheDocument()
+    expect(screen.getByText("Add-Ons")).toBeInTheDocument()
+    expect(screen.getByText("Estimated Total")).toBeInTheDocument()
+    expect(screen.getByText("$80+")).toBeInTheDocument()
+  })
+
+  it("places the wishlist panel before the quote form in DOM order, for mobile's wishlist-first stacking", () => {
+    seedWishlist([
+      { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
+    ])
+
+    renderWishlistPage()
+
+    const body = document.body.innerHTML
+    expect(body.indexOf("Estimated Total")).toBeLessThan(body.indexOf("Request Your Custom Quote"))
+  })
+
+  it("lets the visitor remove an item from the wishlist", async () => {
+    const user = userEvent.setup()
+    seedWishlist([
+      { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
+    ])
+
+    renderWishlistPage()
+
+    expect(screen.getByText("Tent Sleepover")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Remove Tent Sleepover from wishlist" }))
 
     expect(await screen.findByText("Your wishlist is empty")).toBeInTheDocument()
