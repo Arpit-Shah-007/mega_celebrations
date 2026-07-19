@@ -16,7 +16,7 @@ afterEach(() => {
 describe("HoneyBookEmbed", () => {
   it("renders the HoneyBook placeholder div with the placement class", () => {
     const { container } = render(<HoneyBookEmbed />)
-    expect(container.querySelector(".hb-p-5de351586567280cf9f3b1e7-1")).toBeInTheDocument()
+    expect(container.querySelector(".hb-p-5de351586567280cf9f3b1e7-7")).toBeInTheDocument()
   })
 
   it("renders the tracking pixel image", () => {

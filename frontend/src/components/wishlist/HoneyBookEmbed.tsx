@@ -30,7 +30,7 @@ export function HoneyBookEmbed() {
 
   return (
     <div>
-      <div className={`hb-p-${HONEYBOOK_PLACEMENT_ID}-1`} />
+      <div className={`hb-p-${HONEYBOOK_PLACEMENT_ID}-7`} />
       <img
         height={1}
         width={1}
