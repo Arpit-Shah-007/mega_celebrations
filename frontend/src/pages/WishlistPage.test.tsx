@@ -47,9 +47,9 @@ describe("WishlistPage", () => {
     const { container } = renderWishlistPage()
 
     expect(screen.queryByText("Your wishlist is empty")).not.toBeInTheDocument()
-    expect(screen.getByText("Tent Sleepover")).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Tent Sleepover" })).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "Request Your Custom Quote" })).toBeInTheDocument()
-    expect(container.querySelector(".hb-p-5de351586567280cf9f3b1e7-1")).toBeInTheDocument()
+    expect(container.querySelector(".hb-p-5de351586567280cf9f3b1e7-7")).toBeInTheDocument()
   })
 
   it("lets the visitor remove an item from the cart", async () => {
@@ -58,7 +58,7 @@ describe("WishlistPage", () => {
 
     renderWishlistPage()
 
-    expect(screen.getByText("Tent Sleepover")).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Tent Sleepover" })).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Remove Tent Sleepover from wishlist" }))
 
     expect(await screen.findByText("Your wishlist is empty")).toBeInTheDocument()

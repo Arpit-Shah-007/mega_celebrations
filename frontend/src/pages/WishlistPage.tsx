@@ -3,6 +3,7 @@ import { PageHero } from "@/components/ui/PageHero"
 import { Container } from "@/components/ui/Container"
 import { EmptyWishlist } from "@/components/wishlist/EmptyWishlist"
 import { WishlistSummary } from "@/components/wishlist/WishlistSummary"
+import { WishlistSelectionsSummary } from "@/components/wishlist/WishlistSelectionsSummary"
 import { HoneyBookEmbed } from "@/components/wishlist/HoneyBookEmbed"
 import { useWishlist } from "@/context/useWishlist"
 
@@ -35,6 +36,9 @@ export function WishlistPage() {
                 <p className="mt-2 text-sm text-body">
                   Tell us a bit about your event and we'll price out everything on your wishlist.
                 </p>
+                <div className="mt-6">
+                  <WishlistSelectionsSummary items={items} />
+                </div>
                 <HoneyBookEmbed />
               </motion.div>
             </div>
