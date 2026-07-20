@@ -54,7 +54,7 @@ describe("WishlistPage", () => {
     expect(container.querySelector(".hb-p-5de351586567280cf9f3b1e7-7")).toBeInTheDocument()
   })
 
-  it("renders all four wishlist categories and the estimated total", () => {
+  it("renders all three wishlist categories and the estimated total", () => {
     seedWishlist([
       { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
     ])
@@ -63,7 +63,6 @@ describe("WishlistPage", () => {
 
     expect(screen.getByText("Packages")).toBeInTheDocument()
     expect(screen.getByText("A La Carte")).toBeInTheDocument()
-    expect(screen.getByText("Themes")).toBeInTheDocument()
     expect(screen.getByText("Add-Ons")).toBeInTheDocument()
     expect(screen.getByText("Estimated Total")).toBeInTheDocument()
     expect(screen.getByText("$80+")).toBeInTheDocument()

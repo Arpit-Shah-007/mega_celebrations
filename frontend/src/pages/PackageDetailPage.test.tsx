@@ -88,6 +88,20 @@ describe("PackageDetailPage", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
   })
 
+  it("auto-adds the package itself to the wishlist when a theme is added", async () => {
+    const user = userEvent.setup()
+    renderPackageDetailPage(VALID_SLUG)
+    const firstTheme = tentSleepover.themes![0]
+
+    await user.click(await screen.findByRole("button", { name: `Add ${firstTheme.name} to wishlist` }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(
+      parsed.some((entry: { slug: string; category: string }) => entry.slug === VALID_SLUG && entry.category === "package"),
+    ).toBe(true)
+  })
+
   it("shows a not-found message and a link back to packages for an invalid slug", async () => {
     renderPackageDetailPage("this-package-does-not-exist")
 

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest"
 import { render } from "@testing-library/react"
-import { HoneyBookEmbed } from "./HoneyBookEmbed"
+import { HoneyBookEmbed, isHoneyBookResizerNoise } from "./HoneyBookEmbed"
 
 const SCRIPT_SRC = "https://widget.honeybook.com/assets_users_production/websiteplacements/placement-controller.min.js"
 
@@ -37,5 +37,16 @@ describe("HoneyBookEmbed", () => {
     render(<HoneyBookEmbed />)
     render(<HoneyBookEmbed />)
     expect(scriptTags()).toHaveLength(1)
+  })
+
+  it("identifies HoneyBook's own benign iframeResizer warning for suppression", () => {
+    expect(isHoneyBookResizerNoise(["[iFrameSizer][Host page: iFrameResizer0] Ignored iFrame, already setup."])).toBe(
+      true,
+    )
+  })
+
+  it("leaves unrelated console.warn calls alone", () => {
+    expect(isHoneyBookResizerNoise(["some unrelated warning"])).toBe(false)
+    expect(isHoneyBookResizerNoise([{ notAString: true }])).toBe(false)
   })
 })

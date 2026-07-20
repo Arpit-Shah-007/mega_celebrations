@@ -114,4 +114,16 @@ describe("VariantDetailModal", () => {
 
     expect(thumbnail).toHaveAttribute("aria-current", "true")
   })
+
+  it("auto-adds the parent package alongside the theme when packageContext is given", async () => {
+    const user = userEvent.setup()
+    renderModal({ packageContext: { slug: "tent-sleepover", name: "Tent Sleepover", startingPrice: 80 } })
+
+    await user.click(screen.getByRole("button", { name: "Add To Wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed).toHaveLength(2)
+    expect(parsed.find((entry: { slug: string }) => entry.slug === "tent-sleepover").category).toBe("package")
+  })
 })

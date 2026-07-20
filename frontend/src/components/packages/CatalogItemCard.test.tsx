@@ -97,4 +97,22 @@ describe("CatalogItemCard", () => {
     expect(screen.queryByRole("button", { name: "Popcorn Machine" })).not.toBeInTheDocument()
     expect(screen.getByText("Popcorn Machine")).toBeInTheDocument()
   })
+
+  it("auto-adds the parent package alongside a theme when packageContext is given", async () => {
+    const user = userEvent.setup()
+    renderCard({
+      name: "Batter Up",
+      namespace: "theme-tent-sleepover",
+      category: "theme",
+      packageContext: { slug: "tent-sleepover", name: "Tent Sleepover", startingPrice: 80 },
+    })
+
+    await user.click(screen.getByRole("button", { name: "Add Batter Up to wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed).toHaveLength(2)
+    expect(parsed.find((entry: { slug: string }) => entry.slug === "tent-sleepover").category).toBe("package")
+    expect(parsed.find((entry: { slug: string }) => entry.slug.includes("batter-up")).packageSlug).toBe("tent-sleepover")
+  })
 })

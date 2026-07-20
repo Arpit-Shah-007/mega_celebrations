@@ -6,7 +6,8 @@ import { useWishlist } from "@/context/useWishlist"
 import { useToast } from "@/context/useToast"
 import { parsePriceValue, slugify } from "@/lib/catalogItem"
 import { ModalAccordionSection } from "@/components/packages/ModalAccordionSection"
-import type { PackageVariant, WishlistItemCategory } from "@/types"
+import type { PackageContext } from "@/components/packages/CatalogItemCard"
+import type { PackageVariant, WishlistItem, WishlistItemCategory } from "@/types"
 
 interface VariantDetailModalProps {
   variant: PackageVariant | null
@@ -16,6 +17,8 @@ interface VariantDetailModalProps {
   headingLabel: string
   /** Which wishlist panel section this item belongs to when saved — "theme" for the "Choose Your Theme" grid, "add-on" for "Popular Add-Ons". */
   category: WishlistItemCategory
+  /** Set only for category="theme" — auto-adds/removes the parent package alongside the theme so the wishlist can group them together. */
+  packageContext?: PackageContext
   onClose: () => void
 }
 
@@ -26,7 +29,7 @@ interface VariantDetailModalProps {
  * row, price badge, wishlist CTA, Description accordion) — PackageVariant has
  * no category/pricing-breakdown fields, so only those two sections are omitted.
  */
-export function VariantDetailModal({ variant, namespace, headingLabel, category, onClose }: VariantDetailModalProps) {
+export function VariantDetailModal({ variant, namespace, headingLabel, category, packageContext, onClose }: VariantDetailModalProps) {
   const { toggleItem, isSaved } = useWishlist()
   const { showToast } = useToast()
   const [quantity, setQuantity] = useState(1)
@@ -59,7 +62,26 @@ export function VariantDetailModal({ variant, namespace, headingLabel, category,
   const images = [variant.image, ...(variant.additionalImages ?? [])].filter((src): src is string => Boolean(src))
 
   const handleWishlistClick = () => {
-    toggleItem({ slug, name: variant.name, imageSeed: slug, image: variant.image, startingPrice: parsePriceValue(variant.price), category })
+    const item: WishlistItem = {
+      slug,
+      name: variant.name,
+      imageSeed: slug,
+      image: variant.image,
+      startingPrice: parsePriceValue(variant.price),
+      category,
+      ...(packageContext ? { packageSlug: packageContext.slug } : {}),
+    }
+    const relatedPackage: WishlistItem | undefined = packageContext
+      ? {
+          slug: packageContext.slug,
+          name: packageContext.name,
+          imageSeed: packageContext.slug,
+          image: packageContext.image,
+          startingPrice: packageContext.startingPrice,
+          category: "package",
+        }
+      : undefined
+    toggleItem(item, relatedPackage)
     showToast(saved ? `Removed ${variant.name} from your wishlist` : `Added ${variant.name} to your wishlist`)
   }
 

@@ -33,16 +33,47 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     setItems((current) => (current.some((existing) => existing.slug === item.slug) ? current : [...current, item]))
   }, [])
 
-  const removeItem = useCallback((slug: string) => {
-    setItems((current) => current.filter((existing) => existing.slug !== slug))
+  // A package only ever enters the wishlist because a theme under it was picked, so when the
+  // last theme referencing a package is removed, the package is dropped too rather than left
+  // behind as an empty row.
+  const dropOrphanedPackage = useCallback((items: WishlistItem[], removed: WishlistItem): WishlistItem[] => {
+    if (removed.category !== "theme" || !removed.packageSlug) return items
+    const packageStillHasThemes = items.some(
+      (existing) => existing.category === "theme" && existing.packageSlug === removed.packageSlug,
+    )
+    return packageStillHasThemes ? items : items.filter((existing) => existing.slug !== removed.packageSlug)
   }, [])
 
-  const toggleItem = useCallback((item: WishlistItem) => {
-    setItems((current) => {
-      const exists = current.some((existing) => existing.slug === item.slug)
-      return exists ? current.filter((existing) => existing.slug !== item.slug) : [...current, item]
-    })
-  }, [])
+  const removeItem = useCallback(
+    (slug: string) => {
+      setItems((current) => {
+        const removed = current.find((existing) => existing.slug === slug)
+        const withoutItem = current.filter((existing) => existing.slug !== slug)
+        return removed ? dropOrphanedPackage(withoutItem, removed) : withoutItem
+      })
+    },
+    [dropOrphanedPackage],
+  )
+
+  const toggleItem = useCallback(
+    (item: WishlistItem, relatedPackage?: WishlistItem) => {
+      setItems((current) => {
+        const exists = current.some((existing) => existing.slug === item.slug)
+        if (exists) {
+          return dropOrphanedPackage(
+            current.filter((existing) => existing.slug !== item.slug),
+            item,
+          )
+        }
+        const withPackage =
+          relatedPackage && !current.some((existing) => existing.slug === relatedPackage.slug)
+            ? [...current, relatedPackage]
+            : current
+        return [...withPackage, item]
+      })
+    },
+    [dropOrphanedPackage],
+  )
 
   const clear = useCallback(() => setItems([]), [])
 

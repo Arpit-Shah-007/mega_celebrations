@@ -107,4 +107,6 @@ export interface WishlistItem {
   image?: string | null
   startingPrice: number
   category: WishlistItemCategory
+  /** Parent package slug, set only on "theme" items — links a theme back to the package it was picked under so the wishlist can group them together. */
+  packageSlug?: string
 }

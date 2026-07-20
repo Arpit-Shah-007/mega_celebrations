@@ -6,6 +6,29 @@ const HONEYBOOK_SCRIPT_SRC =
 
 type HoneyBookWindow = typeof window & { _HB_?: { pid?: string } }
 
+let honeyBookResizerNoiseSuppressed = false
+
+/**
+ * HoneyBook's own iframeResizer script logs a "[iFrameSizer] ... already
+ * setup, ignoring" warning as part of its normal (benign) idempotency check —
+ * it fires even on a single fresh page load and isn't caused by anything on
+ * our side. We can't edit their minified script, so this filters just that
+ * one known-harmless line rather than leaving it cluttering the console.
+ */
+export function isHoneyBookResizerNoise(args: unknown[]): boolean {
+  return typeof args[0] === "string" && args[0].includes("[iFrameSizer]")
+}
+
+function suppressHoneyBookResizerNoise() {
+  if (honeyBookResizerNoiseSuppressed) return
+  honeyBookResizerNoiseSuppressed = true
+  const originalWarn = console.warn
+  console.warn = (...args: unknown[]) => {
+    if (isHoneyBookResizerNoise(args)) return
+    originalWarn(...args)
+  }
+}
+
 /**
  * HoneyBook's widget script only scans the DOM and mounts its form once, on
  * the script's own load — it does not notice this div reappearing after a
@@ -15,6 +38,8 @@ type HoneyBookWindow = typeof window & { _HB_?: { pid?: string } }
  */
 export function HoneyBookEmbed() {
   useEffect(() => {
+    suppressHoneyBookResizerNoise()
+
     const win = window as HoneyBookWindow
     win._HB_ = win._HB_ || {}
     win._HB_.pid = HONEYBOOK_PLACEMENT_ID
