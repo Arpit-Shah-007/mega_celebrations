@@ -19,19 +19,14 @@ export function WishlistPage() {
             <EmptyWishlist />
           ) : (
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-[420px_minmax(0,1fr)]">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              >
+              {/* Fade only, no vertical slide — a position offset here briefly puts the panel's
+                  remove buttons somewhere other than where they're about to render, so a click
+                  right after mount can land on the wrong element. */}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
                 <WishlistPanel items={items} onRemove={removeItem} />
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 }}>
                 <h2 className="text-xl sm:text-2xl">Request Your Custom Quote</h2>
                 <p className="mt-2 text-sm text-body">
                   Tell us a bit about your event and we'll price out everything on your wishlist.

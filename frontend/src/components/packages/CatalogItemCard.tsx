@@ -5,7 +5,14 @@ import { PlaceholderPhoto } from "@/components/ui/PlaceholderPhoto"
 import { useWishlist } from "@/context/useWishlist"
 import { useToast } from "@/context/useToast"
 import { parsePriceValue, slugify } from "@/lib/catalogItem"
-import type { WishlistItemCategory } from "@/types"
+import type { WishlistItem, WishlistItemCategory } from "@/types"
+
+export interface PackageContext {
+  slug: string
+  name: string
+  image?: string | null
+  startingPrice: number
+}
 
 interface CatalogItemCardProps {
   name: string
@@ -20,6 +27,8 @@ interface CatalogItemCardProps {
   delay?: number
   /** Opens the item detail modal. Omitted for callers that don't support it yet. */
   onOpenDetails?: () => void
+  /** Set only for category="theme" cards — auto-adds/removes the parent package alongside the theme so the wishlist can group them together. */
+  packageContext?: PackageContext
 }
 
 /**
@@ -29,14 +38,33 @@ interface CatalogItemCardProps {
  * detail page of their own, so they're added to the shared wishlist by a
  * locally-built slug rather than a package slug.
  */
-export function CatalogItemCard({ name, price, namespace, category, icon, image, delay = 0, onOpenDetails }: CatalogItemCardProps) {
+export function CatalogItemCard({ name, price, namespace, category, icon, image, delay = 0, onOpenDetails, packageContext }: CatalogItemCardProps) {
   const { toggleItem, isSaved } = useWishlist()
   const { showToast } = useToast()
   const slug = `${namespace}-${slugify(name)}`
   const saved = isSaved(slug)
 
   const handleClick = () => {
-    toggleItem({ slug, name, imageSeed: slug, image, startingPrice: parsePriceValue(price), category })
+    const item: WishlistItem = {
+      slug,
+      name,
+      imageSeed: slug,
+      image,
+      startingPrice: parsePriceValue(price),
+      category,
+      ...(packageContext ? { packageSlug: packageContext.slug } : {}),
+    }
+    const relatedPackage: WishlistItem | undefined = packageContext
+      ? {
+          slug: packageContext.slug,
+          name: packageContext.name,
+          imageSeed: packageContext.slug,
+          image: packageContext.image,
+          startingPrice: packageContext.startingPrice,
+          category: "package",
+        }
+      : undefined
+    toggleItem(item, relatedPackage)
     showToast(saved ? `Removed ${name} from your wishlist` : `Added ${name} to your wishlist`)
   }
 

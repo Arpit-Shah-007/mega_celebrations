@@ -23,11 +23,12 @@ const itemB: WishlistItem = {
   category: "add-on",
 }
 
-function WishlistHarness({ item }: { item: WishlistItem }) {
+function WishlistHarness({ item, relatedPackage }: { item: WishlistItem; relatedPackage?: WishlistItem }) {
   const { items, addItem, removeItem, toggleItem, clear, isSaved } = useWishlist()
   return (
     <div>
       <p data-testid="count">{items.length}</p>
+      <p data-testid="names">{items.map((existing) => existing.name).join(",")}</p>
       <p data-testid="saved">{isSaved(item.slug) ? "saved" : "not-saved"}</p>
       <button type="button" onClick={() => addItem(item)}>
         Add
@@ -35,7 +36,7 @@ function WishlistHarness({ item }: { item: WishlistItem }) {
       <button type="button" onClick={() => removeItem(item.slug)}>
         Remove
       </button>
-      <button type="button" onClick={() => toggleItem(item)}>
+      <button type="button" onClick={() => toggleItem(item, relatedPackage)}>
         Toggle
       </button>
       <button type="button" onClick={() => clear()}>
@@ -191,6 +192,106 @@ describe("WishlistProvider / useWishlist", () => {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     const parsed = JSON.parse(raw as string)
     expect(parsed[0].category).toBe("package")
+  })
+
+  it("toggleItem auto-adds the related package alongside a theme, then removes the package once the theme is toggled off again", async () => {
+    const user = userEvent.setup()
+    const theme: WishlistItem = {
+      slug: "theme-batter-up",
+      name: "Batter Up",
+      imageSeed: "theme-batter-up",
+      startingPrice: 80,
+      category: "theme",
+      packageSlug: "tent-sleepover",
+    }
+    const relatedPackage: WishlistItem = {
+      slug: "tent-sleepover",
+      name: "Tent Sleepover",
+      imageSeed: "tent-sleepover-1",
+      startingPrice: 80,
+      category: "package",
+    }
+    render(
+      <WishlistProvider>
+        <WishlistHarness item={theme} relatedPackage={relatedPackage} />
+      </WishlistProvider>,
+    )
+
+    await user.click(screen.getByRole("button", { name: "Toggle" }))
+    expect(screen.getByTestId("count")).toHaveTextContent("2")
+    expect(screen.getByTestId("names")).toHaveTextContent("Tent Sleepover,Batter Up")
+
+    await user.click(screen.getByRole("button", { name: "Toggle" }))
+    expect(screen.getByTestId("count")).toHaveTextContent("0")
+  })
+
+  it("removeItem also removes the parent package once its last theme is removed", async () => {
+    const theme: WishlistItem = {
+      slug: "theme-batter-up",
+      name: "Batter Up",
+      imageSeed: "theme-batter-up",
+      startingPrice: 80,
+      category: "theme",
+      packageSlug: "tent-sleepover",
+    }
+    const relatedPackage: WishlistItem = {
+      slug: "tent-sleepover",
+      name: "Tent Sleepover",
+      imageSeed: "tent-sleepover-1",
+      startingPrice: 80,
+      category: "package",
+    }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([relatedPackage, theme]))
+    const user = userEvent.setup()
+
+    render(
+      <WishlistProvider>
+        <WishlistHarness item={theme} />
+      </WishlistProvider>,
+    )
+
+    expect(screen.getByTestId("count")).toHaveTextContent("2")
+
+    await user.click(screen.getByRole("button", { name: "Remove" }))
+    expect(screen.getByTestId("count")).toHaveTextContent("0")
+  })
+
+  it("removeItem keeps the package if it still has another theme left", async () => {
+    const themeA: WishlistItem = {
+      slug: "theme-batter-up",
+      name: "Batter Up",
+      imageSeed: "theme-batter-up",
+      startingPrice: 80,
+      category: "theme",
+      packageSlug: "tent-sleepover",
+    }
+    const themeB: WishlistItem = {
+      slug: "theme-boho-chic",
+      name: "Boho Chic",
+      imageSeed: "theme-boho-chic",
+      startingPrice: 80,
+      category: "theme",
+      packageSlug: "tent-sleepover",
+    }
+    const relatedPackage: WishlistItem = {
+      slug: "tent-sleepover",
+      name: "Tent Sleepover",
+      imageSeed: "tent-sleepover-1",
+      startingPrice: 80,
+      category: "package",
+    }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([relatedPackage, themeA, themeB]))
+    const user = userEvent.setup()
+
+    render(
+      <WishlistProvider>
+        <WishlistHarness item={themeA} />
+      </WishlistProvider>,
+    )
+
+    await user.click(screen.getByRole("button", { name: "Remove" }))
+    expect(screen.getByTestId("count")).toHaveTextContent("2")
+    expect(screen.getByTestId("names")).toHaveTextContent("Tent Sleepover,Boho Chic")
   })
 
   it("throws when useWishlist is called outside a WishlistProvider", () => {

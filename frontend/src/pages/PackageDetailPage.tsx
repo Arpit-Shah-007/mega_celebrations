@@ -18,6 +18,7 @@ import { fetchPackageBySlug, fetchPackages } from "@/lib/api"
 import { getRelatedPackages } from "@/lib/relatedPackages"
 import { TestimonialsSection } from "@/components/home/TestimonialsSection"
 import { MEDIA_BASE_URL } from "@/lib/media"
+import type { PackageContext } from "@/components/packages/CatalogItemCard"
 import type { PackageVariant, WishlistItemCategory } from "@/types"
 
 /** Matches the live site's "What's Included"/"Pricing" bullet marker: a filled blue circle badge with a white check, not a plain checkmark glyph. */
@@ -33,11 +34,13 @@ function VariantGrid({
   variants,
   namespace,
   category,
+  packageContext,
   onOpenDetails,
 }: {
   variants: PackageVariant[]
   namespace: string
   category: WishlistItemCategory
+  packageContext?: PackageContext
   onOpenDetails: (variant: PackageVariant) => void
 }) {
   return (
@@ -50,6 +53,7 @@ function VariantGrid({
           image={variant.image}
           namespace={namespace}
           category={category}
+          packageContext={packageContext}
           onOpenDetails={() => onOpenDetails(variant)}
         />
       ))}
@@ -62,6 +66,7 @@ interface ActiveVariant {
   namespace: string
   label: string
   category: WishlistItemCategory
+  packageContext?: PackageContext
 }
 
 export function PackageDetailPage() {
@@ -96,6 +101,12 @@ export function PackageDetailPage() {
   }
 
   const relatedPackages = allPackages ? getRelatedPackages(pkg, allPackages, 3) : []
+  const packageContext: PackageContext = {
+    slug: pkg.slug,
+    name: pkg.name,
+    image: pkg.cardImage.url || undefined,
+    startingPrice: pkg.startingPrice,
+  }
   const Icon = getTagIcon(pkg.tags[0])
   const galleryImages = pkg.gallery.length > 0 ? pkg.gallery.map((image) => image.url) : [pkg.cardImage.url].filter(Boolean)
   const packageFaqs = pkg.faqs ?? []
@@ -185,8 +196,9 @@ export function PackageDetailPage() {
               variants={pkg.themes}
               namespace={`theme-${pkg.slug}`}
               category="theme"
+              packageContext={packageContext}
               onOpenDetails={(variant) =>
-                setActiveVariant({ variant, namespace: `theme-${pkg.slug}`, label: "Theme", category: "theme" })
+                setActiveVariant({ variant, namespace: `theme-${pkg.slug}`, label: "Theme", category: "theme", packageContext })
               }
             />
           </Container>
@@ -252,6 +264,7 @@ export function PackageDetailPage() {
         namespace={activeVariant?.namespace ?? ""}
         headingLabel={activeVariant?.label ?? ""}
         category={activeVariant?.category ?? "theme"}
+        packageContext={activeVariant?.packageContext}
         onClose={() => setActiveVariant(null)}
       />
     </>
