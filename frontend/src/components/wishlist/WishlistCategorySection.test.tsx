@@ -46,4 +46,10 @@ describe("WishlistCategorySection", () => {
     expect(screen.getByText("Nothing picked yet.")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Explore Packages" })).toHaveAttribute("href", "/packages")
   })
+
+  it("shows an Add More link pointing at the same explore destination when the category has items", () => {
+    renderSection({ items })
+
+    expect(screen.getByRole("link", { name: "Add More" })).toHaveAttribute("href", "/packages")
+  })
 })

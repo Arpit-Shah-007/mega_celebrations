@@ -55,7 +55,10 @@ describe("WishlistPanel", () => {
     renderPanel({ items: [] })
 
     expect(screen.getAllByText("Nothing picked yet.")).toHaveLength(3)
-    expect(screen.getByRole("link", { name: "Explore Packages" })).toHaveAttribute("href", "/packages")
+    expect(screen.getByRole("link", { name: "Explore Packages" })).toHaveAttribute(
+      "href",
+      "/packages/full-services-packages",
+    )
     expect(screen.getByRole("link", { name: "Explore A La Carte" })).toHaveAttribute("href", "/packages/a-la-carte")
     expect(screen.getByRole("link", { name: "Explore Add-Ons" })).toHaveAttribute("href", "/packages/add-ons")
   })

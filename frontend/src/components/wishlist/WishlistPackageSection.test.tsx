@@ -56,11 +56,20 @@ describe("WishlistPackageSection", () => {
     expect(screen.queryByText("Magical Unicorn")).not.toBeInTheDocument()
   })
 
-  it("renders the empty state with an explore link when no packages are saved", () => {
+  it("renders the empty state with an explore link pointing at the full-service packages listing", () => {
     renderSection()
 
     expect(screen.getByText("Nothing picked yet.")).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "Explore Packages" })).toHaveAttribute("href", "/packages")
+    expect(screen.getByRole("link", { name: "Explore Packages" })).toHaveAttribute(
+      "href",
+      "/packages/full-services-packages",
+    )
+  })
+
+  it("shows an Add More link pointing at the full-service packages listing when packages are already saved", () => {
+    renderSection({ packages: [tentSleepover] })
+
+    expect(screen.getByRole("link", { name: "Add More" })).toHaveAttribute("href", "/packages/full-services-packages")
   })
 
   it("calls onRemovePackage and onRemoveTheme with the right slug", async () => {
