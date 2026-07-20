@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { WishlistItemTile } from "@/components/wishlist/WishlistItemTile"
 import { EmptyCategoryState } from "@/components/wishlist/EmptyCategoryState"
+import { AddMoreButton } from "@/components/wishlist/AddMoreButton"
 import type { WishlistItem } from "@/types"
 
 interface WishlistCategorySectionProps {
@@ -33,13 +34,16 @@ export function WishlistCategorySection({
 
       <div className="mt-3">
         {items.length > 0 ? (
-          <ul className="flex flex-col gap-2">
-            <AnimatePresence initial={false}>
-              {items.map((item) => (
-                <WishlistItemTile key={item.slug} item={item} onRemove={onRemove} />
-              ))}
-            </AnimatePresence>
-          </ul>
+          <>
+            <ul className="flex flex-col gap-2">
+              <AnimatePresence initial={false}>
+                {items.map((item) => (
+                  <WishlistItemTile key={item.slug} item={item} onRemove={onRemove} />
+                ))}
+              </AnimatePresence>
+            </ul>
+            <AddMoreButton to={exploreTo} />
+          </>
         ) : (
           <EmptyCategoryState icon={Icon} message={emptyMessage} exploreLabel={exploreLabel} exploreTo={exploreTo} />
         )}
