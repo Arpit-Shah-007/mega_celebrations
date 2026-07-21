@@ -30,7 +30,7 @@ interface VariantDetailModalProps {
  * no category/pricing-breakdown fields, so only those two sections are omitted.
  */
 export function VariantDetailModal({ variant, namespace, headingLabel, category, packageContext, onClose }: VariantDetailModalProps) {
-  const { toggleItem, isSaved } = useWishlist()
+  const { addItem, removeItem, isSaved } = useWishlist()
   const { showToast } = useToast()
   const [quantity, setQuantity] = useState(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -61,7 +61,10 @@ export function VariantDetailModal({ variant, namespace, headingLabel, category,
   const saved = isSaved(slug)
   const images = [variant.image, ...(variant.additionalImages ?? [])].filter((src): src is string => Boolean(src))
 
-  const handleWishlistClick = () => {
+  // Always additive: re-opening this modal for an already-saved variant and adding more should
+  // accumulate onto its existing quantity (1 saved + 5 added here = 6), never replace it or
+  // silently no-op the way a plain saved/unsaved toggle would.
+  const handleAddClick = () => {
     const item: WishlistItem = {
       slug,
       name: variant.name,
@@ -81,8 +84,13 @@ export function VariantDetailModal({ variant, namespace, headingLabel, category,
           category: "package",
         }
       : undefined
-    toggleItem(item, relatedPackage)
-    showToast(saved ? `Removed ${variant.name} from your wishlist` : `Added ${variant.name} to your wishlist`)
+    addItem(item, quantity, relatedPackage)
+    showToast(`Added ${quantity} ${variant.name} to your wishlist`)
+  }
+
+  const handleRemoveClick = () => {
+    removeItem(slug)
+    showToast(`Removed ${variant.name} from your wishlist`)
   }
 
   return createPortal(
@@ -188,11 +196,21 @@ export function VariantDetailModal({ variant, namespace, headingLabel, category,
 
                 <button
                   type="button"
-                  onClick={handleWishlistClick}
+                  onClick={handleAddClick}
                   className="mt-4 w-full cursor-pointer bg-pink py-2.5 text-center font-bold uppercase tracking-wide text-white transition-colors hover:bg-pink-dark"
                 >
-                  {saved ? "Remove From Wishlist" : "Add To Wishlist"}
+                  Add To Wishlist
                 </button>
+
+                {saved ? (
+                  <button
+                    type="button"
+                    onClick={handleRemoveClick}
+                    className="mt-2 w-full cursor-pointer py-1 text-center text-sm font-bold uppercase tracking-wide text-navy/70 transition-colors hover:text-pink"
+                  >
+                    Remove From Wishlist
+                  </button>
+                ) : null}
 
                 {variant.description && variant.description.length > 0 ? (
                   <ModalAccordionSection title="Description">

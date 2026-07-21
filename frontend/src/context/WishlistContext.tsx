@@ -29,15 +29,35 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items])
 
-  const addItem = useCallback((item: WishlistItem, quantity = 1) => {
+  // A submission redirects the whole tab away to HoneyBook and back (see
+  // ContactThankYouPage, which clears the wishlist there). Returning via the
+  // browser's back button can restore this page instance from bfcache with
+  // its pre-clear in-memory state still intact, even though localStorage was
+  // already emptied on the page in between — so re-sync from storage on any
+  // bfcache restore rather than trusting the frozen React state.
+  useEffect(() => {
+    function handlePageShow(event: PageTransitionEvent) {
+      if (event.persisted) setItems(readStoredWishlist())
+    }
+    window.addEventListener("pageshow", handlePageShow)
+    return () => window.removeEventListener("pageshow", handlePageShow)
+  }, [])
+
+  const addItem = useCallback((item: WishlistItem, quantity = 1, relatedPackage?: WishlistItem) => {
     setItems((current) => {
-      const existing = current.find((entry) => entry.slug === item.slug)
+      // The package itself isn't quantity-tracked (it's an umbrella for its themes), so it's
+      // inserted as-is rather than through the quantity-accumulate path below.
+      const withPackage =
+        relatedPackage && !current.some((existing) => existing.slug === relatedPackage.slug)
+          ? [...current, relatedPackage]
+          : current
+      const existing = withPackage.find((entry) => entry.slug === item.slug)
       if (existing) {
-        return current.map((entry) =>
+        return withPackage.map((entry) =>
           entry.slug === item.slug ? { ...entry, quantity: (entry.quantity ?? 1) + quantity } : entry,
         )
       }
-      return [...current, { ...item, quantity }]
+      return [...withPackage, { ...item, quantity }]
     })
   }, [])
 

@@ -21,8 +21,15 @@ export function WishlistPage() {
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-[420px_minmax(0,1fr)]">
               {/* Fade only, no vertical slide — a position offset here briefly puts the panel's
                   remove buttons somewhere other than where they're about to render, so a click
-                  right after mount can land on the wrong element. */}
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+                  right after mount can land on the wrong element. Sticky keeps the picks in view
+                  while the (usually taller) quote form is scrolled, releasing once the shorter
+                  panel column runs out of room — so it's on screen right up to submit. */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+                className="lg:sticky lg:top-24 lg:self-start"
+              >
                 <WishlistPanel items={items} onRemove={removeItem} />
               </motion.div>
 

@@ -43,7 +43,7 @@ export function WishlistPanel({ items, onRemove }: WishlistPanelProps) {
   const themes = items.filter((item) => item.category === "theme")
 
   return (
-    <div className="bg-graytint p-5 sm:p-8">
+    <div className="bg-graytint p-5 sm:p-8 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
       <div className="border-b border-navy/15 pb-5">
         <p className="text-sm font-bold uppercase tracking-wide text-navy">Your Picks</p>
         <p className="text-xs text-body/80">Final pricing is confirmed in your custom quote.</p>
