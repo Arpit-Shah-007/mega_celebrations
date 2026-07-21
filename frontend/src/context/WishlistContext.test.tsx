@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { render, screen } from "@testing-library/react"
+import { act, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { WishlistItem } from "@/types"
 import { WishlistProvider } from "./WishlistContext"
@@ -365,6 +365,42 @@ describe("WishlistProvider / useWishlist", () => {
 
     await user.click(screen.getByRole("button", { name: "Remove" }))
     expect(screen.getByTestId("count")).toHaveTextContent("0")
+  })
+
+  it("re-syncs from localStorage when the page is restored from bfcache, discarding stale in-memory state", async () => {
+    render(
+      <WishlistProvider>
+        <WishlistHarness item={itemA} />
+      </WishlistProvider>,
+    )
+
+    // Simulates another page (e.g. the post-submit thank-you page) clearing the wishlist
+    // while this instance sat frozen in bfcache with its old, pre-clear state.
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([itemB]))
+
+    const pageShowEvent = new Event("pageshow") as PageTransitionEvent
+    Object.defineProperty(pageShowEvent, "persisted", { value: true })
+    act(() => window.dispatchEvent(pageShowEvent))
+
+    await waitFor(() => expect(screen.getByTestId("names")).toHaveTextContent("MEGALounge"))
+  })
+
+  it("ignores a normal (non-bfcache) pageshow, leaving in-memory state alone", async () => {
+    const user = userEvent.setup()
+    render(
+      <WishlistProvider>
+        <WishlistHarness item={itemA} />
+      </WishlistProvider>,
+    )
+
+    await user.click(screen.getByRole("button", { name: "Add" }))
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([itemB]))
+
+    const pageShowEvent = new Event("pageshow") as PageTransitionEvent
+    Object.defineProperty(pageShowEvent, "persisted", { value: false })
+    act(() => window.dispatchEvent(pageShowEvent))
+
+    expect(screen.getByTestId("names")).toHaveTextContent("Canopy Lounge")
   })
 
   it("throws when useWishlist is called outside a WishlistProvider", () => {
