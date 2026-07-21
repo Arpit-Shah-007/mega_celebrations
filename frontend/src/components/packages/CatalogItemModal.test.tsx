@@ -93,12 +93,55 @@ describe("CatalogItemModal", () => {
     expect(screen.getByText("2", { selector: "span" })).toBeInTheDocument()
   })
 
-  it("toggles the item in the wishlist when the CTA is clicked", async () => {
+  it("shows a Remove From Wishlist control once the item is saved, alongside the persistent Add button", async () => {
+    const user = userEvent.setup()
+    renderModal()
+
+    expect(screen.queryByRole("button", { name: "Remove From Wishlist" })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Add To Wishlist" }))
+    expect(screen.getByRole("button", { name: "Remove From Wishlist" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Add To Wishlist" })).toBeInTheDocument()
+  })
+
+  it("removes the item entirely when Remove From Wishlist is clicked", async () => {
     const user = userEvent.setup()
     renderModal()
 
     await user.click(screen.getByRole("button", { name: "Add To Wishlist" }))
-    expect(screen.getByRole("button", { name: "Remove From Wishlist" })).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Remove From Wishlist" }))
+
+    expect(screen.queryByRole("button", { name: "Remove From Wishlist" })).not.toBeInTheDocument()
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    expect(JSON.parse(raw as string)).toEqual([])
+  })
+
+  it("adds the chosen quantity, not just a single unit", async () => {
+    const user = userEvent.setup()
+    renderModal()
+
+    await user.click(screen.getByRole("button", { name: "Increase quantity" }))
+    await user.click(screen.getByRole("button", { name: "Increase quantity" }))
+    await user.click(screen.getByRole("button", { name: "Add To Wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed[0].quantity).toBe(3)
+  })
+
+  it("accumulates quantity when adding the same item again instead of replacing it", async () => {
+    const user = userEvent.setup()
+    renderModal()
+
+    await user.click(screen.getByRole("button", { name: "Add To Wishlist" }))
+    await user.click(screen.getByRole("button", { name: "Increase quantity" }))
+    await user.click(screen.getByRole("button", { name: "Increase quantity" }))
+    await user.click(screen.getByRole("button", { name: "Add To Wishlist" }))
+
+    const raw = window.localStorage.getItem("mega-celebrations:wishlist")
+    const parsed = JSON.parse(raw as string)
+    expect(parsed).toHaveLength(1)
+    expect(parsed[0].quantity).toBe(4)
   })
 
   it("tags the saved item with the given category", async () => {

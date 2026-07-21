@@ -109,4 +109,6 @@ export interface WishlistItem {
   category: WishlistItemCategory
   /** Parent package slug, set only on "theme" items — links a theme back to the package it was picked under so the wishlist can group them together. */
   packageSlug?: string
+  /** How many units were requested — set by the catalog item modal's quantity stepper. Absent (treated as 1) for items that aren't quantity-based, like packages and themes. */
+  quantity?: number
 }

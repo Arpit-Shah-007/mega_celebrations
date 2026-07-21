@@ -25,6 +25,11 @@ export function WishlistItemTile({ item, onRemove, children }: WishlistItemTileP
       <div className="flex items-center gap-3">
         <PlaceholderPhoto seed={item.imageSeed} alt={item.name} src={item.image ?? undefined} className="h-14 w-14 shrink-0" />
         <p className="text-sm font-semibold leading-snug text-navy">{item.name}</p>
+        {item.quantity !== undefined ? (
+          <span className="shrink-0 rounded-full bg-navy/10 px-2 py-0.5 text-xs font-bold text-navy">
+            ×{item.quantity}
+          </span>
+        ) : null}
         <button
           type="button"
           onClick={() => onRemove(item.slug)}

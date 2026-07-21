@@ -34,6 +34,18 @@ describe("WishlistItemTile", () => {
     expect(photo.tagName).toBe("DIV")
   })
 
+  it("shows a quantity badge when the item has a tracked quantity", () => {
+    render(<WishlistItemTile item={{ ...item, quantity: 5 }} onRemove={vi.fn()} />)
+
+    expect(screen.getByText("×5")).toBeInTheDocument()
+  })
+
+  it("renders no quantity badge for items with no tracked quantity, like packages and themes", () => {
+    render(<WishlistItemTile item={item} onRemove={vi.fn()} />)
+
+    expect(screen.queryByText(/^×/)).not.toBeInTheDocument()
+  })
+
   it("calls onRemove with the item's slug when the remove control is clicked", async () => {
     const user = userEvent.setup()
     const onRemove = vi.fn()

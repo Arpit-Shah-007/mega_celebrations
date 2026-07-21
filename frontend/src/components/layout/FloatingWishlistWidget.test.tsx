@@ -28,8 +28,8 @@ describe("FloatingWishlistWidget", () => {
     window.localStorage.setItem(
       "mega-celebrations:wishlist",
       JSON.stringify([
-        { slug: "pkg-1", name: "Package One", imageSeed: "pkg-1", startingPrice: 100 },
-        { slug: "pkg-2", name: "Package Two", imageSeed: "pkg-2", startingPrice: 200 },
+        { slug: "addon-1", name: "Add-On One", imageSeed: "addon-1", startingPrice: 100, category: "add-on" },
+        { slug: "addon-2", name: "Add-On Two", imageSeed: "addon-2", startingPrice: 200, category: "add-on" },
       ]),
     )
 
@@ -41,7 +41,28 @@ describe("FloatingWishlistWidget", () => {
   it("uses singular item wording when there is exactly one saved item", () => {
     window.localStorage.setItem(
       "mega-celebrations:wishlist",
-      JSON.stringify([{ slug: "pkg-1", name: "Package One", imageSeed: "pkg-1", startingPrice: 100 }]),
+      JSON.stringify([{ slug: "addon-1", name: "Add-On One", imageSeed: "addon-1", startingPrice: 100, category: "add-on" }]),
+    )
+
+    renderWidget()
+
+    expect(screen.getByRole("link", { name: "View wishlist, 1 item" })).toBeInTheDocument()
+  })
+
+  it("does not count an auto-added package toward the shown total, since it's the same pick as its theme", () => {
+    window.localStorage.setItem(
+      "mega-celebrations:wishlist",
+      JSON.stringify([
+        { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover", startingPrice: 80, category: "package" },
+        {
+          slug: "theme-magical-unicorn",
+          name: "Magical Unicorn",
+          imageSeed: "theme-magical-unicorn",
+          startingPrice: 0,
+          category: "theme",
+          packageSlug: "tent-sleepover",
+        },
+      ]),
     )
 
     renderWidget()
