@@ -27,11 +27,12 @@ function renderPanel(props: Partial<React.ComponentProps<typeof WishlistPanel>> 
 }
 
 describe("WishlistPanel", () => {
-  it("renders the estimated total across all categories", () => {
+  it("renders a pricing disclaimer instead of a computed total", () => {
     renderPanel()
 
-    expect(screen.getByText("Estimated Total")).toBeInTheDocument()
-    expect(screen.getByText("$280+")).toBeInTheDocument()
+    expect(screen.getByText("Your Picks")).toBeInTheDocument()
+    expect(screen.getByText("Final pricing is confirmed in your custom quote.")).toBeInTheDocument()
+    expect(screen.queryByText(/^\$/)).not.toBeInTheDocument()
   })
 
   it("renders exactly three sections in a fixed order: Packages, A La Carte, Add-Ons", () => {

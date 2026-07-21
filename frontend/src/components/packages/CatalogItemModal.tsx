@@ -24,7 +24,7 @@ interface CatalogItemModalProps {
  * stepper, rate readout, wishlist CTA, and Description/Pricing accordions.
  */
 export function CatalogItemModal({ item, namespace, category, onClose }: CatalogItemModalProps) {
-  const { toggleItem, isSaved } = useWishlist()
+  const { addItem, removeItem, isSaved } = useWishlist()
   const { showToast } = useToast()
   const [quantity, setQuantity] = useState(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -55,9 +55,20 @@ export function CatalogItemModal({ item, namespace, category, onClose }: Catalog
   const saved = isSaved(slug)
   const images = [item.image, ...(item.additionalImages ?? [])].filter((src): src is string => Boolean(src))
 
-  const handleWishlistClick = () => {
-    toggleItem({ slug, name: item.name, imageSeed: slug, image: item.image, startingPrice: parsePriceValue(item.price), category })
-    showToast(saved ? `Removed ${item.name} from your wishlist` : `Added ${item.name} to your wishlist`)
+  // Always additive: re-opening this modal for an already-saved item and adding more should
+  // accumulate onto its existing quantity (1 saved + 5 added here = 6), never replace it or
+  // silently no-op the way a plain saved/unsaved toggle would.
+  const handleAddClick = () => {
+    addItem(
+      { slug, name: item.name, imageSeed: slug, image: item.image, startingPrice: parsePriceValue(item.price), category },
+      quantity,
+    )
+    showToast(`Added ${quantity} ${item.name} to your wishlist`)
+  }
+
+  const handleRemoveClick = () => {
+    removeItem(slug)
+    showToast(`Removed ${item.name} from your wishlist`)
   }
 
   return createPortal(
@@ -163,11 +174,21 @@ export function CatalogItemModal({ item, namespace, category, onClose }: Catalog
 
                 <button
                   type="button"
-                  onClick={handleWishlistClick}
+                  onClick={handleAddClick}
                   className="mt-4 w-full cursor-pointer bg-pink py-2.5 text-center font-bold uppercase tracking-wide text-white transition-colors hover:bg-pink-dark"
                 >
-                  {saved ? "Remove From Wishlist" : "Add To Wishlist"}
+                  Add To Wishlist
                 </button>
+
+                {saved ? (
+                  <button
+                    type="button"
+                    onClick={handleRemoveClick}
+                    className="mt-2 w-full cursor-pointer py-1 text-center text-sm font-bold uppercase tracking-wide text-navy/70 transition-colors hover:text-pink"
+                  >
+                    Remove From Wishlist
+                  </button>
+                ) : null}
 
                 <ModalAccordionSection title="Description">
                   <ul className="space-y-1.5">

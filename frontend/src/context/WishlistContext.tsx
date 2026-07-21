@@ -29,19 +29,33 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items])
 
-  const addItem = useCallback((item: WishlistItem) => {
-    setItems((current) => (current.some((existing) => existing.slug === item.slug) ? current : [...current, item]))
+  const addItem = useCallback((item: WishlistItem, quantity = 1) => {
+    setItems((current) => {
+      const existing = current.find((entry) => entry.slug === item.slug)
+      if (existing) {
+        return current.map((entry) =>
+          entry.slug === item.slug ? { ...entry, quantity: (entry.quantity ?? 1) + quantity } : entry,
+        )
+      }
+      return [...current, { ...item, quantity }]
+    })
   }, [])
 
-  // A package only ever enters the wishlist because a theme under it was picked, so when the
-  // last theme referencing a package is removed, the package is dropped too rather than left
-  // behind as an empty row.
-  const dropOrphanedPackage = useCallback((items: WishlistItem[], removed: WishlistItem): WishlistItem[] => {
-    if (removed.category !== "theme" || !removed.packageSlug) return items
-    const packageStillHasThemes = items.some(
-      (existing) => existing.category === "theme" && existing.packageSlug === removed.packageSlug,
-    )
-    return packageStillHasThemes ? items : items.filter((existing) => existing.slug !== removed.packageSlug)
+  // A package and its themes are two sides of the same pick, so removing either side should
+  // take the other with it: removing a theme drops its package once no sibling theme is left
+  // referencing it, and removing a package directly drops every theme nested under it (they'd
+  // otherwise linger in state with nowhere left to render).
+  const dropRelatedItems = useCallback((items: WishlistItem[], removed: WishlistItem): WishlistItem[] => {
+    if (removed.category === "theme" && removed.packageSlug) {
+      const packageStillHasThemes = items.some(
+        (existing) => existing.category === "theme" && existing.packageSlug === removed.packageSlug,
+      )
+      return packageStillHasThemes ? items : items.filter((existing) => existing.slug !== removed.packageSlug)
+    }
+    if (removed.category === "package") {
+      return items.filter((existing) => !(existing.category === "theme" && existing.packageSlug === removed.slug))
+    }
+    return items
   }, [])
 
   const removeItem = useCallback(
@@ -49,10 +63,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       setItems((current) => {
         const removed = current.find((existing) => existing.slug === slug)
         const withoutItem = current.filter((existing) => existing.slug !== slug)
-        return removed ? dropOrphanedPackage(withoutItem, removed) : withoutItem
+        return removed ? dropRelatedItems(withoutItem, removed) : withoutItem
       })
     },
-    [dropOrphanedPackage],
+    [dropRelatedItems],
   )
 
   const toggleItem = useCallback(
@@ -60,7 +74,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       setItems((current) => {
         const exists = current.some((existing) => existing.slug === item.slug)
         if (exists) {
-          return dropOrphanedPackage(
+          return dropRelatedItems(
             current.filter((existing) => existing.slug !== item.slug),
             item,
           )
@@ -72,7 +86,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         return [...withPackage, item]
       })
     },
-    [dropOrphanedPackage],
+    [dropRelatedItems],
   )
 
   const clear = useCallback(() => setItems([]), [])

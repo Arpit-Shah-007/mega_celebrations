@@ -23,14 +23,24 @@ const itemB: WishlistItem = {
   category: "add-on",
 }
 
-function WishlistHarness({ item, relatedPackage }: { item: WishlistItem; relatedPackage?: WishlistItem }) {
+function WishlistHarness({
+  item,
+  relatedPackage,
+  addQuantity = 1,
+}: {
+  item: WishlistItem
+  relatedPackage?: WishlistItem
+  addQuantity?: number
+}) {
   const { items, addItem, removeItem, toggleItem, clear, isSaved } = useWishlist()
+  const savedItem = items.find((existing) => existing.slug === item.slug)
   return (
     <div>
       <p data-testid="count">{items.length}</p>
       <p data-testid="names">{items.map((existing) => existing.name).join(",")}</p>
       <p data-testid="saved">{isSaved(item.slug) ? "saved" : "not-saved"}</p>
-      <button type="button" onClick={() => addItem(item)}>
+      <p data-testid="quantity">{savedItem?.quantity ?? ""}</p>
+      <button type="button" onClick={() => addItem(item, addQuantity)}>
         Add
       </button>
       <button type="button" onClick={() => removeItem(item.slug)}>
@@ -56,7 +66,7 @@ describe("WishlistProvider / useWishlist", () => {
     window.localStorage.clear()
   })
 
-  it("adds an item to the wishlist", async () => {
+  it("adds an item to the wishlist with a default quantity of 1", async () => {
     const user = userEvent.setup()
     render(
       <WishlistProvider>
@@ -68,9 +78,10 @@ describe("WishlistProvider / useWishlist", () => {
 
     expect(screen.getByTestId("count")).toHaveTextContent("1")
     expect(screen.getByTestId("saved")).toHaveTextContent("saved")
+    expect(screen.getByTestId("quantity")).toHaveTextContent("1")
   })
 
-  it("is idempotent when adding the same slug twice", async () => {
+  it("adding the same slug again accumulates quantity instead of creating a duplicate row", async () => {
     const user = userEvent.setup()
     render(
       <WishlistProvider>
@@ -82,6 +93,29 @@ describe("WishlistProvider / useWishlist", () => {
     await user.click(screen.getByRole("button", { name: "Add" }))
 
     expect(screen.getByTestId("count")).toHaveTextContent("1")
+    expect(screen.getByTestId("quantity")).toHaveTextContent("2")
+  })
+
+  it("adding 5 more to an existing 1 results in 6, not 5 or 1", async () => {
+    const user = userEvent.setup()
+    const { rerender } = render(
+      <WishlistProvider>
+        <WishlistHarness item={itemA} addQuantity={1} />
+      </WishlistProvider>,
+    )
+
+    await user.click(screen.getByRole("button", { name: "Add" }))
+    expect(screen.getByTestId("quantity")).toHaveTextContent("1")
+
+    rerender(
+      <WishlistProvider>
+        <WishlistHarness item={itemA} addQuantity={5} />
+      </WishlistProvider>,
+    )
+    await user.click(screen.getByRole("button", { name: "Add" }))
+
+    expect(screen.getByTestId("count")).toHaveTextContent("1")
+    expect(screen.getByTestId("quantity")).toHaveTextContent("6")
   })
 
   it("removes an item by slug", async () => {
@@ -145,7 +179,7 @@ describe("WishlistProvider / useWishlist", () => {
     expect(raw).not.toBeNull()
     const parsed: unknown = JSON.parse(raw as string)
     expect(Array.isArray(parsed)).toBe(true)
-    expect(parsed).toEqual([itemA])
+    expect(parsed).toEqual([{ ...itemA, quantity: 1 }])
   })
 
   it("loads previously persisted items from localStorage on mount", () => {
@@ -292,6 +326,45 @@ describe("WishlistProvider / useWishlist", () => {
     await user.click(screen.getByRole("button", { name: "Remove" }))
     expect(screen.getByTestId("count")).toHaveTextContent("2")
     expect(screen.getByTestId("names")).toHaveTextContent("Tent Sleepover,Boho Chic")
+  })
+
+  it("removeItem also removes every theme nested under a package when the package is removed directly", async () => {
+    const themeA: WishlistItem = {
+      slug: "theme-batter-up",
+      name: "Batter Up",
+      imageSeed: "theme-batter-up",
+      startingPrice: 80,
+      category: "theme",
+      packageSlug: "tent-sleepover",
+    }
+    const themeB: WishlistItem = {
+      slug: "theme-boho-chic",
+      name: "Boho Chic",
+      imageSeed: "theme-boho-chic",
+      startingPrice: 80,
+      category: "theme",
+      packageSlug: "tent-sleepover",
+    }
+    const relatedPackage: WishlistItem = {
+      slug: "tent-sleepover",
+      name: "Tent Sleepover",
+      imageSeed: "tent-sleepover-1",
+      startingPrice: 80,
+      category: "package",
+    }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([relatedPackage, themeA, themeB]))
+    const user = userEvent.setup()
+
+    render(
+      <WishlistProvider>
+        <WishlistHarness item={relatedPackage} />
+      </WishlistProvider>,
+    )
+
+    expect(screen.getByTestId("count")).toHaveTextContent("3")
+
+    await user.click(screen.getByRole("button", { name: "Remove" }))
+    expect(screen.getByTestId("count")).toHaveTextContent("0")
   })
 
   it("throws when useWishlist is called outside a WishlistProvider", () => {

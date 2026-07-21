@@ -39,18 +39,14 @@ interface WishlistPanelProps {
 }
 
 export function WishlistPanel({ items, onRemove }: WishlistPanelProps) {
-  const total = items.reduce((sum, item) => sum + item.startingPrice, 0)
   const packages = items.filter((item) => item.category === "package")
   const themes = items.filter((item) => item.category === "theme")
 
   return (
     <div className="bg-graytint p-5 sm:p-8">
-      <div className="flex items-center justify-between gap-4 border-b border-navy/15 pb-5">
-        <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-navy">Estimated Total</p>
-          <p className="text-xs text-body/80">Final pricing is confirmed in your custom quote.</p>
-        </div>
-        <p className="text-2xl text-pink-dark sm:text-3xl">${total.toLocaleString()}+</p>
+      <div className="border-b border-navy/15 pb-5">
+        <p className="text-sm font-bold uppercase tracking-wide text-navy">Your Picks</p>
+        <p className="text-xs text-body/80">Final pricing is confirmed in your custom quote.</p>
       </div>
 
       <div className="mt-6 space-y-6">

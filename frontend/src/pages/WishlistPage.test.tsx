@@ -54,7 +54,7 @@ describe("WishlistPage", () => {
     expect(container.querySelector(".hb-p-5de351586567280cf9f3b1e7-7")).toBeInTheDocument()
   })
 
-  it("renders all three wishlist categories and the estimated total", () => {
+  it("renders all three wishlist categories and a pricing disclaimer instead of a computed total", () => {
     seedWishlist([
       { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
     ])
@@ -64,8 +64,8 @@ describe("WishlistPage", () => {
     expect(screen.getByText("Packages")).toBeInTheDocument()
     expect(screen.getByText("A La Carte")).toBeInTheDocument()
     expect(screen.getByText("Add-Ons")).toBeInTheDocument()
-    expect(screen.getByText("Estimated Total")).toBeInTheDocument()
-    expect(screen.getByText("$80+")).toBeInTheDocument()
+    expect(screen.getByText("Final pricing is confirmed in your custom quote.")).toBeInTheDocument()
+    expect(screen.queryByText(/^\$/)).not.toBeInTheDocument()
   })
 
   it("places the wishlist panel before the quote form in DOM order (left column on desktop, top of the stack on mobile)", () => {
@@ -76,7 +76,7 @@ describe("WishlistPage", () => {
     renderWishlistPage()
 
     const body = document.body.innerHTML
-    expect(body.indexOf("Estimated Total")).toBeLessThan(body.indexOf("Request Your Custom Quote"))
+    expect(body.indexOf("Final pricing is confirmed")).toBeLessThan(body.indexOf("Request Your Custom Quote"))
   })
 
   it("lets the visitor remove an item from the wishlist", async () => {
