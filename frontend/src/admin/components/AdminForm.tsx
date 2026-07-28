@@ -1,13 +1,38 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react"
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useId,
+  type ButtonHTMLAttributes,
+  type InputHTMLAttributes,
+  type ReactElement,
+  type ReactNode,
+  type TextareaHTMLAttributes,
+} from "react"
 
+/** Labels a single Input/TextArea child via htmlFor/id; other children (media pickers, custom widgets) render unchanged since they have no single form control to associate the label with. */
 export function Field({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
+  const generatedId = useId()
+  // Children.toArray drops null/undefined/boolean (e.g. a conditional error message
+  // rendered alongside the field), so a lone Input/TextArea is still detected — unlike
+  // Children.only, which throws whenever there is more than one JSX child slot at all.
+  const nonEmptyChildren = Children.toArray(children)
+  const child = nonEmptyChildren.length === 1 ? nonEmptyChildren[0] : undefined
+  const canAssociate = isValidElement(child) && (child.type === Input || child.type === TextArea)
+  const fieldId = canAssociate ? ((child.props as { id?: string }).id ?? generatedId) : undefined
+
   return (
     <div className="flex flex-col gap-1.5 text-sm">
-      <span className="font-semibold text-navy">
+      <label htmlFor={fieldId} className="font-semibold text-navy">
         {label}
         {required ? <span className="text-red-600"> *</span> : null}
-      </span>
-      {children}
+      </label>
+      {canAssociate
+        ? cloneElement(child as ReactElement<{ id?: string; name?: string }>, {
+            id: fieldId,
+            name: (child.props as { name?: string }).name ?? fieldId,
+          })
+        : children}
     </div>
   )
 }

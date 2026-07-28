@@ -1,5 +1,6 @@
 # Internal planning docs, client media exports, and session notes — not for the repo
-# (this also covers docs/r2_storage/, the local used-vs-unused R2 media export)
+# (this also covers docs/r2_storage/ and docs/PROJECT_CONTEXT.md, the cross-session
+# handoff doc for Claude Code, now filed under docs/ instead of the repo root)
 docs/
 
 # Claude Code project config/session state — local tooling only, never pushed
