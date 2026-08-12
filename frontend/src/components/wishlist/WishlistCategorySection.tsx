@@ -29,13 +29,15 @@ export function WishlistCategorySection({
       <div className="flex items-center gap-2">
         <Icon className="h-4 w-4 text-navy/50" aria-hidden="true" />
         <h3 className="text-sm font-bold uppercase tracking-wide text-navy">{label}</h3>
-        <span className="rounded-full bg-navy/10 px-2 py-0.5 text-xs font-bold text-navy">{items.length}</span>
+        <span className="rounded-full bg-navy/10 px-2 py-0.5 text-xs font-bold tabular-nums text-navy">
+          {items.length}
+        </span>
       </div>
 
       <div className="mt-3">
         {items.length > 0 ? (
           <>
-            <ul className="flex flex-col gap-2">
+            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               <AnimatePresence initial={false}>
                 {items.map((item) => (
                   <WishlistItemTile key={item.slug} item={item} onRemove={onRemove} />

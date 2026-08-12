@@ -2,6 +2,8 @@ import type { LucideIcon } from "lucide-react"
 import { ShoppingBag, Sparkles } from "lucide-react"
 import { WishlistCategorySection } from "@/components/wishlist/WishlistCategorySection"
 import { WishlistPackageSection } from "@/components/wishlist/WishlistPackageSection"
+import { WishlistStepCard } from "@/components/wishlist/WishlistStepCard"
+import { WishlistHandoff } from "@/components/wishlist/WishlistHandoff"
 import type { WishlistItem } from "@/types"
 
 interface CategoryConfig {
@@ -41,15 +43,18 @@ interface WishlistPanelProps {
 export function WishlistPanel({ items, onRemove }: WishlistPanelProps) {
   const packages = items.filter((item) => item.category === "package")
   const themes = items.filter((item) => item.category === "theme")
+  // A package is never picked on its own — it rides along with a theme (see
+  // WishlistContext's toggleItem), so counting it would double-count one choice.
+  const pickCount = items.filter((item) => item.category !== "package").length
 
   return (
-    <div className="bg-graytint p-5 sm:p-8 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
-      <div className="border-b border-navy/15 pb-5">
-        <p className="text-sm font-bold uppercase tracking-wide text-navy">Your Picks</p>
-        <p className="text-xs text-body/80">Final pricing is confirmed in your custom quote.</p>
-      </div>
-
-      <div className="mt-6 space-y-6">
+    <WishlistStepCard
+      step={1}
+      title="Your Picks"
+      description="Final pricing is confirmed in your custom quote."
+      count={pickCount}
+    >
+      <div className="space-y-8">
         <WishlistPackageSection packages={packages} themes={themes} onRemovePackage={onRemove} onRemoveTheme={onRemove} />
         {CATEGORY_CONFIG.map((config) => (
           <WishlistCategorySection
@@ -64,6 +69,8 @@ export function WishlistPanel({ items, onRemove }: WishlistPanelProps) {
           />
         ))}
       </div>
-    </div>
+
+      <WishlistHandoff items={items} />
+    </WishlistStepCard>
   )
 }

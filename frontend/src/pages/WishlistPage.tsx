@@ -3,44 +3,43 @@ import { PageHero } from "@/components/ui/PageHero"
 import { Container } from "@/components/ui/Container"
 import { EmptyWishlist } from "@/components/wishlist/EmptyWishlist"
 import { WishlistPanel } from "@/components/wishlist/WishlistPanel"
-import { HoneyBookEmbed } from "@/components/wishlist/HoneyBookEmbed"
+import { HoneyBookInquiryForm } from "@/components/wishlist/HoneyBookInquiryForm"
 import { useWishlist } from "@/context/useWishlist"
+
+const ENTER = { duration: 0.45, ease: [0.16, 1, 0.3, 1] } as const
 
 export function WishlistPage() {
   const { items, removeItem } = useWishlist()
 
   return (
     <>
-      <PageHero variant="navy" title="Your Wishlist" />
+      <PageHero variant="navy" title="Your Wishlist">
+        <p className="mx-auto mt-3 max-w-md text-pretty px-6 text-sm text-white/75 sm:text-base">
+          Review what you picked, then tell us about your event.
+        </p>
+      </PageHero>
 
-      <section className="py-16 sm:py-20">
+      {/* Off-white ground so the white step cards read as raised surfaces — on a
+          white page they would need heavier borders to separate at all. */}
+      <section className="bg-offwhite py-12 sm:py-16">
         <Container className={items.length === 0 ? "max-w-3xl" : "max-w-6xl"}>
           {items.length === 0 ? (
             <EmptyWishlist />
           ) : (
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[420px_minmax(0,1fr)]">
-              {/* Fade only, no vertical slide — a position offset here briefly puts the panel's
-                  remove buttons somewhere other than where they're about to render, so a click
-                  right after mount can land on the wrong element. Sticky keeps the picks in view
-                  while the (usually taller) quote form is scrolled, releasing once the shorter
-                  panel column runs out of room — so it's on screen right up to submit. */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                className="lg:sticky lg:top-24 lg:self-start"
-              >
+            // Two numbered steps, stacked, each full width: the picks grid reads
+            // across the page instead of down a narrow rail, and the embedded
+            // form gets the whole container rather than a cramped column.
+            <div className="space-y-8">
+              <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={ENTER}>
                 <WishlistPanel items={items} onRemove={removeItem} />
               </motion.div>
 
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 }}>
-                <h2 className="text-xl sm:text-2xl">Request Your Custom Quote</h2>
-                <p className="mt-2 text-sm text-body">
-                  Tell us a bit about your event and we'll price out everything on your wishlist.
-                </p>
-                <div className="mt-6">
-                  <HoneyBookEmbed />
-                </div>
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...ENTER, delay: 0.1 }}
+              >
+                <HoneyBookInquiryForm />
               </motion.div>
             </div>
           )}

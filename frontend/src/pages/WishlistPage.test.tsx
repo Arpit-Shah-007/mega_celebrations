@@ -1,18 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import { WishlistProvider } from "@/context/WishlistContext"
+import { HONEYBOOK_INQUIRY_FORM_URL } from "@/components/wishlist/HoneyBookInquiryForm"
 import { WishlistPage } from "./WishlistPage"
 import type { WishlistItem } from "@/types"
 
 const STORAGE_KEY = "mega-celebrations:wishlist"
-const HONEYBOOK_SCRIPT_SRC =
-  "https://widget.honeybook.com/assets_users_production/websiteplacements/placement-controller.min.js"
-
-afterEach(() => {
-  document.querySelectorAll(`script[src="${HONEYBOOK_SCRIPT_SRC}"]`).forEach((tag) => tag.remove())
-})
 
 function renderWishlistPage() {
   return render(
@@ -41,7 +36,7 @@ describe("WishlistPage", () => {
     expect(screen.getByRole("link", { name: "Browse Packages" })).toHaveAttribute("href", "/packages")
   })
 
-  it("shows the wishlist panel and HoneyBook widget when items are saved", () => {
+  it("shows the wishlist panel and the embedded HoneyBook inquiry form when items are saved", () => {
     seedWishlist([
       { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
     ])
@@ -51,7 +46,7 @@ describe("WishlistPage", () => {
     expect(screen.queryByText("Your wishlist is empty")).not.toBeInTheDocument()
     expect(screen.getByText("Tent Sleepover")).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "Request Your Custom Quote" })).toBeInTheDocument()
-    expect(container.querySelector(".hb-p-5de351586567280cf9f3b1e7-7")).toBeInTheDocument()
+    expect(container.querySelector("iframe")).toHaveAttribute("src", HONEYBOOK_INQUIRY_FORM_URL)
   })
 
   it("renders all three wishlist categories and a pricing disclaimer instead of a computed total", () => {

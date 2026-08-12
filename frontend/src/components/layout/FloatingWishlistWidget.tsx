@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react"
-import { useLocation } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { useWishlist } from "@/context/useWishlist"
 
 export function FloatingWishlistWidget() {
@@ -18,12 +18,13 @@ export function FloatingWishlistWidget() {
   const selectionCount = items.filter((item) => item.category !== "package").length
 
   return (
-    // A plain anchor (not React Router's Link) forces a full page load on
-    // the wishlist page, which the embedded HoneyBook widget script requires —
-    // it only initializes once per page load and can't remount via client-side
-    // navigation alone.
-    <a
-      href="/wishlist"
+    // This was a plain anchor to force a full page load, because the old
+    // HoneyBook widget script only initialized once per load and couldn't
+    // remount on a client-side navigation. The wishlist page now embeds the
+    // hosted inquiry form in an iframe, which mounts fresh either way, so a
+    // Link is fine again — and skips the reload.
+    <Link
+      to="/wishlist"
       aria-label={`View wishlist, ${selectionCount} item${selectionCount === 1 ? "" : "s"}`}
       className="fixed bottom-6 right-4 z-40 flex h-12 w-11 flex-col items-center justify-center rounded-sm bg-pink text-white shadow-lift transition hover:bg-pink-dark"
     >
@@ -31,6 +32,6 @@ export function FloatingWishlistWidget() {
         {selectionCount}
       </span>
       <Heart className="h-5 w-5" fill="currentColor" />
-    </a>
+    </Link>
   )
 }

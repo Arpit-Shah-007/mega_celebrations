@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/Button"
 import { useWishlist } from "@/context/useWishlist"
 
 /**
- * HoneyBook's contact form widget redirects the whole browser tab here on a
- * successful submission (verified against the live placement — it's a real
- * top-level navigation, not a same-page event we could listen for), so this
- * is where the wishlist actually gets cleared.
+ * The old HoneyBook placement widget redirected the whole browser tab here on
+ * a successful submission, which is why clearing the wishlist lives on this
+ * page. The wishlist page now embeds the hosted inquiry form in an iframe, and
+ * that form shows its own thank-you screen inside the frame without ever
+ * navigating the top-level tab — so nothing routes here automatically anymore
+ * and the wishlist survives a submission. Kept as a working destination for
+ * the HoneyBook redirect setting, should it be pointed back at this path.
  */
 export function ContactThankYouPage() {
   const { clear } = useWishlist()

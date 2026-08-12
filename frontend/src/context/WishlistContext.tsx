@@ -29,12 +29,12 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items])
 
-  // A submission redirects the whole tab away to HoneyBook and back (see
-  // ContactThankYouPage, which clears the wishlist there). Returning via the
-  // browser's back button can restore this page instance from bfcache with
-  // its pre-clear in-memory state still intact, even though localStorage was
-  // already emptied on the page in between — so re-sync from storage on any
-  // bfcache restore rather than trusting the frozen React state.
+  // The wishlist can be edited on a page this instance never sees — another
+  // tab, or the inquiry form opened in its own tab and then navigated back
+  // from. Returning via the browser's back button can restore this instance
+  // from bfcache with its stale in-memory state intact even though
+  // localStorage moved on, so re-sync from storage on any bfcache restore
+  // rather than trusting the frozen React state.
   useEffect(() => {
     function handlePageShow(event: PageTransitionEvent) {
       if (event.persisted) setItems(readStoredWishlist())
