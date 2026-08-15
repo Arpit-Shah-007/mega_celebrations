@@ -13,8 +13,8 @@ export function WishlistPage() {
 
   return (
     <>
-      <PageHero variant="navy" title="Your Wishlist">
-        <p className="mx-auto mt-3 max-w-md text-pretty px-6 text-sm text-white/75 sm:text-base">
+      <PageHero variant="navy" compact title="Your Wishlist">
+        <p className="mx-auto mt-2 max-w-md text-pretty px-6 text-sm text-white/75">
           Review what you picked, then tell us about your event.
         </p>
       </PageHero>
@@ -27,21 +27,15 @@ export function WishlistPage() {
             <EmptyWishlist />
           </Container>
         ) : (
-          // Deliberately not Container: that caps at 1200px, and the embedded
-          // HoneyBook form is a fixed cross-origin iframe whose usable width is
-          // the one thing we can still give it. A wider wrapper with slimmer
-          // gutters buys the form a few hundred pixels beside the picks rail.
-          <div className="mx-auto w-full max-w-[1800px] px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[19rem_minmax(0,1fr)] lg:gap-8">
+          // One column at every width: picks first, then the form. The same
+          // order the page has always had on mobile, now kept on desktop too
+          // rather than splitting into a rail beside the form.
+          <Container>
+            <div className="flex flex-col gap-6">
               {/* Fade only, no vertical slide — a position offset here briefly puts the
-                  rail's remove buttons somewhere other than where they are about to
+                  panel's remove buttons somewhere other than where they are about to
                   render, so a click right after mount can land on the wrong element. */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={ENTER}
-                className="lg:sticky lg:top-24 lg:self-start"
-              >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={ENTER}>
                 <WishlistPanel items={items} onRemove={removeItem} onClear={clear} />
               </motion.div>
 
@@ -49,7 +43,7 @@ export function WishlistPage() {
                 <HoneyBookInquiryForm items={items} />
               </motion.div>
             </div>
-          </div>
+          </Container>
         )}
       </section>
     </>

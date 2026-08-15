@@ -63,7 +63,7 @@ describe("WishlistPage", () => {
     expect(screen.queryByText(/^\$/)).not.toBeInTheDocument()
   })
 
-  it("places the wishlist panel before the quote form in DOM order (left column on desktop, top of the stack on mobile)", () => {
+  it("stacks the wishlist panel above the quote form at every width", () => {
     seedWishlist([
       { slug: "tent-sleepover", name: "Tent Sleepover", imageSeed: "tent-sleepover-1", startingPrice: 80, category: "package" },
     ])

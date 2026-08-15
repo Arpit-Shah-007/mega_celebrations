@@ -23,6 +23,15 @@ describe("PageHero", () => {
     expect(screen.getByRole("img", { name: "A festive party setup" })).toBeInTheDocument()
   })
 
+  it("renders a shorter navy band with a smaller title when compact", () => {
+    const { container } = render(<PageHero title="Your Wishlist" compact />)
+
+    const band = container.querySelector("section")
+    expect(band).toHaveClass("py-7")
+    expect(band).not.toHaveClass("py-12")
+    expect(screen.getByRole("heading", { level: 1, name: "Your Wishlist" })).toHaveClass("text-2xl")
+  })
+
   it("renders a ReactNode title", () => {
     render(
       <PageHero

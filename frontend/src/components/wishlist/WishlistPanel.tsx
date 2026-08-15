@@ -50,9 +50,7 @@ export function WishlistPanel({ items, onRemove, onClear }: WishlistPanelProps) 
 
   return (
     <WishlistStepCard title="Your Picks" description="Final pricing is confirmed in your custom quote.">
-      {/* Caps its own height and scrolls internally so the rail can stay stuck
-          beside a much taller form without running off the bottom of the screen. */}
-      <div className="space-y-6 lg:max-h-[calc(100vh-19rem)] lg:overflow-y-auto lg:pr-1">
+      <div className="space-y-6">
         <WishlistPackageSection packages={packages} themes={themes} onRemovePackage={onRemove} onRemoveTheme={onRemove} />
         {CATEGORY_CONFIG.map((config) => (
           <WishlistCategorySection

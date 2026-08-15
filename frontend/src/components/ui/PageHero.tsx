@@ -18,6 +18,12 @@ interface PageHeroProps {
   photoOverlayClassName?: string
   /** Override the photo variant's default title weight (font-bold) — e.g. font-semibold for Package Detail. */
   titleWeightClassName?: string
+  /**
+   * Shorter navy band with a smaller title. For pages where the band is only a
+   * label and the content below it is what the visitor came for — the wishlist,
+   * where a full-height banner just pushes the picks and the quote form down.
+   */
+  compact?: boolean
   children?: ReactNode
 }
 
@@ -31,6 +37,7 @@ export function PageHero({
   photoHeightClassName = "h-72 sm:h-96",
   photoOverlayClassName = "bg-navy/35",
   titleWeightClassName = "font-bold",
+  compact = false,
   children,
 }: PageHeroProps) {
   if (variant === "photo") {
@@ -59,7 +66,7 @@ export function PageHero({
 
   return (
     <section
-      className="relative overflow-hidden bg-navy bg-cover bg-center py-12 text-center sm:py-14"
+      className={`relative overflow-hidden bg-navy bg-cover bg-center text-center ${compact ? "py-7 sm:py-9" : "py-12 sm:py-14"}`}
       style={{ backgroundImage: `url(${MEDIA_BASE_URL}/media/Navy_Background_Pattern.png)` }}
     >
       <motion.div
@@ -68,7 +75,7 @@ export function PageHero({
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="relative"
       >
-        <h1 className="text-3xl font-bold text-white sm:text-4xl">{title}</h1>
+        <h1 className={`font-bold text-white ${compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>{title}</h1>
         {children}
       </motion.div>
     </section>
