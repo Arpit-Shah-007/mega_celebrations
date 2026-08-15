@@ -16,7 +16,7 @@ describe("WishlistHandoff", () => {
     expect(screen.getByText(/Any thing else you would like us to know\?/)).toBeInTheDocument()
   })
 
-  it("copies the wishlist summary and confirms where it went", async () => {
+  it("copies the wishlist summary and confirms on the button alone", async () => {
     const user = userEvent.setup()
     render(<WishlistHandoff items={ITEMS} />)
 
@@ -24,7 +24,9 @@ describe("WishlistHandoff", () => {
 
     await expect(navigator.clipboard.readText()).resolves.toContain("- Tent Sleepover")
     await expect(navigator.clipboard.readText()).resolves.toContain("- Balloons x2")
-    expect(await screen.findByText(/Wishlist copied\. Paste it into/)).toBeInTheDocument()
+    expect(await screen.findByRole("button", { name: /copied/i })).toBeInTheDocument()
+    // The confirmation sentence stays in the DOM for screen readers but is not shown.
+    expect(screen.getByText(/Wishlist copied\. Paste it into/)).toHaveClass("sr-only")
   })
 
   it("shows the summary as selectable text when the clipboard is blocked", async () => {

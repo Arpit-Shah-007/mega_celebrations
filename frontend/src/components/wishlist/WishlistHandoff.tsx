@@ -78,7 +78,11 @@ export function WishlistHandoff({ items }: WishlistHandoffProps) {
         </Button>
       </div>
 
-      <p aria-live="polite" className="mt-2 text-xs text-body/80">
+      {/* The button turning into "Copied" is the confirmation; the sentence that
+          used to sit here in plain sight repeated the instruction above it. Kept
+          for screen readers only, because a label change on a button that already
+          has focus is not reliably announced. */}
+      <p aria-live="polite" className="sr-only">
         {copied ? `Wishlist copied. Paste it into "${FREE_TEXT_QUESTION}" near the bottom of the form.` : ""}
       </p>
 

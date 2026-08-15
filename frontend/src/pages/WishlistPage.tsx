@@ -21,7 +21,10 @@ export function WishlistPage() {
 
       {/* Off-white ground so the white cards read as raised surfaces — on a white
           page they would need heavier borders to separate at all. */}
-      <section className="bg-offwhite py-10 sm:py-14">
+      {/* Tighter at the top than the bottom: the band above is a label for the
+          picks right under it, so a wide gap there read as a break between two
+          unrelated things. */}
+      <section className="bg-offwhite pb-10 pt-5 sm:pb-14 sm:pt-7">
         {items.length === 0 ? (
           <Container className="max-w-3xl">
             <EmptyWishlist />
