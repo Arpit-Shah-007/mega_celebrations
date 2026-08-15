@@ -9,7 +9,7 @@ import { useWishlist } from "@/context/useWishlist"
 const ENTER = { duration: 0.45, ease: [0.16, 1, 0.3, 1] } as const
 
 export function WishlistPage() {
-  const { items, removeItem } = useWishlist()
+  const { items, clear, removeItem } = useWishlist()
 
   return (
     <>
@@ -19,31 +19,38 @@ export function WishlistPage() {
         </p>
       </PageHero>
 
-      {/* Off-white ground so the white step cards read as raised surfaces — on a
-          white page they would need heavier borders to separate at all. */}
-      <section className="bg-offwhite py-12 sm:py-16">
-        <Container className={items.length === 0 ? "max-w-3xl" : "max-w-6xl"}>
-          {items.length === 0 ? (
+      {/* Off-white ground so the white cards read as raised surfaces — on a white
+          page they would need heavier borders to separate at all. */}
+      <section className="bg-offwhite py-10 sm:py-14">
+        {items.length === 0 ? (
+          <Container className="max-w-3xl">
             <EmptyWishlist />
-          ) : (
-            // Two numbered steps, stacked, each full width: the picks grid reads
-            // across the page instead of down a narrow rail, and the embedded
-            // form gets the whole container rather than a cramped column.
-            <div className="space-y-8">
-              <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={ENTER}>
-                <WishlistPanel items={items} onRemove={removeItem} />
+          </Container>
+        ) : (
+          // Deliberately not Container: that caps at 1200px, and the embedded
+          // HoneyBook form is a fixed cross-origin iframe whose usable width is
+          // the one thing we can still give it. A wider wrapper with slimmer
+          // gutters buys the form a few hundred pixels beside the picks rail.
+          <div className="mx-auto w-full max-w-[1800px] px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[19rem_minmax(0,1fr)] lg:gap-8">
+              {/* Fade only, no vertical slide — a position offset here briefly puts the
+                  rail's remove buttons somewhere other than where they are about to
+                  render, so a click right after mount can land on the wrong element. */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={ENTER}
+                className="lg:sticky lg:top-24 lg:self-start"
+              >
+                <WishlistPanel items={items} onRemove={removeItem} onClear={clear} />
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...ENTER, delay: 0.1 }}
-              >
-                <HoneyBookInquiryForm />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ ...ENTER, delay: 0.1 }}>
+                <HoneyBookInquiryForm items={items} />
               </motion.div>
             </div>
-          )}
-        </Container>
+          </div>
+        )}
       </section>
     </>
   )

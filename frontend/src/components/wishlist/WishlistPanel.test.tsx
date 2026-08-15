@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import type { WishlistItem } from "@/types"
 import { WishlistPanel } from "./WishlistPanel"
@@ -21,7 +22,7 @@ const items: WishlistItem[] = [
 function renderPanel(props: Partial<React.ComponentProps<typeof WishlistPanel>> = {}) {
   return render(
     <MemoryRouter>
-      <WishlistPanel items={items} onRemove={vi.fn()} {...props} />
+      <WishlistPanel items={items} onRemove={vi.fn()} onClear={vi.fn()} {...props} />
     </MemoryRouter>,
   )
 }
@@ -50,6 +51,36 @@ describe("WishlistPanel", () => {
     expect(screen.getByText("Magical Unicorn")).toBeInTheDocument()
     expect(screen.getByText("Boho Umbrella")).toBeInTheDocument()
     expect(screen.queryByRole("heading", { name: "Themes" })).not.toBeInTheDocument()
+  })
+
+  it("asks before emptying the wishlist, then clears it once confirmed", async () => {
+    const user = userEvent.setup()
+    const onClear = vi.fn()
+    renderPanel({ onClear })
+
+    await user.click(screen.getByRole("button", { name: /clear wishlist/i }))
+    expect(onClear).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: /yes, clear it/i }))
+    expect(onClear).toHaveBeenCalledOnce()
+  })
+
+  it("lets the visitor back out of clearing the wishlist", async () => {
+    const user = userEvent.setup()
+    const onClear = vi.fn()
+    renderPanel({ onClear })
+
+    await user.click(screen.getByRole("button", { name: /clear wishlist/i }))
+    await user.click(screen.getByRole("button", { name: /cancel/i }))
+
+    expect(onClear).not.toHaveBeenCalled()
+    expect(screen.getByRole("button", { name: /clear wishlist/i })).toBeInTheDocument()
+  })
+
+  it("offers no clear control when there is nothing picked", () => {
+    renderPanel({ items: [] })
+
+    expect(screen.queryByRole("button", { name: /clear wishlist/i })).not.toBeInTheDocument()
   })
 
   it("shows an empty state with an explore link for a category with no items", () => {

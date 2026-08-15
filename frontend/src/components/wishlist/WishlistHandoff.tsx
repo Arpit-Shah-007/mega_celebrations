@@ -43,13 +43,13 @@ export function WishlistHandoff({ items }: WishlistHandoffProps) {
   const copied = copyState === "copied"
 
   return (
-    <div className="mt-8 border-t border-navy/10 pt-6">
-      <div className="flex flex-col gap-4 bg-pink/10 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
+    <div className="border-b border-navy/10 bg-pink/8 px-5 py-4 sm:px-7">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="min-w-0">
           <p className="text-sm font-bold text-navy">Bring your picks into the form</p>
-          <p className="mt-1 text-pretty text-sm text-body">
-            Copy your wishlist, then paste it into the form's "{FREE_TEXT_QUESTION}" box in step 2 — that way we quote
-            exactly what you picked.
+          <p className="mt-0.5 text-pretty text-sm text-body">
+            Copy your wishlist, then paste it into the "{FREE_TEXT_QUESTION}" box near the bottom of the form — that way
+            we quote exactly what you picked.
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export function WishlistHandoff({ items }: WishlistHandoffProps) {
       </div>
 
       <p aria-live="polite" className="mt-2 text-xs text-body/80">
-        {copied ? `Wishlist copied. Paste it into "${FREE_TEXT_QUESTION}" in step 2 below.` : ""}
+        {copied ? `Wishlist copied. Paste it into "${FREE_TEXT_QUESTION}" near the bottom of the form.` : ""}
       </p>
 
       {copyState === "manual" ? (

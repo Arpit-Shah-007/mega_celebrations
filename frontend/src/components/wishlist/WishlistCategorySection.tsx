@@ -37,7 +37,7 @@ export function WishlistCategorySection({
       <div className="mt-3">
         {items.length > 0 ? (
           <>
-            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <ul className="flex flex-col gap-2">
               <AnimatePresence initial={false}>
                 {items.map((item) => (
                   <WishlistItemTile key={item.slug} item={item} onRemove={onRemove} />

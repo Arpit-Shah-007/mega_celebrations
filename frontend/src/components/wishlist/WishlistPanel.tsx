@@ -3,7 +3,7 @@ import { ShoppingBag, Sparkles } from "lucide-react"
 import { WishlistCategorySection } from "@/components/wishlist/WishlistCategorySection"
 import { WishlistPackageSection } from "@/components/wishlist/WishlistPackageSection"
 import { WishlistStepCard } from "@/components/wishlist/WishlistStepCard"
-import { WishlistHandoff } from "@/components/wishlist/WishlistHandoff"
+import { ClearWishlistButton } from "@/components/wishlist/ClearWishlistButton"
 import type { WishlistItem } from "@/types"
 
 interface CategoryConfig {
@@ -38,9 +38,10 @@ const CATEGORY_CONFIG: CategoryConfig[] = [
 interface WishlistPanelProps {
   items: WishlistItem[]
   onRemove: (slug: string) => void
+  onClear: () => void
 }
 
-export function WishlistPanel({ items, onRemove }: WishlistPanelProps) {
+export function WishlistPanel({ items, onRemove, onClear }: WishlistPanelProps) {
   const packages = items.filter((item) => item.category === "package")
   const themes = items.filter((item) => item.category === "theme")
   // A package is never picked on its own — it rides along with a theme (see
@@ -48,13 +49,10 @@ export function WishlistPanel({ items, onRemove }: WishlistPanelProps) {
   const pickCount = items.filter((item) => item.category !== "package").length
 
   return (
-    <WishlistStepCard
-      step={1}
-      title="Your Picks"
-      description="Final pricing is confirmed in your custom quote."
-      count={pickCount}
-    >
-      <div className="space-y-8">
+    <WishlistStepCard title="Your Picks" description="Final pricing is confirmed in your custom quote.">
+      {/* Caps its own height and scrolls internally so the rail can stay stuck
+          beside a much taller form without running off the bottom of the screen. */}
+      <div className="space-y-6 lg:max-h-[calc(100vh-19rem)] lg:overflow-y-auto lg:pr-1">
         <WishlistPackageSection packages={packages} themes={themes} onRemovePackage={onRemove} onRemoveTheme={onRemove} />
         {CATEGORY_CONFIG.map((config) => (
           <WishlistCategorySection
@@ -70,7 +68,11 @@ export function WishlistPanel({ items, onRemove }: WishlistPanelProps) {
         ))}
       </div>
 
-      <WishlistHandoff items={items} />
+      {pickCount > 0 ? (
+        <div className="mt-5 border-t border-navy/10 pt-2">
+          <ClearWishlistButton count={pickCount} onClear={onClear} />
+        </div>
+      ) : null}
     </WishlistStepCard>
   )
 }

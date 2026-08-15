@@ -1,5 +1,7 @@
 import { ExternalLink } from "lucide-react"
 import { WishlistStepCard } from "@/components/wishlist/WishlistStepCard"
+import { WishlistHandoff } from "@/components/wishlist/WishlistHandoff"
+import type { WishlistItem } from "@/types"
 
 export const HONEYBOOK_INQUIRY_FORM_URL = "https://megacelebrations.hbportal.co/public/inquiryform/1-Inquiry_form"
 
@@ -24,14 +26,15 @@ export const HONEYBOOK_INQUIRY_FORM_URL = "https://megacelebrations.hbportal.co/
  * sticky Submit bar and scrolls internally, which is what that fixed
  * viewport-relative box gives it.
  */
-export function HoneyBookInquiryForm() {
+export function HoneyBookInquiryForm({ items }: { items: WishlistItem[] }) {
   return (
     <WishlistStepCard
-      step={2}
       title="Request Your Custom Quote"
       description="Tell us about your event and we'll price out everything on your wishlist."
       emphasis
     >
+      <WishlistHandoff items={items} />
+
       <iframe
         title="Mega Celebrations inquiry form"
         src={HONEYBOOK_INQUIRY_FORM_URL}
