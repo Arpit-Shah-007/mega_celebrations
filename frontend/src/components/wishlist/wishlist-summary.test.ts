@@ -26,7 +26,7 @@ describe("formatWishlistSummary", () => {
   it("nests picked themes under the package they came from", () => {
     expect(formatWishlistSummary([TENT, PARIS])).toBe(
       [
-        "MY WISHLIST (from the Mega Celebrations website)",
+        "MY WISHLIST",
         "",
         "PACKAGES",
         "- Tent Sleepover",

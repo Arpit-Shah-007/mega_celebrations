@@ -4,7 +4,7 @@ import { MemoryRouter } from "react-router-dom"
 import { EmptyWishlist } from "./EmptyWishlist"
 
 describe("EmptyWishlist", () => {
-  it("renders the empty-state heading and copy", () => {
+  it("renders the empty-state heading with no explanatory copy under it", () => {
     render(
       <MemoryRouter>
         <EmptyWishlist />
@@ -12,7 +12,7 @@ describe("EmptyWishlist", () => {
     )
 
     expect(screen.getByRole("heading", { name: "Your wishlist is empty" })).toBeInTheDocument()
-    expect(screen.getByText(/Browse our packages and tap the heart/)).toBeInTheDocument()
+    expect(screen.queryByText(/Browse our packages and tap the heart/)).not.toBeInTheDocument()
   })
 
   it("renders a CTA linking to the packages page", () => {

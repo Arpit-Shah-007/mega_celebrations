@@ -14,11 +14,7 @@ export function EmptyWishlist() {
         <HeartCrack className="h-8 w-8 text-pink-dark" strokeWidth={1.5} />
       </div>
       <h2 className="mt-6 text-2xl sm:text-3xl">Your wishlist is empty</h2>
-      <p className="mt-3 text-base leading-relaxed text-body">
-        Browse our packages and tap the heart on anything you love — we'll keep it here so you can request a
-        custom quote when you're ready.
-      </p>
-      <Button kind="link" to="/packages" size="lg" className="mt-8">
+      <Button kind="link" to="/packages" size="lg" className="mt-6">
         Browse Packages
       </Button>
     </motion.div>

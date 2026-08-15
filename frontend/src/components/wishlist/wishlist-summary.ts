@@ -9,7 +9,7 @@ import type { WishlistItem, WishlistItemCategory } from "@/types"
  * the output is deliberately readable rather than machine-parseable.
  */
 
-const HEADING = "MY WISHLIST (from the Mega Celebrations website)"
+const HEADING = "MY WISHLIST"
 
 const FLAT_SECTIONS: { heading: string; category: WishlistItemCategory }[] = [
   { heading: "A LA CARTE", category: "a-la-carte" },
