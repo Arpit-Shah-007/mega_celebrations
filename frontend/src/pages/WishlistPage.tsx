@@ -30,20 +30,30 @@ export function WishlistPage() {
           // One column at every width: picks first, then the form. The same
           // order the page has always had on mobile, now kept on desktop too
           // rather than splitting into a rail beside the form.
-          <Container>
-            <div className="flex flex-col gap-6">
-              {/* Fade only, no vertical slide — a position offset here briefly puts the
-                  panel's remove buttons somewhere other than where they are about to
-                  render, so a click right after mount can land on the wrong element. */}
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={ENTER}>
-                <WishlistPanel items={items} onRemove={removeItem} onClear={clear} />
-              </motion.div>
+          <div className="flex flex-col gap-6">
+            {/* Picks run the full page width like the navy band above, instead of
+                stopping at the container's 1200px — the three category columns
+                inside want the room. Only the site's edge gutter is kept so the
+                card still lines up with the header.
 
+                Fade only, no vertical slide — a position offset here briefly puts
+                the panel's remove buttons somewhere other than where they are about
+                to render, so a click right after mount can land on the wrong one. */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={ENTER}
+              className="px-5 sm:px-8 lg:px-15"
+            >
+              <WishlistPanel items={items} onRemove={removeItem} onClear={clear} />
+            </motion.div>
+
+            <Container>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ ...ENTER, delay: 0.1 }}>
                 <HoneyBookInquiryForm items={items} />
               </motion.div>
-            </div>
-          </Container>
+            </Container>
+          </div>
         )}
       </section>
     </>

@@ -50,7 +50,12 @@ export function WishlistPanel({ items, onRemove, onClear }: WishlistPanelProps) 
 
   return (
     <WishlistStepCard title="Your Picks" description="Final pricing is confirmed in your custom quote.">
-      <div className="space-y-6">
+      {/* Three columns side by side once there is room, so the card reads as one
+          glance across the three categories instead of a long scroll. Below lg
+          the columns would squeeze the item rows narrower than their thumbnail
+          plus name, so they stack there. items-start keeps each column its own
+          height rather than stretching all three to the tallest. */}
+      <div className="grid items-start gap-6 lg:grid-cols-3 lg:gap-8">
         <WishlistPackageSection packages={packages} themes={themes} onRemovePackage={onRemove} onRemoveTheme={onRemove} />
         {CATEGORY_CONFIG.map((config) => (
           <WishlistCategorySection

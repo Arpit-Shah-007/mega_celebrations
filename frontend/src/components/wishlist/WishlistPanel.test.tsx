@@ -43,6 +43,14 @@ describe("WishlistPanel", () => {
     expect(headings).toEqual(["Packages", "A La Carte", "Add-Ons"])
   })
 
+  it("lays the three sections out side by side on wide screens", () => {
+    const { container } = renderPanel()
+
+    const sections = container.querySelector("div.grid")
+    expect(sections).toHaveClass("lg:grid-cols-3")
+    expect(sections?.children).toHaveLength(3)
+  })
+
   it("nests a theme's item beneath its parent package instead of listing it separately", () => {
     renderPanel()
 
